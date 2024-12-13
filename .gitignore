@@ -1,0 +1,11 @@
+out/
+bin/
+obj/
+
+*.exe
+*.dll
+*.out
+*.obj
+*.bin
+*.pdb
+.fake

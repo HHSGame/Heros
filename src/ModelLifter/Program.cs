@@ -3,6 +3,8 @@ using ModelLifter.Samples;
 
 // await ChatCompletion.RunAsync();
 
-MultiModal.Run();
+// MultiModal.Run();
 
 // await AutoGenLMStudio.RunAsync();
+
+await AutoGenConversation.RunAsync();

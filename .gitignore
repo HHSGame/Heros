@@ -9,3 +9,5 @@ obj/
 *.bin
 *.pdb
 .fake
+
+.venv/

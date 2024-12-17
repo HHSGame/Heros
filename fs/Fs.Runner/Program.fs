@@ -1,11 +1,12 @@
-﻿open Fplib
+﻿
+module Fs.Runner.Main
 
-type Tree<'a> =
+type 'a Tree =
     | Node of 'a * Tree<'a> * Tree<'a>
     | Empty
 
 
-type Visitor<'a, 'acc> = 'acc -> 'a -> Tree<'a> -> Tree<'a> -> 'acc
+type ('a, 'acc) Visitor = 'acc -> 'a -> Tree<'a> -> Tree<'a> -> 'acc
 
 let rec traverse f tree =
     match tree with

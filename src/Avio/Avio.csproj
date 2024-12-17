@@ -8,7 +8,7 @@
     <RootNamespace>Avio</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\fs\Fplib\Fplib.fsproj" />
+    <ProjectReference Include="..\..\fs\Fs.Lib\Fs.Lib.fsproj" />
     <ProjectReference Include="..\Mana\Mana.csproj" />
 
   </ItemGroup>

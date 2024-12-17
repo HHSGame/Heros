@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fplib\Fplib.fsproj" />
+    <ProjectReference Include="..\Fs.Lib\Fs.Lib.fsproj" />
   </ItemGroup>
 
 </Project>

@@ -18,11 +18,4 @@
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.Onnx" Version="1.32.0-alpha" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\3rdparty\autogen\dotnet\src\AutoGen.Core\AutoGen.Core.csproj" />
-    <ProjectReference Include="..\..\3rdparty\autogen\dotnet\src\AutoGen.OpenAI\AutoGen.OpenAI.csproj" />
-    <ProjectReference Include="..\..\3rdparty\autogen\dotnet\src\AutoGen.SourceGenerator\AutoGen.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\3rdparty\autogen\dotnet\src\AutoGen\AutoGen.csproj" />
-  </ItemGroup>
-
 </Project>

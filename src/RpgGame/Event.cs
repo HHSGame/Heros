@@ -1,19 +1,27 @@
 namespace RpgGame
 {
-    public class Event
+    public class GameEvent : EventArgs
     {
         public string Message { get; }
-        public DateTime Timestamp { get; }
 
-        public Event(string message)
+        public GameEvent(string message)
         {
             Message = message;
-            Timestamp = DateTime.Now;
         }
 
         public override string ToString()
         {
-            return $"[{Timestamp:HH:mm:ss}] {Message}";
+            return Message;
+        }
+    }
+
+    public static class EventSystem
+    {
+        public static event EventHandler<GameEvent>? OnGameEvent;
+
+        public static void RaiseEvent(string message)
+        {
+            OnGameEvent?.Invoke(null, new GameEvent(message));
         }
     }
 }

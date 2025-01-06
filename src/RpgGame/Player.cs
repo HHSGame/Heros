@@ -21,7 +21,7 @@ namespace RpgGame
         private List<ActiveEffect> _activeEffects;
         private Random _random;
         private GameWorld _world;
-        private Game _game;
+        public Game _game;
         public Player(int x, int y, GameWorld world, Game game)
         {
             X = x;
@@ -70,7 +70,6 @@ namespace RpgGame
                 var enemy = _world.GetEnemyAt(newX, newY);
                 if (enemy != null)
                 {
-                    
                     Attack(enemy);
                 }
                 else
@@ -79,7 +78,13 @@ namespace RpgGame
                     PreviousY = Y;
                     X = newX;
                     Y = newY;
+                    EventSystem.RaiseEvent($"Player moved to ({X}, {Y})");
                 }
+                _game.EndPlayerTurn();
+            }
+            else
+            {
+                EventSystem.RaiseEvent($"Player tried to move to blocked position ({newX}, {newY})");
             }
         }
 
@@ -87,7 +92,7 @@ namespace RpgGame
         {
             if (IsStunned()) return;
 
-            _game.PublishEvent($"Player hits {enemy.Name}");
+            EventSystem.RaiseEvent($"Player attacks {enemy.Name}!");
 
             int damage = Strength;
             enemy.TakeDamage(damage);
@@ -101,7 +106,7 @@ namespace RpgGame
         public void TakeDamage(int damage)
         {
             if (IsStunned()) return;
-            _game.PublishEvent($"Player get {damage} hits");
+            EventSystem.RaiseEvent($"Player takes {damage} damage!");
 
             int actualDamage = damage - Defense;
             if (actualDamage < 0) actualDamage = 0;
@@ -110,6 +115,7 @@ namespace RpgGame
             if (Health <= 0)
             {
                 Health = 0;
+                EventSystem.RaiseEvent("Player has been defeated!");
                 Die();
             }
         }

@@ -1,5 +1,6 @@
 using Terminal.Gui;
 using System.Collections.Generic;
+using System;
 
 namespace RpgGame
 {
@@ -10,14 +11,27 @@ namespace RpgGame
         private bool _isRunning;
         private DateTime _lastFrameTime;
         private const double TargetFrameTime = 1000.0 / 60.0; // 60 FPS
-        private readonly Queue<Event> _events = new();
+        private const int MaxEventMessages = 10;
+        private readonly List<string> _eventMessages = new();
+        
+        // Turn-based system
+        public enum TurnState
+        {
+            PlayerTurn,
+            EnemyTurn
+        }
+        public TurnState _currentTurn = TurnState.PlayerTurn;
 
         private readonly View _view;
         private readonly View _textView;
 
-        public void PublishEvent(string message)
+        private void HandleGameEvent(object? sender, GameEvent e)
         {
-            _events.Enqueue(new Event(message));
+            _eventMessages.Insert(0, e.ToString());
+            if (_eventMessages.Count > MaxEventMessages)
+            {
+                _eventMessages.RemoveAt(MaxEventMessages);
+            }
         }
 
         public Game(View view, View textView)
@@ -25,6 +39,7 @@ namespace RpgGame
             _isRunning = false;
             _view = view;
             _textView = textView;
+            EventSystem.OnGameEvent += HandleGameEvent;
         }
         
         public void Start()
@@ -84,15 +99,9 @@ namespace RpgGame
             // Render to view
             _view.Text = sb.ToString();
 
-            // Process events
-            var eventText = new System.Text.StringBuilder();
-            int count = _events.Count;
-            while (_events.Count > 0)
-            {
-                eventText.AppendLine(_events.Dequeue().ToString());
-            }
-
-            _textView.Text = $"Player is at {_player.X}, {_player.Y}, Health: {_player.Health}.\nevents: {count}\n{eventText}";
+            // Update display
+            var eventText = string.Join("\n", _eventMessages);
+            _textView.Text = $"Player is at {_player.X}, {_player.Y}, Health: {_player.Health}.\n{eventText}";
 
             // Maintain consistent frame rate
             double frameTime = (DateTime.Now - _lastFrameTime).TotalMilliseconds;
@@ -119,6 +128,19 @@ namespace RpgGame
             // _world?.Clear(_view);
         }
 
+        public void EndPlayerTurn()
+        {
+            if (_currentTurn != TurnState.PlayerTurn) return;
+            
+            _currentTurn = TurnState.EnemyTurn;
+        }
+        public void EndSystemTurn()
+        {
+            if (_currentTurn != TurnState.EnemyTurn) return;
+            
+            _currentTurn = TurnState.PlayerTurn;
+        }
+
         private double CalculateDeltaTime()
         {
             var now = DateTime.Now;
@@ -138,7 +160,8 @@ namespace RpgGame
                 return;
 
             // Update game world with scaled delta time
-            _world.Update(_player, deltaTime / TargetFrameTime);
+            _world.Update(_player, _currentTurn);
+            EndSystemTurn();
         }
     }
 }

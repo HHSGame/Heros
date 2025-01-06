@@ -74,8 +74,10 @@ namespace RpgGame
             _specialAbilityCooldown = 0;
         }
 
-        public void Update(Player player)
+        public void Update(Player player, bool isEnemyTurn)
         {
+            if (!isEnemyTurn) return;
+
             if (_attackCooldown > 0) _attackCooldown--;
             if (_specialAbilityCooldown > 0) _specialAbilityCooldown--;
             
@@ -137,12 +139,21 @@ namespace RpgGame
         public void Attack(Player player)
         {
             int damage = Strength;
+            EventSystem.RaiseEvent($"{Name} attacks the player for {damage} damage!");
             
             // Apply type-specific effects
             if (_attackEffects.TryGetValue(Type, out var effectData) && 
                 _random.Next(100) < effectData.Chance)
             {
                 effectData.Effect(player, this);
+                string abilityMessage = Type switch
+                {
+                    EnemyType.Goblin => $"{Name} poisons the player!",
+                    EnemyType.Orc => $"{Name} stuns the player!",
+                    EnemyType.Troll => $"{Name} heals itself!",
+                    _ => $"{Name} uses a special ability!"
+                };
+                EventSystem.RaiseEvent(abilityMessage);
             }
             
             player.TakeDamage(damage);
@@ -157,7 +168,12 @@ namespace RpgGame
             if (Health <= 0)
             {
                 Health = 0;
+                EventSystem.RaiseEvent($"{Name} was defeated!");
                 Die();
+            }
+            else
+            {
+                EventSystem.RaiseEvent($"{Name} took {actualDamage} damage!");
             }
         }
 
@@ -171,6 +187,7 @@ namespace RpgGame
         {
             X += dx;
             Y += dy;
+            EventSystem.RaiseEvent($"{Name} moves to ({X}, {Y})");
         }
 
         private void Die()

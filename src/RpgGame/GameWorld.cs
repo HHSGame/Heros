@@ -27,6 +27,8 @@ namespace RpgGame
 
         private void GenerateDungeon()
         {
+            EventSystem.RaiseEvent("Generating dungeon...");
+            
             // Generate walls and floors
             for (int y = 0; y < MapHeight; y++)
             {
@@ -47,6 +49,8 @@ namespace RpgGame
             AddRoom(5, 5, 10, 6);
             AddRoom(20, 15, 8, 8);
             AddRoom(40, 10, 12, 10);
+            
+            EventSystem.RaiseEvent("Dungeon generated with 3 main chambers");
         }
 
         private void AddRoom(int x, int y, int width, int height)
@@ -65,10 +69,14 @@ namespace RpgGame
 
         private void SpawnEnemies()
         {
+            EventSystem.RaiseEvent("Spawning enemies...");
+            
             // Spawn different enemy types
             SpawnEnemyType(EnemyType.Goblin, 3);
             SpawnEnemyType(EnemyType.Orc, 2);
             SpawnEnemyType(EnemyType.Troll, 1);
+            
+            EventSystem.RaiseEvent("Enemies spawned: 3 Goblins, 2 Orcs, 1 Troll");
         }
 
         private void SpawnEnemyType(EnemyType type, int count)
@@ -86,7 +94,7 @@ namespace RpgGame
             }
         }
 
-        public void Update(Player player, double deltaTime)
+        public void Update(Player player, Game.TurnState turn)
         {
             // Update all enemies
             foreach (var enemy in _enemies.ToArray())
@@ -99,7 +107,7 @@ namespace RpgGame
                     continue;
                 }
 
-                enemy.Update(player);
+                enemy.Update(player, turn == Game.TurnState.EnemyTurn);
             }
 
             // Check for loot collection
@@ -171,7 +179,7 @@ namespace RpgGame
             if (x < 0 || y < 0 || x >= MapWidth || y >= MapHeight)
                 return false;
 
-            return _map[y, x] == '.' && GetEnemyAt(x, y) == null;
+            return _map[y, x] == '.';
         }
 
         public Enemy? GetEnemyAt(int x, int y)

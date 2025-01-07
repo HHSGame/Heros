@@ -1,3 +1,4 @@
+using Terminal.Gui;
 
 namespace RpgGame.Core
 {
@@ -13,6 +14,8 @@ namespace RpgGame.Core
         public int Level { get; private set; }
 
         public override char Glyph => '@';
+
+        public override Terminal.Gui.Attribute Attribute => Terminal.Gui.Attribute.Make(Color.BrightCyan, Color.Magenta);
 
         private List<Item> _inventory;
         private List<ActiveEffect> _activeEffects;

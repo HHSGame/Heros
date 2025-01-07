@@ -7,6 +7,7 @@ namespace RpgGame.UI {
 
     public interface IDrawingContext {
         void DrawAt(Position pos, char tile);
+        void DrawAt(Position pos, Cell cell);
         void Clear();
         void Render();
     }
@@ -38,14 +39,14 @@ namespace RpgGame.UI {
         }
 
         // Explicit interface implementation for original method
-        void IDrawingContext.DrawAt((int X, int Y) pos, char tile)
+        public void DrawAt((int X, int Y) pos, char tile)
         {
             _mapView.SetCell(pos.X, pos.Y, tile, Colors.Base.Normal);
         }
 
-        public void DrawAt((int X, int Y) pos, char tile, Terminal.Gui.Attribute? attr = null)
+        public void DrawAt((int X, int Y) pos, Cell cell)
         {
-            _mapView.SetCell(pos.X, pos.Y, tile, attr ?? Colors.Base.Normal);
+            _mapView.SetCell(pos.X, pos.Y, cell.Character, cell.Attribute);
         }
 
         public void Render()

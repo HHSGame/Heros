@@ -1,7 +1,8 @@
 using System;
 using Terminal.Gui;
+using RpgGame.Core;
 
-namespace RpgGame
+namespace RpgGame.UI
 {
     class Program
     {
@@ -46,20 +47,17 @@ namespace RpgGame
                 }
             };
 
-            // Text view fixed at bottom with 10 line height
-            View tv = new View {
+            EventLogger tv = new EventLogger() {
                 X = 0,
                 Y = 0,
-                Height = 10,
-                Width = Dim.Fill()
+                Width = Dim.Fill(),
+                Height = 10
             };
 
             viewWin.Add(view);
             // Add views to container
             consoleWin.Add(tv);
             top.Add(viewWin, consoleWin);
-            tv.Text += $"Window dimensions: {view.Bounds}\n";
-            tv.Text += $"View dimensions: {tv.Bounds}\n";
             
             StartNewGame(view, tv);
             
@@ -100,17 +98,18 @@ namespace RpgGame
             Application.Shutdown();
         }
 
-        private static void StartNewGame(View view, View textView)
+        private static void StartNewGame(View view, EventLogger eventLogger)
         {
             try
             {
-                var game = new Game(view, textView);
+                BufferedDrawingContext ctx = new(GameWorld.MapWidth, GameWorld.MapHeight, view);
+                var game = new Game(ctx);
                 currentGame = game;
                 game.Start();
             }
             catch (Exception ex)
             {
-                textView.Text += $"Error starting new game: {ex.Message}\n";
+                eventLogger.LogEvent($"Error starting new game: {ex.Message}");
             }
         }
     }

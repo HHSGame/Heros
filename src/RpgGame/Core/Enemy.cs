@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using Terminal.Gui;
 
-namespace RpgGame
+namespace RpgGame.Core
 {
+    using EnemySetup = (string Name, int MaxHealth, int Strength, int Defense, int ExperienceValue);
+
     public enum EnemyType
     {
         Goblin,
@@ -19,10 +21,9 @@ namespace RpgGame
         Fleeing
     }
 
-    public class Enemy
+    
+    public class Enemy : GameActor
     {
-        public int X { get; private set; }
-        public int Y { get; private set; }
         public int Health { get; private set; }
         public int MaxHealth { get; private set; }
         public int Strength { get; private set; }
@@ -31,12 +32,16 @@ namespace RpgGame
         public string? Name { get; private set; }
         public EnemyType Type { get; private set; }
         public EnemyState State { get; private set; }
-        
+        public override char Glyph => _symbol;
         private int _attackCooldown;
         private int _specialAbilityCooldown;
         private Random _random;
 
-        private static readonly Dictionary<EnemyType, (string Name, int MaxHealth, int Strength, int Defense, int ExperienceValue)> _enemyStats = new()
+        private char _symbol;
+
+        
+
+        private static readonly Dictionary<EnemyType, EnemySetup> _enemyStats = new()
         {
             { 
                 EnemyType.Goblin, 
@@ -72,6 +77,14 @@ namespace RpgGame
             Health = MaxHealth;
             _attackCooldown = 0;
             _specialAbilityCooldown = 0;
+
+            _symbol = Type switch
+            {
+                EnemyType.Goblin => 'g',
+                EnemyType.Orc => 'o',
+                EnemyType.Troll => 'T',
+                _ => 'E'
+            };
         }
 
         public void Update(Player player, bool isEnemyTurn)
@@ -124,15 +137,15 @@ namespace RpgGame
         {
             { 
                 EnemyType.Goblin, 
-                (20, (player, self) => player.ApplyEffect(new PoisonEffect(3))) 
+                (20, (Player player, Enemy self) => player.ApplyEffect(new PoisonEffect(3))) 
             },
             { 
                 EnemyType.Orc, 
-                (10, (player, self) => player.ApplyEffect(new StunEffect(1))) 
+                (10, (Player player, Enemy self) => player.ApplyEffect(new StunEffect(1))) 
             },
             { 
                 EnemyType.Troll, 
-                (30, (player, self) => self.Heal(10)) 
+                (30, (Player player, Enemy self) => self.Heal(10)) 
             }
         };
 
@@ -173,7 +186,7 @@ namespace RpgGame
             }
             else
             {
-                EventSystem.RaiseEvent($"{Name} took {actualDamage} damage!");
+                EventSystem.RaiseEvent($"{Name} took {actualDamage} damage! HP remains {Health}.");
             }
         }
 
@@ -219,15 +232,7 @@ namespace RpgGame
         
         public void Draw(char[,] buffer)
         {
-            char symbol = Type switch
-            {
-                EnemyType.Goblin => 'g',
-                EnemyType.Orc => 'o',
-                EnemyType.Troll => 'T',
-                _ => 'E'
-            };
-                
-            buffer[Y, X] = symbol;
+            buffer[Y, X] = _symbol;
         }
 
         public void Clear(char[,] buffer)

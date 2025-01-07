@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
+using RpgGame.UI;
 using Terminal.Gui;
 
-namespace RpgGame
+namespace RpgGame.Core
 {
-    public class Player
+    public class Player: GameActor
     {
-        public int X { get; private set; }
-        public int Y { get; private set; }
         public int PreviousX { get; private set; }
         public int PreviousY { get; private set; }
         public int Health { get; private set; }
@@ -17,12 +16,13 @@ namespace RpgGame
         public int Experience { get; private set; }
         public int Level { get; private set; }
 
+        public override char Glyph => '@';
+
         private List<Item> _inventory;
         private List<ActiveEffect> _activeEffects;
         private Random _random;
         private GameWorld _world;
-        public Game _game;
-        public Player(int x, int y, GameWorld world, Game game)
+        public Player(int x, int y, GameWorld world)
         {
             X = x;
             Y = y;
@@ -38,12 +38,7 @@ namespace RpgGame
             _activeEffects = new List<ActiveEffect>();
             _random = new Random();
             _world = world;
-            _game = game;
 
-        }
-
-        public void Dispose()
-        {
         }
 
         public void Update()
@@ -64,7 +59,7 @@ namespace RpgGame
 
         public void Move(int dx, int dy)
         {
-            if (!_game.IsPlayerTurn)
+            if (_world.CurrentTurn != TurnState.PlayerTurn)
             {
                 EventSystem.RaiseEvent("Not your turn!");
                 return;
@@ -96,7 +91,15 @@ namespace RpgGame
             {
                 EventSystem.RaiseEvent($"Player tried to move to blocked position ({newX}, {newY})");
             }
-            EventSystem.RaiseTurnChanged(TurnState.EnemyTurn);
+            EndPlayerTurn();
+        }
+
+        private void EndPlayerTurn()
+        {
+            if (_world.CurrentTurn == TurnState.PlayerTurn)
+            {
+                EventSystem.RaiseTurnChanged(TurnState.EnemyTurn);
+            }
         }
 
         public void Attack(Enemy enemy)

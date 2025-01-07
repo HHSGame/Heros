@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RpgGame.UI;
 using Terminal.Gui;
 
-namespace RpgGame
+namespace RpgGame.Core
 {
-    public class GameWorld
+    public class GameWorld : IDrawable
     {
         public static int MapWidth { get; } = 80;
         public static int MapHeight { get; } = 24;
@@ -15,7 +16,9 @@ namespace RpgGame
         private List<Item> _loot;
         private Random _random;
 
-        private TurnState? _currentTurn;
+        private TurnState _currentTurn = TurnState.PlayerTurn;
+        
+        public TurnState CurrentTurn => _currentTurn;
 
         public GameWorld()
         {
@@ -119,8 +122,8 @@ namespace RpgGame
 
                 enemy.Update(player, _currentTurn == TurnState.EnemyTurn);
 
-                EndEnemyTurn();
             }
+            EndEnemyTurn();
 
             // Check for loot collection
             var lootAtPlayer = _loot.FirstOrDefault(l => l.X == player.X && l.Y == player.Y);
@@ -133,7 +136,7 @@ namespace RpgGame
 
         private void EndEnemyTurn()
         {
-            if (this._currentTurn == TurnState.EnemyTurn) {
+            if (_currentTurn == TurnState.EnemyTurn) {
                 EventSystem.RaiseTurnChanged(TurnState.PlayerTurn);
             }
         }
@@ -181,18 +184,6 @@ namespace RpgGame
             }
         }
 
-        public void Clear(View view)
-        {
-            // Clear the entire map area
-            for (int y = 0; y < MapHeight; y++)
-            {
-                for (int x = 0; x < MapWidth; x++)
-                {
-                    view.AddRune(x, y, ' ');
-                }
-            }
-        }
-
         public bool IsWalkable(int x, int y)
         {
             if (x < 0 || y < 0 || x >= MapWidth || y >= MapHeight)
@@ -211,6 +202,38 @@ namespace RpgGame
             return _enemies.Where(e => 
                 Math.Abs(e.X - x) <= range && 
                 Math.Abs(e.Y - y) <= range).ToList();
+        }
+
+        public void Draw(IDrawingContext ctx)
+        {
+            // Draw map tiles
+            for (int y = 0; y < MapHeight; y++)
+            {
+                for (int x = 0; x < MapWidth; x++)
+                {
+                    ctx.DrawAt((x, y), _map[y, x]);
+                }
+            }
+
+            // Draw enemies
+            foreach (var enemy in _enemies)
+            {
+                if (enemy.X >= 0 && enemy.X < MapWidth &&
+                    enemy.Y >= 0 && enemy.Y < MapHeight)
+                {
+                    enemy.Draw(ctx);
+                }
+            }
+
+            // Draw loot
+            foreach (var item in _loot)
+            {
+                if (item.X >= 0 && item.X < MapWidth &&
+                    item.Y >= 0 && item.Y < MapHeight)
+                {
+                    ctx.DrawAt((item.X, item.Y), '*');
+                }
+            }
         }
     }
 

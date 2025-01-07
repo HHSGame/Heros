@@ -9,13 +9,15 @@ namespace RpgGame.Core
         private readonly int _mapWidth;
         private readonly int _mapHeight;
         private readonly GameWorld _world;
+        private readonly CollisionSystem _collisionSystem;
 
-        public EnemyFactory(int mapWidth, int mapHeight, Random random, GameWorld world)
+        public EnemyFactory(int mapWidth, int mapHeight, Random random, GameWorld world, CollisionSystem collisionSystem)
         {
             _mapWidth = mapWidth;
             _mapHeight = mapHeight;
             _random = random;
             _world = world;
+            _collisionSystem = collisionSystem;
         }
 
         public List<Enemy> SpawnEnemies()
@@ -42,18 +44,10 @@ namespace RpgGame.Core
                 {
                     x = _random.Next(1, _mapWidth - 1);
                     y = _random.Next(1, _mapHeight - 1);
-                } while (!IsWalkable(x, y) || GetEnemyAt(enemies, x, y) != null);
+                } while (!_world.IsWalkable(x, y) || GetEnemyAt(enemies, x, y) != null);
                 
-                enemies.Add(new Enemy(type, x, y, _world));
+                enemies.Add(new Enemy(type, x, y, _world, _collisionSystem));
             }
-        }
-
-        private bool IsWalkable(int x, int y)
-        {
-            if (x < 0 || y < 0 || x >= _mapWidth || y >= _mapHeight)
-                return false;
-
-            return true; // Map validation will be handled by GameWorld
         }
 
         private Enemy? GetEnemyAt(List<Enemy> enemies, int x, int y)

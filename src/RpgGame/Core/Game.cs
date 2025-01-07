@@ -23,7 +23,7 @@ namespace RpgGame.Core
         {
             // Initialize game world and player
             _world = new GameWorld();
-            _player = new Player(GameWorld.MapWidth / 2, GameWorld.MapHeight / 2, _world); // Start player in center
+            _player = _world.NewPlayer();
 
             // Start game loop with refresh rate
             Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(TargetFrameTime), GameLoop);

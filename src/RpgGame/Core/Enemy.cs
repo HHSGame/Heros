@@ -19,6 +19,7 @@ namespace RpgGame.Core
     public class Enemy : GameActor
     {
         private readonly GameWorld _world;
+        private readonly CollisionSystem _collisionSystem;
         private readonly EnemyAbilitySystem _abilitySystem;
         private readonly EnemyLootSystem _lootSystem;
         public int Health { get; private set; }
@@ -26,7 +27,7 @@ namespace RpgGame.Core
         public int Strength { get; private set; }
         public int Defense { get; private set; }
         public int ExperienceValue { get; private set; }
-        public string? Name { get; private set; }
+        public override string Name { get; }
         public EnemyType Type { get; private set; }
         public EnemyState State { get; private set; }
         public override char Glyph { get; }
@@ -34,13 +35,14 @@ namespace RpgGame.Core
         private int _specialAbilityCooldown;
         private readonly Random _random;
 
-        public Enemy(EnemyType type, int x, int y, GameWorld world)
+        public Enemy(EnemyType type, int x, int y, GameWorld world, CollisionSystem collisionSystem)
         {
             _random = new Random();
             Type = type;
             X = x;
             Y = y;
             _world = world;
+            _collisionSystem = collisionSystem;
             State = EnemyState.Chasing;
 
             var config = EnemyRegistry.GetConfig(type);
@@ -148,23 +150,17 @@ namespace RpgGame.Core
         {
             int newX = X + dx;
             int newY = Y + dy;
-            
-            if (!_world.IsWalkable(newX, newY))
-            {
-                EventSystem.RaiseEvent($"{Name} bumps into an obstacle at ({newX}, {newY})");
-                return;
-            }
 
-            var enemyAtTarget = _world.GetEnemyAt(newX, newY);
-            if (enemyAtTarget != null && enemyAtTarget != this)
+            if (_collisionSystem.CanMoveTo(newX, newY, this))
             {
-                EventSystem.RaiseEvent($"{Name} bumps into {enemyAtTarget.Name} at ({newX}, {newY})");
-                return;
+                X = newX;
+                Y = newY;
+                EventSystem.RaiseEvent(_collisionSystem.GetCollisionMessage(newX, newY, this));
             }
-
-            X = newX;
-            Y = newY;
-            EventSystem.RaiseEvent($"{Name} moves to ({X}, {Y})");
+            else
+            {
+                EventSystem.RaiseEvent(_collisionSystem.GetCollisionMessage(newX, newY, this));
+            }
         }
 
         private void Die()

@@ -8,6 +8,8 @@ namespace RpgGame.Core {
         public int X { get; protected set; }
         public int Y { get; protected set; }
 
+        public virtual string Name => "Unknown";
+        
         public abstract char Glyph { get; }
 
         public virtual Terminal.Gui.Attribute Attribute => Colors.Base.Normal;

@@ -19,7 +19,9 @@ namespace RpgGame.Core
         private List<ActiveEffect> _activeEffects;
         private Random _random;
         private GameWorld _world;
-        public Player(int x, int y, GameWorld world)
+        private readonly CollisionSystem _collisionSystem;
+        
+        public Player(int x, int y, GameWorld world, CollisionSystem collisionSystem)
         {
             X = x;
             Y = y;
@@ -33,6 +35,7 @@ namespace RpgGame.Core
             _activeEffects = new List<ActiveEffect>();
             _random = new Random();
             _world = world;
+            _collisionSystem = collisionSystem;
 
         }
 
@@ -65,13 +68,10 @@ namespace RpgGame.Core
             int newX = X + dx;
             int newY = Y + dy;
 
-            // Check world bounds and collision
-            if (newX >= 0 && newX < GameWorld.MapWidth &&
-                newY >= 0 && newY < GameWorld.MapHeight &&
-                _world.IsWalkable(newX, newY))
+            if (_collisionSystem.CanMoveTo(newX, newY, this))
             {
-                var enemy = _world.GetEnemyAt(newX, newY);
-                if (enemy != null)
+                var collision = _collisionSystem.GetCollisionAt(newX, newY);
+                if (collision is Enemy enemy)
                 {
                     Attack(enemy);
                 }
@@ -79,12 +79,12 @@ namespace RpgGame.Core
                 {
                     X = newX;
                     Y = newY;
-                    EventSystem.RaiseEvent($"Player moved to ({X}, {Y})");
+                    EventSystem.RaiseEvent(_collisionSystem.GetCollisionMessage(newX, newY, this));
                 }
             }
             else
             {
-                EventSystem.RaiseEvent($"Player tried to move to blocked position ({newX}, {newY})");
+                EventSystem.RaiseEvent(_collisionSystem.GetCollisionMessage(newX, newY, this));
             }
             EndPlayerTurn();
         }

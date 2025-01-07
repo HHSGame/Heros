@@ -15,6 +15,7 @@ namespace RpgGame.Core
         private MapGenerator _mapGenerator;
         private EnemyFactory _enemyFactory;
         private Pathfinder _pathfinder;
+        private CollisionSystem _collisionSystem;
 
         private TurnState _currentTurn = TurnState.PlayerTurn;
         
@@ -27,8 +28,9 @@ namespace RpgGame.Core
             _loot = new List<Item>();
             _random = new Random();
             
+            _collisionSystem = new CollisionSystem(this);
             _mapGenerator = new MapGenerator(MapWidth, MapHeight, _random);
-            _enemyFactory = new EnemyFactory(MapWidth, MapHeight, _random, this);
+            _enemyFactory = new EnemyFactory(MapWidth, MapHeight, _random, this, _collisionSystem);
             
             _map = _mapGenerator.GenerateDungeon();
             _enemies = _enemyFactory.SpawnEnemies();
@@ -40,6 +42,19 @@ namespace RpgGame.Core
         private void HandleTurnChange(object? sender, TurnEvent e)
         {
             _currentTurn = e.State;
+        }
+
+        public Player NewPlayer() {
+            // create a player at the center of the map but avoid any obstacles
+            int x = MapWidth / 2, y = MapHeight / 2;
+            int round = 0;
+            while (!IsWalkable(x, y))
+            {
+                x = _random.Next(x - round, x + round);
+                y = _random.Next(y - round, y + round);
+                round ++;
+            }
+            return new Player(x, y, this, _collisionSystem);
         }
 
         public void Update(Player player)

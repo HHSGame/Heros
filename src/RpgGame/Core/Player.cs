@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using RpgGame.UI;
-using Terminal.Gui;
 
 namespace RpgGame.Core
 {
@@ -64,6 +60,8 @@ namespace RpgGame.Core
                 EventSystem.RaiseEvent("Not your turn!");
                 return;
             }
+
+            Update();
 
             int newX = X + dx;
             int newY = Y + dy;
@@ -192,18 +190,6 @@ namespace RpgGame.Core
         private void Die()
         {
             // Handle player death
-        }
-
-        public void Draw(char[,] buffer)
-        {
-            // Draw player character at current position
-            buffer[Y, X] = '@';
-        }
-
-        public void Clear(char[,] buffer)
-        {
-            // Clear player character from previous position
-            buffer[Y, X] = ' ';
         }
     }
 

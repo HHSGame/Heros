@@ -1,19 +1,17 @@
 using Terminal.Gui;
-using System.Collections.Generic;
-using System;
 using RpgGame.UI;
 
 namespace RpgGame.Core
 {
-    public class Game(IDrawingContext context) : IDisposable
+    public class Game(IDrawingContext _drawingCtx) : IDisposable
     {
+        public Player? Player => _player;
+
         private GameWorld? _world;
         private Player? _player;
         private bool _isRunning = false;
         private DateTime _lastFrameTime;
         private const double TargetFrameTime = 1000.0 / 60.0; // 60 FPS
-
-        private readonly IDrawingContext _drawingCtx = context;
 
         public void Start()
         {
@@ -25,12 +23,12 @@ namespace RpgGame.Core
         {
             // Initialize game world and player
             _world = new GameWorld();
-            _player = new Player(40, 12, _world); // Start player in center
-            
-            // Start game loop with faster refresh rate
+            _player = new Player(GameWorld.MapWidth / 2, GameWorld.MapHeight / 2, _world); // Start player in center
+
+            // Start game loop with refresh rate
             Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(TargetFrameTime), GameLoop);
         }
-
+        
         private bool GameLoop(MainLoop arg)
         {
             if (!_isRunning || _world == null || _player == null)
@@ -58,9 +56,6 @@ namespace RpgGame.Core
             return _isRunning;
         }
 
-        public Player? Player => _player;
-        public GameWorld? World => _world;
-
         public void Stop()
         {
             _isRunning = false;
@@ -84,7 +79,6 @@ namespace RpgGame.Core
             if (_world == null || _player == null)
                 return;
 
-            // Update game world
             _world.Update(_player);
         }
     }

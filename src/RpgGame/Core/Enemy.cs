@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using Terminal.Gui;
 
 namespace RpgGame.Core
 {
@@ -228,16 +225,6 @@ namespace RpgGame.Core
             }
             
             return loot;
-        }
-        
-        public void Draw(char[,] buffer)
-        {
-            buffer[Y, X] = _symbol;
-        }
-
-        public void Clear(char[,] buffer)
-        {
-            buffer[Y, X] = ' ';
         }
     }
 }

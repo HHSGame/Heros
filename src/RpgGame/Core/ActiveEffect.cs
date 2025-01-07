@@ -24,6 +24,7 @@ namespace RpgGame.Core {
 
         public override void ApplyEffect(Player player)
         {
+            EventSystem.RaiseEvent($"Player is poisoned!");
             player.TakeDamage(_damagePerTurn);
         }
     }
@@ -36,6 +37,7 @@ namespace RpgGame.Core {
 
         public override void ApplyEffect(Player player)
         {
+            EventSystem.RaiseEvent($"Player is is stunned!");
             // Stun prevents actions but doesn't deal damage
         }
     }

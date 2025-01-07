@@ -1,8 +1,6 @@
 
 namespace RpgGame.Core
 {
-    using EnemySetup = (string Name, int MaxHealth, int Strength, int Defense, int ExperienceValue);
-
     public enum EnemyType
     {
         Goblin,
@@ -18,10 +16,11 @@ namespace RpgGame.Core
         Fleeing
     }
 
-    
     public class Enemy : GameActor
     {
         private readonly GameWorld _world;
+        private readonly EnemyAbilitySystem _abilitySystem;
+        private readonly EnemyLootSystem _lootSystem;
         public int Health { get; private set; }
         public int MaxHealth { get; private set; }
         public int Strength { get; private set; }
@@ -30,30 +29,10 @@ namespace RpgGame.Core
         public string? Name { get; private set; }
         public EnemyType Type { get; private set; }
         public EnemyState State { get; private set; }
-        public override char Glyph => _symbol;
+        public override char Glyph { get; }
         private int _attackCooldown;
         private int _specialAbilityCooldown;
-        private Random _random;
-
-        private char _symbol;
-
-        
-
-        private static readonly Dictionary<EnemyType, EnemySetup> _enemyStats = new()
-        {
-            { 
-                EnemyType.Goblin, 
-                ("Goblin", 30, 5, 2, 50) 
-            },
-            { 
-                EnemyType.Orc, 
-                ("Orc", 60, 8, 5, 100) 
-            },
-            { 
-                EnemyType.Troll, 
-                ("Troll", 100, 12, 8, 200) 
-            }
-        };
+        private readonly Random _random;
 
         public Enemy(EnemyType type, int x, int y, GameWorld world)
         {
@@ -64,26 +43,20 @@ namespace RpgGame.Core
             _world = world;
             State = EnemyState.Chasing;
 
-            if (_enemyStats.TryGetValue(type, out var stats))
-            {
-                Name = stats.Name;
-                MaxHealth = stats.MaxHealth;
-                Strength = stats.Strength;
-                Defense = stats.Defense;
-                ExperienceValue = stats.ExperienceValue;
-            }
+            var config = EnemyRegistry.GetConfig(type);
+            Name = config.Name;
+            MaxHealth = config.MaxHealth;
+            Strength = config.Strength;
+            Defense = config.Defense;
+            ExperienceValue = config.ExperienceValue;
+            Glyph = config.Glyph;
             
             Health = MaxHealth;
             _attackCooldown = 0;
             _specialAbilityCooldown = 0;
 
-            _symbol = Type switch
-            {
-                EnemyType.Goblin => 'g',
-                EnemyType.Orc => 'o',
-                EnemyType.Troll => 'T',
-                _ => 'E'
-            };
+            _abilitySystem = new EnemyAbilitySystem(this, _random);
+            _lootSystem = new EnemyLootSystem(type, _random);
         }
 
         public void Update(Player player, bool isEnemyTurn)
@@ -138,42 +111,12 @@ namespace RpgGame.Core
             }
         }
 
-        private static readonly Dictionary<EnemyType, (int Chance, Action<Player, Enemy> Effect)> _attackEffects = new()
-        {
-            { 
-                EnemyType.Goblin, 
-                (20, (Player player, Enemy self) => player.ApplyEffect(new PoisonEffect(3))) 
-            },
-            { 
-                EnemyType.Orc, 
-                (10, (Player player, Enemy self) => player.ApplyEffect(new StunEffect(1))) 
-            },
-            { 
-                EnemyType.Troll, 
-                (30, (Player player, Enemy self) => self.Heal(10)) 
-            }
-        };
-
         public void Attack(Player player)
         {
             int damage = Strength;
             EventSystem.RaiseEvent($"{Name} attacks the player for {damage} damage!");
             
-            // Apply type-specific effects
-            if (_attackEffects.TryGetValue(Type, out var effectData) && 
-                _random.Next(100) < effectData.Chance)
-            {
-                effectData.Effect(player, this);
-                string abilityMessage = Type switch
-                {
-                    EnemyType.Goblin => $"{Name} poisons the player!",
-                    EnemyType.Orc => $"{Name} stuns the player!",
-                    EnemyType.Troll => $"{Name} heals itself!",
-                    _ => $"{Name} uses a special ability!"
-                };
-                EventSystem.RaiseEvent(abilityMessage);
-            }
-            
+            _abilitySystem.TryApplySpecialEffect(player);
             player.TakeDamage(damage);
         }
 
@@ -225,24 +168,6 @@ namespace RpgGame.Core
             // TODO: Add loot to game world
         }
 
-        private static readonly Dictionary<EnemyType, (int Chance, int Amount)> _lootTable = new()
-        {
-            { EnemyType.Goblin, (30, 10) },
-            { EnemyType.Orc, (50, 20) },
-            { EnemyType.Troll, (70, 30) }
-        };
-
-        public List<Item> GenerateLoot()
-        {
-            var loot = new List<Item>();
-            var roll = _random.Next(100);
-            
-            if (_lootTable.TryGetValue(Type, out var lootData) && roll < lootData.Chance)
-            {
-                loot.Add(new HealthPotion(lootData.Amount));
-            }
-            
-            return loot;
-        }
+        public List<Item> GenerateLoot() => _lootSystem.GenerateLoot();
     }
 }

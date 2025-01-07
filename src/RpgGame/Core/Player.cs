@@ -4,8 +4,6 @@ namespace RpgGame.Core
 {
     public class Player: GameActor
     {
-        public int PreviousX { get; private set; }
-        public int PreviousY { get; private set; }
         public int Health { get; private set; }
         public int MaxHealth { get; private set; }
         public int Strength { get; private set; }
@@ -25,8 +23,6 @@ namespace RpgGame.Core
         {
             X = x;
             Y = y;
-            PreviousX = x;
-            PreviousY = y;
             MaxHealth = 100;
             Health = MaxHealth;
             Strength = 10;
@@ -81,8 +77,6 @@ namespace RpgGame.Core
                 }
                 else
                 {
-                    PreviousX = X;
-                    PreviousY = Y;
                     X = newX;
                     Y = newY;
                     EventSystem.RaiseEvent($"Player moved to ({X}, {Y})");
@@ -183,11 +177,6 @@ namespace RpgGame.Core
         public bool IsStunned()
         {
             return _activeEffects.Any(e => e is StunEffect);
-        }
-
-        public bool IsPoisoned()
-        {
-            return _activeEffects.Any(e => e is PoisonEffect);
         }
 
         private void Die()

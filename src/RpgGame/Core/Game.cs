@@ -28,7 +28,7 @@ namespace RpgGame.Core
             _player = new Player(40, 12, _world); // Start player in center
             
             // Start game loop with faster refresh rate
-            Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(10), GameLoop);
+            Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(TargetFrameTime), GameLoop);
         }
 
         private bool GameLoop(MainLoop arg)
@@ -40,8 +40,6 @@ namespace RpgGame.Core
             double deltaTime = CalculateDeltaTime();
             
             UpdateGame(deltaTime);
-
-            _drawingCtx.Clear();
             
             _world.Draw(_drawingCtx);
             _player.Draw(_drawingCtx);
@@ -53,6 +51,7 @@ namespace RpgGame.Core
             double frameTime = (DateTime.Now - _lastFrameTime).TotalMilliseconds;
             if (frameTime < TargetFrameTime)
             {
+                _drawingCtx.Clear();
                 Thread.Sleep((int)(TargetFrameTime - frameTime));
             }
             

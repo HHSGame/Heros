@@ -47,7 +47,7 @@ namespace RpgGame.UI
                 }
             };
 
-            EventLogger tv = new EventLogger() {
+            var tv = new EventLogger() {
                 X = 0,
                 Y = 0,
                 Width = Dim.Fill(),
@@ -59,7 +59,7 @@ namespace RpgGame.UI
             consoleWin.Add(tv);
             top.Add(viewWin, consoleWin);
             
-            StartNewGame(view, tv);
+            StartNewGame(tv);
             
             view.Visible = true;
             tv.Visible = true;
@@ -98,11 +98,11 @@ namespace RpgGame.UI
             Application.Shutdown();
         }
 
-        private static void StartNewGame(View view, EventLogger eventLogger)
+        private static void StartNewGame(EventLogger eventLogger)
         {
             try
             {
-                BufferedDrawingContext ctx = new(GameWorld.MapWidth, GameWorld.MapHeight, view);
+                DoubleBufferedContext ctx = new(GameWorld.MapWidth, GameWorld.MapHeight);
                 var game = new Game(ctx);
                 currentGame = game;
                 game.Start();

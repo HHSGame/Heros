@@ -21,6 +21,7 @@ namespace RpgGame.Core
     
     public class Enemy : GameActor
     {
+        private readonly GameWorld _world;
         public int Health { get; private set; }
         public int MaxHealth { get; private set; }
         public int Strength { get; private set; }
@@ -54,12 +55,13 @@ namespace RpgGame.Core
             }
         };
 
-        public Enemy(EnemyType type, int x, int y)
+        public Enemy(EnemyType type, int x, int y, GameWorld world)
         {
             _random = new Random();
             Type = type;
             X = x;
             Y = y;
+            _world = world;
             State = EnemyState.Chasing;
 
             if (_enemyStats.TryGetValue(type, out var stats))
@@ -195,9 +197,19 @@ namespace RpgGame.Core
 
         public void Move(int dx, int dy)
         {
-            X += dx;
-            Y += dy;
-            EventSystem.RaiseEvent($"{Name} moves to ({X}, {Y})");
+            int newX = X + dx;
+            int newY = Y + dy;
+            
+            if (_world.IsWalkable(newX, newY))
+            {
+                X = newX;
+                Y = newY;
+                EventSystem.RaiseEvent($"{Name} moves to ({X}, {Y})");
+            }
+            else
+            {
+                EventSystem.RaiseEvent($"{Name} bumps into an obstacle at ({newX}, {newY})");
+            }
         }
 
         private void Die()

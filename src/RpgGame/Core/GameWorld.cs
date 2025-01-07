@@ -1,4 +1,5 @@
 using RpgGame.UI;
+using System.Collections.Generic;
 
 namespace RpgGame.Core
 {
@@ -11,6 +12,8 @@ namespace RpgGame.Core
         private List<Enemy> _enemies;
         private List<Item> _loot;
         private Random _random;
+        private MapGenerator _mapGenerator;
+        private EnemyFactory _enemyFactory;
 
         private TurnState _currentTurn = TurnState.PlayerTurn;
         
@@ -22,174 +25,19 @@ namespace RpgGame.Core
             _enemies = new List<Enemy>();
             _loot = new List<Item>();
             _random = new Random();
-            GenerateDungeon();
-            SpawnEnemies();
+            
+            _mapGenerator = new MapGenerator(MapWidth, MapHeight, _random);
+            _enemyFactory = new EnemyFactory(MapWidth, MapHeight, _random, this);
+            
+            _map = _mapGenerator.GenerateDungeon();
+            _enemies = _enemyFactory.SpawnEnemies();
 
             EventSystem.OnTurnChanged += HandleTurnChange;
-
         }
 
         private void HandleTurnChange(object? sender, TurnEvent e)
         {
             _currentTurn = e.State;
-        }
-
-        private void GenerateDungeon()
-        {
-            EventSystem.RaiseEvent("Generating dungeon using cellular automata...");
-            
-            // Initialize random map
-            for (int y = 0; y < MapHeight; y++)
-            {
-                for (int x = 0; x < MapWidth; x++)
-                {
-                    _map[y, x] = _random.Next(100) < 45 ? '#' : '.';
-                }
-            }
-
-            // Apply cellular automata rules
-            for (int i = 0; i < 5; i++)
-            {
-                SmoothMap();
-            }
-
-            // Ensure border walls
-            for (int y = 0; y < MapHeight; y++)
-            {
-                for (int x = 0; x < MapWidth; x++)
-                {
-                    if (x == 0 || y == 0 || x == MapWidth - 1 || y == MapHeight - 1)
-                    {
-                        _map[y, x] = '#';
-                    }
-                }
-            }
-
-            // Add special terrain
-            AddTerrainFeatures();
-            
-            EventSystem.RaiseEvent("Dungeon generated with natural cave-like structure");
-        }
-
-        private void SmoothMap()
-        {
-            char[,] newMap = new char[MapHeight, MapWidth];
-            
-            for (int y = 0; y < MapHeight; y++)
-            {
-                for (int x = 0; x < MapWidth; x++)
-                {
-                    int neighborWallTiles = GetSurroundingWallCount(x, y);
-
-                    if (neighborWallTiles > 4)
-                        newMap[y, x] = '#';
-                    else if (neighborWallTiles < 4)
-                        newMap[y, x] = '.';
-                    else
-                        newMap[y, x] = _map[y, x];
-                }
-            }
-            
-            _map = newMap;
-        }
-
-        private int GetSurroundingWallCount(int x, int y)
-        {
-            int wallCount = 0;
-            for (int neighborY = y - 1; neighborY <= y + 1; neighborY++)
-            {
-                for (int neighborX = x - 1; neighborX <= x + 1; neighborX++)
-                {
-                    if (neighborX >= 0 && neighborX < MapWidth && 
-                        neighborY >= 0 && neighborY < MapHeight)
-                    {
-                        if (neighborX != x || neighborY != y)
-                        {
-                            wallCount += _map[neighborY, neighborX] == '#' ? 1 : 0;
-                        }
-                    }
-                    else
-                    {
-                        wallCount++;
-                    }
-                }
-            }
-            return wallCount;
-        }
-
-        private void AddTerrainFeatures()
-        {
-            // Add water
-            AddRandomFeature('~', 10, 5);
-            // Add lava
-            AddRandomFeature('^', 5, 3);
-            // Add vegetation
-            AddRandomFeature('*', 15, 7);
-        }
-
-        private void AddRandomFeature(char feature, int count, int maxSize)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                int startX = _random.Next(1, MapWidth - 1);
-                int startY = _random.Next(1, MapHeight - 1);
-                
-                if (_map[startY, startX] == '.')
-                {
-                    FloodFillFeature(startX, startY, feature, maxSize);
-                }
-            }
-        }
-
-        private void FloodFillFeature(int x, int y, char feature, int maxSize)
-        {
-            Queue<(int x, int y)> queue = new();
-            queue.Enqueue((x, y));
-            int filled = 0;
-
-            while (queue.Count > 0 && filled < maxSize)
-            {
-                var (currentX, currentY) = queue.Dequeue();
-                
-                if (_map[currentY, currentX] == '.')
-                {
-                    _map[currentY, currentX] = feature;
-                    filled++;
-                    
-                    // Add neighbors
-                    if (currentX > 1) queue.Enqueue((currentX - 1, currentY));
-                    if (currentX < MapWidth - 2) queue.Enqueue((currentX + 1, currentY));
-                    if (currentY > 1) queue.Enqueue((currentX, currentY - 1));
-                    if (currentY < MapHeight - 2) queue.Enqueue((currentX, currentY + 1));
-                }
-            }
-        }
-
-        private void SpawnEnemies()
-        {
-            EventSystem.RaiseEvent("Spawning enemies...");
-            
-            // Spawn different enemy types
-            SpawnEnemyType(EnemyType.Goblin, 3);
-            SpawnEnemyType(EnemyType.Orc, 2);
-            SpawnEnemyType(EnemyType.Troll, 1);
-            
-            EventSystem.RaiseEvent("Enemies spawned: 3 Goblins, 2 Orcs, 1 Troll");
-        }
-
-        private void SpawnEnemyType(EnemyType type, int count)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                int x, y;
-                do
-                {
-                    x = _random.Next(1, MapWidth - 1);
-                    y = _random.Next(1, MapHeight - 1);
-                } while (!IsWalkable(x, y) || GetEnemyAt(x, y) != null);
-                
-                _enemies.Add(new Enemy(type, x, y));
-            }
         }
 
         public void Update(Player player)

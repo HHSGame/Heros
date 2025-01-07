@@ -14,6 +14,7 @@ namespace RpgGame.Core
         private Random _random;
         private MapGenerator _mapGenerator;
         private EnemyFactory _enemyFactory;
+        private Pathfinder _pathfinder;
 
         private TurnState _currentTurn = TurnState.PlayerTurn;
         
@@ -31,6 +32,7 @@ namespace RpgGame.Core
             
             _map = _mapGenerator.GenerateDungeon();
             _enemies = _enemyFactory.SpawnEnemies();
+            _pathfinder = new Pathfinder(this);
 
             EventSystem.OnTurnChanged += HandleTurnChange;
         }
@@ -96,6 +98,11 @@ namespace RpgGame.Core
         public Enemy? GetEnemyAt(int x, int y)
         {
             return _enemies.FirstOrDefault(e => e.X == x && e.Y == y);
+        }
+
+        public List<(int x, int y)> GetPath((int x, int y) start, (int x, int y) end)
+        {
+            return _pathfinder.FindPath(start, end);
         }
 
         public void Draw(IDrawingContext ctx)

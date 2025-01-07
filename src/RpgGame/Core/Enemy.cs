@@ -124,10 +124,16 @@ namespace RpgGame.Core
                     break;
                     
                 case EnemyState.Chasing:
-                    // Move towards player
-                    int moveX = Math.Sign(dx);
-                    int moveY = Math.Sign(dy);
-                    Move(moveX, moveY);
+                    // Get path to player
+                    var path = _world.GetPath((X, Y), (player.X, player.Y));
+                    
+                    if (path.Count > 1) // First element is current position
+                    {
+                        var nextStep = path[1];
+                        int moveX = nextStep.x - X;
+                        int moveY = nextStep.y - Y;
+                        Move(moveX, moveY);
+                    }
                     break;
             }
         }

@@ -16,7 +16,7 @@ namespace RpgGame
         public int Defense { get; private set; }
         public int Experience { get; private set; }
         public int Level { get; private set; }
-        
+
         private List<Item> _inventory;
         private List<ActiveEffect> _activeEffects;
         private Random _random;
@@ -39,6 +39,11 @@ namespace RpgGame
             _random = new Random();
             _world = world;
             _game = game;
+
+        }
+
+        public void Dispose()
+        {
         }
 
         public void Update()
@@ -59,11 +64,17 @@ namespace RpgGame
 
         public void Move(int dx, int dy)
         {
+            if (!_game.IsPlayerTurn)
+            {
+                EventSystem.RaiseEvent("Not your turn!");
+                return;
+            }
+
             int newX = X + dx;
             int newY = Y + dy;
 
             // Check world bounds and collision
-            if (newX >= 0 && newX < GameWorld.MapWidth && 
+            if (newX >= 0 && newX < GameWorld.MapWidth &&
                 newY >= 0 && newY < GameWorld.MapHeight &&
                 _world.IsWalkable(newX, newY))
             {
@@ -80,12 +91,12 @@ namespace RpgGame
                     Y = newY;
                     EventSystem.RaiseEvent($"Player moved to ({X}, {Y})");
                 }
-                _game.EndPlayerTurn();
             }
             else
             {
                 EventSystem.RaiseEvent($"Player tried to move to blocked position ({newX}, {newY})");
             }
+            EventSystem.RaiseTurnChanged(TurnState.EnemyTurn);
         }
 
         public void Attack(Enemy enemy)
@@ -96,7 +107,7 @@ namespace RpgGame
 
             int damage = Strength;
             enemy.TakeDamage(damage);
-            
+
             if (enemy.Health <= 0)
             {
                 AddExperience(enemy.ExperienceValue);
@@ -111,7 +122,7 @@ namespace RpgGame
             int actualDamage = damage - Defense;
             if (actualDamage < 0) actualDamage = 0;
             Health -= actualDamage;
-            
+
             if (Health <= 0)
             {
                 Health = 0;
@@ -196,7 +207,7 @@ namespace RpgGame
     public abstract class ActiveEffect
     {
         public int Duration { get; set; }
-        
+
         public ActiveEffect(int duration)
         {
             Duration = duration;

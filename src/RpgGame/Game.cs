@@ -14,14 +14,6 @@ namespace RpgGame
         private const int MaxEventMessages = 10;
         private readonly List<string> _eventMessages = new();
         
-        // Turn-based system
-        public enum TurnState
-        {
-            PlayerTurn,
-            EnemyTurn
-        }
-        public TurnState _currentTurn = TurnState.PlayerTurn;
-
         private readonly View _view;
         private readonly View _textView;
 
@@ -40,8 +32,14 @@ namespace RpgGame
             _view = view;
             _textView = textView;
             EventSystem.OnGameEvent += HandleGameEvent;
+            EventSystem.OnTurnChanged += HandleTurnChanged;
         }
-        
+
+        private void HandleTurnChanged(object? sender, TurnEvent e)
+        {
+            _currentTurn = e.State;
+        }
+
         public void Start()
         {
             _isRunning = true;
@@ -128,18 +126,9 @@ namespace RpgGame
             // _world?.Clear(_view);
         }
 
-        public void EndPlayerTurn()
-        {
-            if (_currentTurn != TurnState.PlayerTurn) return;
-            
-            _currentTurn = TurnState.EnemyTurn;
-        }
-        public void EndSystemTurn()
-        {
-            if (_currentTurn != TurnState.EnemyTurn) return;
-            
-            _currentTurn = TurnState.PlayerTurn;
-        }
+        private TurnState _currentTurn = TurnState.PlayerTurn;
+
+        public bool IsPlayerTurn => _currentTurn == TurnState.PlayerTurn;
 
         private double CalculateDeltaTime()
         {
@@ -159,9 +148,8 @@ namespace RpgGame
             if (_world == null || _player == null)
                 return;
 
-            // Update game world with scaled delta time
-            _world.Update(_player, _currentTurn);
-            EndSystemTurn();
+            // Update game world
+            _world.Update(_player);
         }
     }
 }

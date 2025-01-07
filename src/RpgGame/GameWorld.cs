@@ -15,6 +15,8 @@ namespace RpgGame
         private List<Item> _loot;
         private Random _random;
 
+        private TurnState? _currentTurn;
+
         public GameWorld()
         {
             _map = new char[MapHeight, MapWidth];
@@ -23,6 +25,14 @@ namespace RpgGame
             _random = new Random();
             GenerateDungeon();
             SpawnEnemies();
+
+            EventSystem.OnTurnChanged += HandleTurnChange;
+
+        }
+
+        private void HandleTurnChange(object? sender, TurnEvent e)
+        {
+            _currentTurn = e.State;
         }
 
         private void GenerateDungeon()
@@ -94,7 +104,7 @@ namespace RpgGame
             }
         }
 
-        public void Update(Player player, Game.TurnState turn)
+        public void Update(Player player)
         {
             // Update all enemies
             foreach (var enemy in _enemies.ToArray())
@@ -107,7 +117,9 @@ namespace RpgGame
                     continue;
                 }
 
-                enemy.Update(player, turn == Game.TurnState.EnemyTurn);
+                enemy.Update(player, _currentTurn == TurnState.EnemyTurn);
+
+                EndEnemyTurn();
             }
 
             // Check for loot collection
@@ -116,6 +128,13 @@ namespace RpgGame
             {
                 player.AddItem(lootAtPlayer);
                 _loot.Remove(lootAtPlayer);
+            }
+        }
+
+        private void EndEnemyTurn()
+        {
+            if (this._currentTurn == TurnState.EnemyTurn) {
+                EventSystem.RaiseTurnChanged(TurnState.PlayerTurn);
             }
         }
 

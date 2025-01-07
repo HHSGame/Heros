@@ -149,16 +149,22 @@ namespace RpgGame.Core
             int newX = X + dx;
             int newY = Y + dy;
             
-            if (_world.IsWalkable(newX, newY))
-            {
-                X = newX;
-                Y = newY;
-                EventSystem.RaiseEvent($"{Name} moves to ({X}, {Y})");
-            }
-            else
+            if (!_world.IsWalkable(newX, newY))
             {
                 EventSystem.RaiseEvent($"{Name} bumps into an obstacle at ({newX}, {newY})");
+                return;
             }
+
+            var enemyAtTarget = _world.GetEnemyAt(newX, newY);
+            if (enemyAtTarget != null && enemyAtTarget != this)
+            {
+                EventSystem.RaiseEvent($"{Name} bumps into {enemyAtTarget.Name} at ({newX}, {newY})");
+                return;
+            }
+
+            X = newX;
+            Y = newY;
+            EventSystem.RaiseEvent($"{Name} moves to ({X}, {Y})");
         }
 
         private void Die()

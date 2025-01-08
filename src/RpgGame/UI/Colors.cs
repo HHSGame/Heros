@@ -5,6 +5,8 @@ namespace RpgGame.UI
 {
     public static class Colors
     {
+        public static Attribute GreyedOut = new(Color.DarkGray, Color.Black);
+        
         // Terrain colors
         public static class Terrain
         {

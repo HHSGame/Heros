@@ -103,12 +103,51 @@ namespace RpgGame.Core
             }
         }
 
+        private bool[,] _visitedTiles = new bool[MapHeight, MapWidth];
+        private HashSet<(int x, int y)> _currentVisibleTiles = new();
+
         public bool IsWalkable(int x, int y)
         {
             if (x < 0 || y < 0 || x >= MapWidth || y >= MapHeight)
                 return false;
 
             return _map[y, x].Character == '.';
+        }
+
+        public bool IsInBounds(int x, int y)
+        {
+            return x >= 0 && y >= 0 && x < MapWidth && y < MapHeight;
+        }
+
+        public bool IsTransparent(int x, int y)
+        {
+            if (!IsInBounds(x, y)) return false;
+            return _map[y, x].Character == '.' || _map[y, x].Character == ' ';
+        }
+
+        public void MarkVisibleTiles(HashSet<(int x, int y)> visibleTiles)
+        {
+            // Only mark tiles within FOV radius as visible
+            _currentVisibleTiles.Clear();
+            
+            foreach (var (x, y) in visibleTiles)
+            {
+                if (IsInBounds(x, y))
+                {
+                    _visitedTiles[y, x] = true;
+                    _currentVisibleTiles.Add((x, y));
+                }
+            }
+        }
+
+        public bool IsVisible(int x, int y)
+        {
+            return _currentVisibleTiles.Contains((x, y));
+        }
+
+        public bool WasVisited(int x, int y)
+        {
+            return IsInBounds(x, y) && _visitedTiles[y, x];
         }
 
         public Enemy? GetEnemyAt(int x, int y)

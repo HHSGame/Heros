@@ -3,7 +3,7 @@ using RpgGame.UI;
 
 namespace RpgGame.Core
 {
-    public class Game(IDrawingContext _drawingCtx) : IDisposable
+    public class Game(MapViewDrawingContext _drawingCtx) : IDisposable
     {
         public Player? Player => _player;
 
@@ -24,6 +24,7 @@ namespace RpgGame.Core
             // Initialize game world and player
             _world = new GameWorld(mapStyle);
             _player = _world.NewPlayer();
+            _drawingCtx.GameWorld = _world;
 
             // Start game loop with refresh rate
             Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(TargetFrameTime), GameLoop);

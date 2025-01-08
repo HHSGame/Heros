@@ -73,6 +73,13 @@ namespace RpgGame.UI {
         public int Height { get; }
         private readonly MapView _mapView;
         private readonly Viewport _viewport;
+        private GameWorld? _gameWorld;
+
+        public GameWorld? GameWorld
+        {
+            get => _gameWorld;
+            set => _gameWorld = value;
+        }
 
         public View View => _mapView;
 
@@ -96,8 +103,30 @@ namespace RpgGame.UI {
         {
             if (!_viewport.Contains(pos))
                 return;
-            var (posX, posY) = _viewport.ToLocal(pos);
-            _mapView.SetCell(posX, posY, cell.Character, cell.Attribute);
+
+            // Check visibility
+            if (_gameWorld != null)
+            {
+                if (_gameWorld.IsVisible(pos.X, pos.Y))
+                {
+                    // Visible - use normal colors
+                    var (posX, posY) = _viewport.ToLocal(pos);
+                    _mapView.SetCell(posX, posY, cell.Character, cell.Attribute);
+                }
+                else if (_gameWorld.WasVisited(pos.X, pos.Y))
+                {
+                    // Visited but not visible - grey out
+                    var (posX, posY) = _viewport.ToLocal(pos);
+                    _mapView.SetCell(posX, posY, cell.Character, Colors.GreyedOut);
+                }
+                // Else - don't draw at all
+            }
+            else
+            {
+                // Fallback if no game world reference
+                var (posX, posY) = _viewport.ToLocal(pos);
+                _mapView.SetCell(posX, posY, cell.Character, cell.Attribute);
+            }
         }
 
         public void Render()

@@ -22,6 +22,9 @@ namespace RpgGame.Core
         private GameWorld _world;
         private readonly CollisionSystem _collisionSystem;
         
+        private const int FOVRadius = 5;
+        private HashSet<(int x, int y)> _visibleTiles = new();
+
         public Player(int x, int y, GameWorld world, CollisionSystem collisionSystem)
         {
             X = x;
@@ -37,11 +40,85 @@ namespace RpgGame.Core
             _random = new Random();
             _world = world;
             _collisionSystem = collisionSystem;
+            UpdateFOV();
+        }
 
+        public void UpdateFOV()
+        {
+            _visibleTiles.Clear();
+            CalculateFOV(X, Y, FOVRadius);
+            _world.MarkVisibleTiles(_visibleTiles);
+        }
+
+        private void CalculateFOV(int x, int y, int radius)
+        {
+            _visibleTiles.Clear();
+            
+            // Check all tiles within radius
+            for (int dx = -radius; dx <= radius; dx++)
+            {
+                for (int dy = -radius; dy <= radius; dy++)
+                {
+                    // Skip if outside radius
+                    if (dx * dx + dy * dy > radius * radius) continue;
+                    
+                    int targetX = x + dx;
+                    int targetY = y + dy;
+                    
+                    if (!_world.IsInBounds(targetX, targetY)) continue;
+                    
+                    // Check line of sight
+                    if (HasLineOfSight(x, y, targetX, targetY))
+                    {
+                        _visibleTiles.Add((targetX, targetY));
+                    }
+                }
+            }
+            
+            // Always see current position
+            _visibleTiles.Add((x, y));
+        }
+
+        private bool HasLineOfSight(int x0, int y0, int x1, int y1)
+        {
+            int dx = Math.Abs(x1 - x0);
+            int dy = Math.Abs(y1 - y0);
+            int sx = x0 < x1 ? 1 : -1;
+            int sy = y0 < y1 ? 1 : -1;
+            int err = dx - dy;
+
+            while (true)
+            {
+                // Add current tile to visible tiles
+                _visibleTiles.Add((x0, y0));
+                
+                // If we hit an opaque tile, stop here but include it
+                if (!_world.IsTransparent(x0, y0))
+                    return true;
+                    
+                // If we reached the target, we have line of sight
+                if (x0 == x1 && y0 == y1)
+                    return true;
+                    
+                int e2 = 2 * err;
+                if (e2 > -dy)
+                {
+                    err -= dy;
+                    x0 += sx;
+                }
+                if (e2 < dx)
+                {
+                    err += dx;
+                    y0 += sy;
+                }
+            }
         }
 
         public void Update()
         {
+            // Update FOV every turn
+            UpdateFOV();
+            
             foreach (var effect in _activeEffects.ToArray())
             {
                 effect.Duration--;
@@ -54,6 +131,11 @@ namespace RpgGame.Core
                     effect.ApplyEffect(this);
                 }
             }
+        }
+
+        public bool IsInFOV(int x, int y)
+        {
+            return _visibleTiles.Contains((x, y));
         }
 
         public void Move(int dx, int dy)
@@ -80,6 +162,7 @@ namespace RpgGame.Core
                 {
                     X = newX;
                     Y = newY;
+                    UpdateFOV();
                     EventSystem.RaiseEvent(_collisionSystem.GetCollisionMessage(newX, newY, this));
                 }
             }

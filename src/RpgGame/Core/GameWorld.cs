@@ -111,7 +111,7 @@ namespace RpgGame.Core
             if (x < 0 || y < 0 || x >= MapWidth || y >= MapHeight)
                 return false;
 
-            return _map[y, x].Character == '.';
+            return _map[y, x].Character == '.' || _map[y, x].Character == '▒';
         }
 
         public bool IsInBounds(int x, int y)
@@ -122,7 +122,7 @@ namespace RpgGame.Core
         public bool IsTransparent(int x, int y)
         {
             if (!IsInBounds(x, y)) return false;
-            return _map[y, x].Character == '.' || _map[y, x].Character == ' ';
+            return _map[y, x].Character == '.' || _map[y, x].Character == '▒';
         }
 
         public void MarkVisibleTiles(HashSet<(int x, int y)> visibleTiles)

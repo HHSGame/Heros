@@ -13,7 +13,7 @@ namespace RpgGame.Core
         private DateTime _lastFrameTime;
         private const double TargetFrameTime = 1000.0 / 60.0; // 60 FPS
 
-        public void Start(MapStyle mapStyle = MapStyle.Cave)
+        public void Start(MapStyle mapStyle = MapStyle.Town)
         {
             _isRunning = true;
             StartNewGame(mapStyle);

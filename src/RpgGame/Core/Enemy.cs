@@ -1,4 +1,5 @@
 
+
 namespace RpgGame.Core
 {
     public enum EnemyType
@@ -31,6 +32,7 @@ namespace RpgGame.Core
         public EnemyType Type { get; private set; }
         public EnemyState State { get; private set; }
         public override char Glyph { get; }
+        public override Terminal.Gui.Attribute Attribute { get; } 
         private int _attackCooldown;
         private int _specialAbilityCooldown;
         private readonly Random _random;
@@ -52,6 +54,7 @@ namespace RpgGame.Core
             Defense = config.Defense;
             ExperienceValue = config.ExperienceValue;
             Glyph = config.Glyph;
+            Attribute = config.Attribute;
             
             Health = MaxHealth;
             _attackCooldown = 0;

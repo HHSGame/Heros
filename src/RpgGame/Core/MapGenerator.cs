@@ -1,17 +1,36 @@
 using System;
 using System.Collections.Generic;
+using RpgGame.UI;
 
 namespace RpgGame.Core
 {
+    using Attribute = Terminal.Gui.Attribute;
     public enum MapStyle
     {
         Cave,
-        Town,
         Hills,
     }
 
     public class MapGenerator
     {
+        private static readonly Dictionary<char, Attribute> _terrainColors = new()
+        {
+            { '#', Colors.Terrain.Stone },    // Walls
+            { '.', Colors.Terrain.Grass },    // Floors
+            { '~', Colors.Terrain.Water },    // Water
+            { '^', Colors.Terrain.Lava },     // Lava/Hills
+            { '*', Colors.Terrain.Forest },   // Vegetation
+            { 'H', Colors.Terrain.Stone },    // Houses
+            { 'S', Colors.Terrain.Sand }      // Shops
+        };
+
+        public static Attribute GetTerrainColor(char terrainChar)
+        {
+            return _terrainColors.TryGetValue(terrainChar, out var color) 
+                ? color 
+                : Colors.Terrain.Grass;
+        }
+    
         private readonly Random _random;
         private readonly int _mapWidth;
         private readonly int _mapHeight;
@@ -25,18 +44,15 @@ namespace RpgGame.Core
             _style = style;
         }
 
-        public char[,] GenerateDungeon()
+        public Cell[,] GenerateDungeon()
         {
             EventSystem.RaiseEvent($"Generating {_style.ToString().ToLower()} map...");
             
-            var map = new char[_mapHeight, _mapWidth];
+            var map = new Cell[_mapHeight, _mapWidth];
             
             // Initialize map based on style
             switch (_style)
             {
-                case MapStyle.Town:
-                    map = GenerateTown();
-                    break;
                 case MapStyle.Hills:
                     map = GenerateHills();
                     break;
@@ -52,16 +68,17 @@ namespace RpgGame.Core
             return map;
         }
 
-        private char[,] GenerateCave()
+        private Cell[,] GenerateCave()
         {
-            var map = new char[_mapHeight, _mapWidth];
+            var map = new Cell[_mapHeight, _mapWidth];
             
             // Initialize random map
             for (int y = 0; y < _mapHeight; y++)
             {
                 for (int x = 0; x < _mapWidth; x++)
                 {
-                    map[y, x] = _random.Next(100) < 45 ? '#' : '.';
+                    map[y, x] = _random.Next(100) < 45 ? new Cell {Character = '#', Attribute = Colors.Terrain.Stone} : 
+                        new Cell {Character = '.', Attribute = Colors.Terrain.Grass};
                 }
             }
 
@@ -74,34 +91,9 @@ namespace RpgGame.Core
             return map;
         }
 
-        private char[,] GenerateTown()
+        private Cell[,] GenerateHills()
         {
-            var map = new char[_mapHeight, _mapWidth];
-            
-            // Create a grid-like structure
-            for (int y = 0; y < _mapHeight; y++)
-            {
-                for (int x = 0; x < _mapWidth; x++)
-                {
-                    if (x % 5 == 0 || y % 5 == 0)
-                        map[y, x] = '#';
-                    else
-                        map[y, x] = '.';
-                }
-            }
-
-            // Add some randomness to walls
-            for (int i = 0; i < 2; i++)
-            {
-                map = SmoothMap(map, '#');
-            }
-
-            return map;
-        }
-
-        private char[,] GenerateHills()
-        {
-            var map = new char[_mapHeight, _mapWidth];
+            var map = new Cell[_mapHeight, _mapWidth];
             
             // Create height map
             float[,] heightMap = new float[_mapHeight, _mapWidth];
@@ -125,11 +117,11 @@ namespace RpgGame.Core
                 for (int x = 0; x < _mapWidth; x++)
                 {
                     if (heightMap[y, x] > 0.7f)
-                        map[y, x] = '^';
+                        map[y, x] = new Cell {Character = '^', Attribute = Colors.Terrain.Lava};
                     else if (heightMap[y, x] > 0.5f)
-                        map[y, x] = '*';
+                        map[y, x] = new Cell {Character = '*', Attribute = Colors.Terrain.Forest};
                     else
-                        map[y, x] = '.';
+                        map[y, x] = new Cell {Character = '.', Attribute = Colors.Terrain.Grass};
                 }
             }
 
@@ -166,9 +158,9 @@ namespace RpgGame.Core
             return newMap;
         }
 
-        private char[,] SmoothMap(char[,] map, char wallChar = '#')
+        private Cell[,] SmoothMap(Cell[,] map, char wallChar = '#')
         {
-            char[,] newMap = new char[_mapHeight, _mapWidth];
+            Cell[,] newMap = new Cell[_mapHeight, _mapWidth];
             
             for (int y = 0; y < _mapHeight; y++)
             {
@@ -177,9 +169,9 @@ namespace RpgGame.Core
                     int neighborCount = GetSurroundingCount(map, x, y, wallChar);
 
                     if (neighborCount > 4)
-                        newMap[y, x] = wallChar;
+                        newMap[y, x] = new Cell {Character = wallChar, Attribute = GetTerrainColor(wallChar)};
                     else if (neighborCount < 4)
-                        newMap[y, x] = '.';
+                        newMap[y, x] = new Cell {Character = '.', Attribute = Colors.Terrain.Grass};
                     else
                         newMap[y, x] = map[y, x];
                 }
@@ -188,7 +180,7 @@ namespace RpgGame.Core
             return newMap;
         }
 
-        private int GetSurroundingCount(char[,] map, int x, int y, char target)
+        private int GetSurroundingCount(Cell[,] map, int x, int y, char target)
         {
             int count = 0;
             for (int neighborY = y - 1; neighborY <= y + 1; neighborY++)
@@ -200,7 +192,7 @@ namespace RpgGame.Core
                     {
                         if (neighborX != x || neighborY != y)
                         {
-                            count += map[neighborY, neighborX] == target ? 1 : 0;
+                            count += map[neighborY, neighborX].Character == target ? 1 : 0;
                         }
                     }
                     else
@@ -212,37 +204,32 @@ namespace RpgGame.Core
             return count;
         }
 
-        private char[,] AddTerrainFeatures(char[,] map)
+        private Cell[,] AddTerrainFeatures(Cell[,] map)
         {
             switch (_style)
-            {                    
-                case MapStyle.Town:
-                    map = AddRandomFeature(map, 'H', 10, 1); // Houses
-                    map = AddRandomFeature(map, 'S', 3, 1);  // Shops
-                    break;
-                    
+            {                                        
                 case MapStyle.Hills:
-                    map = AddRandomFeature(map, '~', 5, 3);  // Streams
-                    map = AddRandomFeature(map, '*', 10, 5); // Scrub
+                    map = AddRandomFeature(map, new Cell{Character = '~', Attribute = Colors.Terrain.Water}, 5, 3);  // Streams
+                    map = AddRandomFeature(map, new Cell{Character = '*', Attribute = Colors.Terrain.Forest}, 10, 5); // Scrub
                     break;
                     
                 default: // Cave
-                    map = AddRandomFeature(map, '~', 10, 5); // Water
-                    map = AddRandomFeature(map, '^', 5, 3);  // Lava
-                    map = AddRandomFeature(map, '*', 15, 7); // Vegetation
+                    map = AddRandomFeature(map, new Cell{Character = '~', Attribute = Colors.Terrain.Water}, 10, 5); // Water
+                    map = AddRandomFeature(map, new Cell{Character = '^', Attribute = Colors.Terrain.Lava}, 5, 3);  // Lava
+                    map = AddRandomFeature(map, new Cell{Character = '*', Attribute = Colors.Terrain.Forest}, 15, 7); // Vegetation
                     break;
             }
             return map;
         }
 
-        private char[,] AddRandomFeature(char[,] map, char feature, int count, int maxSize)
+        private Cell[,] AddRandomFeature(Cell[,] map, Cell feature, int count, int maxSize)
         {
             for (int i = 0; i < count; i++)
             {
                 int startX = _random.Next(1, _mapWidth - 1);
                 int startY = _random.Next(1, _mapHeight - 1);
                 
-                if (map[startY, startX] == '.')
+                if (map[startY, startX].Character == '.')
                 {
                     map = FloodFillFeature(map, startX, startY, feature, maxSize);
                 }
@@ -250,7 +237,7 @@ namespace RpgGame.Core
             return map;
         }
 
-        private char[,] FloodFillFeature(char[,] map, int x, int y, char feature, int maxSize)
+        private Cell[,] FloodFillFeature(Cell[,] map, int x, int y, Cell feature, int maxSize)
         {
             Queue<(int x, int y)> queue = new();
             queue.Enqueue((x, y));
@@ -260,7 +247,7 @@ namespace RpgGame.Core
             {
                 var (currentX, currentY) = queue.Dequeue();
                 
-                if (map[currentY, currentX] == '.')
+                if (map[currentY, currentX].Character == '.')
                 {
                     map[currentY, currentX] = feature;
                     filled++;

@@ -1,5 +1,4 @@
 using RpgGame.UI;
-using System.Collections.Generic;
 
 namespace RpgGame.Core
 {
@@ -8,7 +7,7 @@ namespace RpgGame.Core
         public static int MapWidth { get; } = 500;
         public static int MapHeight { get; } = 500;
         
-        private char[,] _map;
+        private Cell[,] _map;
         private List<Enemy> _enemies;
         private List<Item> _loot;
         private readonly Random _random;
@@ -25,7 +24,7 @@ namespace RpgGame.Core
         public GameWorld(MapStyle mapStyle = MapStyle.Cave)
         {
             _mapStyle = mapStyle;
-            _map = new char[MapHeight, MapWidth];
+            _map = new Cell[MapHeight, MapWidth];
             _enemies = new List<Enemy>();
             _loot = new List<Item>();
             _random = new Random();
@@ -109,7 +108,7 @@ namespace RpgGame.Core
             if (x < 0 || y < 0 || x >= MapWidth || y >= MapHeight)
                 return false;
 
-            return _map[y, x] == '.';
+            return _map[y, x].Character == '.';
         }
 
         public Enemy? GetEnemyAt(int x, int y)

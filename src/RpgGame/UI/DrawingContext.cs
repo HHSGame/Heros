@@ -1,4 +1,4 @@
-using System.Security.Cryptography.X509Certificates;
+using RpgGame.Core;
 using Terminal.Gui;
 
 
@@ -89,7 +89,7 @@ namespace RpgGame.UI {
         // Explicit interface implementation for original method
         public void DrawAt((int X, int Y) pos, char tile)
         {
-            this.DrawAt(pos, new Cell {Character = tile, Attribute = Colors.Base.Normal});
+            this.DrawAt(pos, new Cell {Character = tile, Attribute = Colors.Terrain.Stone});
         }
 
         public void DrawAt((int X, int Y) pos, Cell cell)

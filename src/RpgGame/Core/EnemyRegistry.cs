@@ -1,3 +1,6 @@
+using RpgGame.UI;
+using Attribute = Terminal.Gui.Attribute;
+
 namespace RpgGame.Core
 {
     public class EnemyRegistry
@@ -8,22 +11,23 @@ namespace RpgGame.Core
             int Strength,
             int Defense,
             int ExperienceValue,
-            char Glyph
+            char Glyph,
+            Attribute Attribute
         );
 
         private static readonly Dictionary<EnemyType, EnemyConfig> _enemyConfigs = new()
         {
             { 
                 EnemyType.Goblin, 
-                new EnemyConfig("Goblin", 30, 5, 2, 50, 'g')
+                new EnemyConfig("Goblin", 30, 5, 2, 50, 'g', Colors.Enemies.Goblin)
             },
             { 
                 EnemyType.Orc, 
-                new EnemyConfig("Orc", 60, 8, 5, 100, 'o') 
+                new EnemyConfig("Orc", 60, 8, 5, 100, 'o', Colors.Enemies.Orc) 
             },
             { 
                 EnemyType.Troll, 
-                new EnemyConfig("Troll", 100, 12, 8, 200, 'T') 
+                new EnemyConfig("Troll", 100, 12, 8, 200, 'T', Colors.Enemies.Troll) 
             }
         };
 

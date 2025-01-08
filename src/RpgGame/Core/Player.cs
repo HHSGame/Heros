@@ -12,6 +12,7 @@ namespace RpgGame.Core
         public int Level { get; private set; }
 
         public override char Glyph => '@';
+        public override string Name => "Player";
 
         public override Terminal.Gui.Attribute Attribute => Terminal.Gui.Attribute.Make(Color.BrightCyan, Color.Magenta);
 

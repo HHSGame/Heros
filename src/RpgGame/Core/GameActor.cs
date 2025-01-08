@@ -1,4 +1,3 @@
-using Terminal.Gui;
 using RpgGame.UI;
 
 namespace RpgGame.Core {
@@ -12,14 +11,10 @@ namespace RpgGame.Core {
         
         public abstract char Glyph { get; }
 
-        public virtual Terminal.Gui.Attribute Attribute => Colors.Base.Normal;
+        public virtual Terminal.Gui.Attribute Attribute => Colors.Terrain.Grass;
 
         public void Draw(IDrawingContext ctx) {
             ctx.DrawAt((X, Y), new Cell {Character = Glyph, Attribute = Attribute});
-        }
-
-        public void DrawAt(IDrawingContext ctx, int viewportX, int viewportY) {
-            ctx.DrawAt((viewportX, viewportY), new Cell {Character = Glyph, Attribute = Attribute});
         }
     }
 }

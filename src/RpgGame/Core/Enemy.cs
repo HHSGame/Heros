@@ -18,10 +18,10 @@ namespace RpgGame.Core
 
     public class Enemy : GameActor
     {
-        private readonly GameWorld _world;
         private readonly CollisionSystem _collisionSystem;
         private readonly EnemyAbilitySystem _abilitySystem;
         private readonly EnemyLootSystem _lootSystem;
+        private readonly Pathfinder _pathfinder;
         public int Health { get; private set; }
         public int MaxHealth { get; private set; }
         public int Strength { get; private set; }
@@ -35,14 +35,14 @@ namespace RpgGame.Core
         private int _specialAbilityCooldown;
         private readonly Random _random;
 
-        public Enemy(EnemyType type, int x, int y, GameWorld world, CollisionSystem collisionSystem)
+        public Enemy(EnemyType type, int x, int y, CollisionSystem collisionSystem, Pathfinder pathfinder)
         {
             _random = new Random();
             Type = type;
             X = x;
             Y = y;
-            _world = world;
             _collisionSystem = collisionSystem;
+            _pathfinder = pathfinder;
             State = EnemyState.Chasing;
 
             var config = EnemyRegistry.GetConfig(type);
@@ -100,7 +100,7 @@ namespace RpgGame.Core
                     
                 case EnemyState.Chasing:
                     // Get path to player
-                    var path = _world.GetPath((X, Y), (player.X, player.Y));
+                    var path = _pathfinder.FindPath((X, Y), (player.X, player.Y));
                     
                     if (path.Count > 1) // First element is current position
                     {

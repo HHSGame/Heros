@@ -11,11 +11,11 @@ namespace RpgGame.Core
         private char[,] _map;
         private List<Enemy> _enemies;
         private List<Item> _loot;
-        private Random _random;
-        private MapGenerator _mapGenerator;
-        private EnemyFactory _enemyFactory;
-        private Pathfinder _pathfinder;
-        private CollisionSystem _collisionSystem;
+        private readonly Random _random;
+        private readonly MapGenerator _mapGenerator;
+        private readonly EnemyFactory _enemyFactory;
+        private readonly Pathfinder _pathfinder;
+        private readonly CollisionSystem _collisionSystem;
 
         private TurnState _currentTurn = TurnState.PlayerTurn;
         
@@ -29,12 +29,12 @@ namespace RpgGame.Core
             _random = new Random();
             
             _collisionSystem = new CollisionSystem(this);
+            _pathfinder = new Pathfinder(this);
             _mapGenerator = new MapGenerator(MapWidth, MapHeight, _random);
-            _enemyFactory = new EnemyFactory(MapWidth, MapHeight, _random, this, _collisionSystem);
+            _enemyFactory = new EnemyFactory(MapWidth, MapHeight, _random, this, _collisionSystem, _pathfinder);
             
             _map = _mapGenerator.GenerateDungeon();
             _enemies = _enemyFactory.SpawnEnemies();
-            _pathfinder = new Pathfinder(this);
 
             EventSystem.OnTurnChanged += HandleTurnChange;
         }
@@ -123,7 +123,7 @@ namespace RpgGame.Core
         public void Draw(IDrawingContext ctx)
         {
             var viewport = ctx.Viewport;
-            
+
             // Draw map tiles within viewport
             for (int y = viewport.Y; y < viewport.Y + viewport.Height; y++)
             {

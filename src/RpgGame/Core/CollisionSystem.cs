@@ -49,7 +49,7 @@ namespace RpgGame.Core
                 return $"Collision: {actor.Name} blocked by terrain at ({x}, {y})";
 
             var collision = GetCollisionAt(x, y);
-            if (collision != null)
+            if (collision != null && collision != actor)
                 return $"Collision: {actor.Name} blocked by {collision.Name} at ({x}, {y})";
 
             return $"Movement: {actor.Name} moved to ({x}, {y})";

@@ -10,14 +10,16 @@ namespace RpgGame.Core
         private readonly int _mapHeight;
         private readonly GameWorld _world;
         private readonly CollisionSystem _collisionSystem;
+        private readonly Pathfinder _pathfinder;
 
-        public EnemyFactory(int mapWidth, int mapHeight, Random random, GameWorld world, CollisionSystem collisionSystem)
+        public EnemyFactory(int mapWidth, int mapHeight, Random random, GameWorld world, CollisionSystem collisionSystem, Pathfinder pathfinder)
         {
             _mapWidth = mapWidth;
             _mapHeight = mapHeight;
             _random = random;
             _world = world;
             _collisionSystem = collisionSystem;
+            _pathfinder = pathfinder;
         }
 
         public List<Enemy> SpawnEnemies()
@@ -27,8 +29,8 @@ namespace RpgGame.Core
             var enemies = new List<Enemy>();
             
             // Spawn different enemy types
-            SpawnEnemyType(enemies, EnemyType.Goblin, 3);
-            SpawnEnemyType(enemies, EnemyType.Orc, 2);
+            SpawnEnemyType(enemies, EnemyType.Goblin, 15);
+            SpawnEnemyType(enemies, EnemyType.Orc, 10);
             SpawnEnemyType(enemies, EnemyType.Troll, 1);
             
             EventSystem.RaiseEvent("Enemies spawned: 3 Goblins, 2 Orcs, 1 Troll");
@@ -46,7 +48,7 @@ namespace RpgGame.Core
                     y = _random.Next(1, _mapHeight - 1);
                 } while (!_world.IsWalkable(x, y) || GetEnemyAt(enemies, x, y) != null);
                 
-                enemies.Add(new Enemy(type, x, y, _world, _collisionSystem));
+                enemies.Add(new Enemy(type, x, y, _collisionSystem, _pathfinder));
             }
         }
 

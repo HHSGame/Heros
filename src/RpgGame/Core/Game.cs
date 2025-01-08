@@ -13,16 +13,16 @@ namespace RpgGame.Core
         private DateTime _lastFrameTime;
         private const double TargetFrameTime = 1000.0 / 60.0; // 60 FPS
 
-        public void Start()
+        public void Start(MapStyle mapStyle = MapStyle.Cave)
         {
             _isRunning = true;
-            StartNewGame();
+            StartNewGame(mapStyle);
         }
 
-        private void StartNewGame()
+        private void StartNewGame(MapStyle mapStyle)
         {
             // Initialize game world and player
-            _world = new GameWorld();
+            _world = new GameWorld(mapStyle);
             _player = _world.NewPlayer();
 
             // Start game loop with refresh rate

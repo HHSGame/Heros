@@ -16,13 +16,15 @@ namespace RpgGame.Core
         private readonly EnemyFactory _enemyFactory;
         private readonly Pathfinder _pathfinder;
         private readonly CollisionSystem _collisionSystem;
+        private readonly MapStyle _mapStyle;
 
         private TurnState _currentTurn = TurnState.PlayerTurn;
         
         public TurnState CurrentTurn => _currentTurn;
 
-        public GameWorld()
+        public GameWorld(MapStyle mapStyle = MapStyle.Cave)
         {
+            _mapStyle = mapStyle;
             _map = new char[MapHeight, MapWidth];
             _enemies = new List<Enemy>();
             _loot = new List<Item>();
@@ -30,7 +32,7 @@ namespace RpgGame.Core
             
             _collisionSystem = new CollisionSystem(this);
             _pathfinder = new Pathfinder(this);
-            _mapGenerator = new MapGenerator(MapWidth, MapHeight, _random);
+            _mapGenerator = new MapGenerator(MapWidth, MapHeight, _random, _mapStyle);
             _enemyFactory = new EnemyFactory(MapWidth, MapHeight, _random, this, _collisionSystem, _pathfinder);
             
             _map = _mapGenerator.GenerateDungeon();
@@ -154,6 +156,5 @@ namespace RpgGame.Core
                 }
             }
         }
-
     }
 }

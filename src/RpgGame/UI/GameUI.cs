@@ -46,7 +46,7 @@ namespace RpgGame.UI
                 Width = Dim.Fill(),
                 Height = 10
             };
-            drawingContext = new MapViewDrawingContext(GameWorld.MapWidth, GameWorld.MapHeight);
+            drawingContext = new MapViewDrawingContext(Viewport.DefaultWidth, Viewport.DefaultHeight);
             _game = new Game(drawingContext);
         }
 

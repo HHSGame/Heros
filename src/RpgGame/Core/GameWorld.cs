@@ -5,8 +5,8 @@ namespace RpgGame.Core
 {
     public class GameWorld : IDrawable
     {
-        public static int MapWidth { get; } = 150;
-        public static int MapHeight { get; } = 30;
+        public static int MapWidth { get; } = 500;
+        public static int MapHeight { get; } = 500;
         
         private char[,] _map;
         private List<Enemy> _enemies;
@@ -122,34 +122,38 @@ namespace RpgGame.Core
 
         public void Draw(IDrawingContext ctx)
         {
-            // Draw map tiles
-            for (int y = 0; y < MapHeight; y++)
+            var viewport = ctx.Viewport;
+            
+            // Draw map tiles within viewport
+            for (int y = viewport.Y; y < viewport.Y + viewport.Height; y++)
             {
-                for (int x = 0; x < MapWidth; x++)
+                for (int x = viewport.X; x < viewport.X + viewport.Width; x++)
                 {
-                    ctx.DrawAt((x, y), _map[y, x]);
+                    if (x >= 0 && x < MapWidth && y >= 0 && y < MapHeight)
+                    {
+                        ctx.DrawAt((x, y), _map[y, x]);
+                    }
                 }
             }
 
-            // Draw enemies
+            // Draw enemies within viewport
             foreach (var enemy in _enemies)
             {
-                if (enemy.X >= 0 && enemy.X < MapWidth &&
-                    enemy.Y >= 0 && enemy.Y < MapHeight)
+                if (viewport.Contains((enemy.X, enemy.Y)))
                 {
                     enemy.Draw(ctx);
                 }
             }
 
-            // Draw loot
+            // Draw loot within viewport
             foreach (var item in _loot)
             {
-                if (item.X >= 0 && item.X < MapWidth &&
-                    item.Y >= 0 && item.Y < MapHeight)
+                if (viewport.Contains((item.X, item.Y)))
                 {
                     ctx.DrawAt((item.X, item.Y), '*');
                 }
             }
         }
+
     }
 }

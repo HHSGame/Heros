@@ -17,5 +17,9 @@ namespace RpgGame.Core {
         public void Draw(IDrawingContext ctx) {
             ctx.DrawAt((X, Y), new Cell {Character = Glyph, Attribute = Attribute});
         }
+
+        public void DrawAt(IDrawingContext ctx, int viewportX, int viewportY) {
+            ctx.DrawAt((viewportX, viewportY), new Cell {Character = Glyph, Attribute = Attribute});
+        }
     }
 }

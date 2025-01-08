@@ -39,6 +39,7 @@ namespace RpgGame.Core
             
             UpdateGame(deltaTime);
             
+            _drawingCtx.Viewport.UpdateViewport(_player.X, _player.Y, GameWorld.MapWidth, GameWorld.MapHeight);
             _world.Draw(_drawingCtx);
             _player.Draw(_drawingCtx);
             

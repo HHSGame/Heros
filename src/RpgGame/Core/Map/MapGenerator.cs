@@ -49,12 +49,14 @@ namespace RpgGame.Core
         private readonly int _mapWidth;
         private readonly int _mapHeight;
         private readonly MapStyle _style;
+        private readonly GameWorld _gameWorld;
         
-        public MapGenerator(int mapWidth, int mapHeight, Random random, MapStyle style = MapStyle.Cave)
+        public MapGenerator(int mapWidth, int mapHeight, Random random, GameWorld gameWorld, MapStyle style = MapStyle.Cave)
         {
             _mapWidth = mapWidth;
             _mapHeight = mapHeight;
             _random = random;
+            _gameWorld = gameWorld;
             _style = style;
         }
 
@@ -71,8 +73,21 @@ namespace RpgGame.Core
 
             var map = generator.Generate();
             
+            // Place random items in the dungeon
+            PlaceRandomItems(map);
+            
             EventSystem.RaiseEvent($"{_style} map generated successfully");
             return map;
+        }
+
+        private void PlaceRandomItems(Cell[,] map)
+        {
+            int itemCount = _random.Next(3, 6); // Place some items
+            for (int i = 0; i < itemCount; i++)
+            {
+                var item = ItemFactory.CreateRandomItem();
+                _gameWorld.AddItem(item);
+            }
         }
 
     }

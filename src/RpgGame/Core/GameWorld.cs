@@ -31,7 +31,7 @@ namespace RpgGame.Core
             
             _collisionSystem = new CollisionSystem(this);
             _pathfinder = new Pathfinder(this);
-            _mapGenerator = new MapGenerator(MapWidth, MapHeight, _random, _mapStyle);
+            _mapGenerator = new MapGenerator(MapWidth, MapHeight, _random, this, _mapStyle);
             _enemyFactory = new EnemyFactory(MapWidth, MapHeight, _random, this, _collisionSystem, _pathfinder);
             
             _map = _mapGenerator.GenerateDungeon();
@@ -163,6 +163,33 @@ namespace RpgGame.Core
         public void RemoveItemsAt(int x, int y)
         {
             _loot.RemoveAll(item => item.X == x && item.Y == y);
+        }
+
+        public void AddItem(Item item)
+        {
+            // Try to place item at random valid location
+            int attempts = 3;
+            while (attempts-- > 0)
+            {
+                int x = _random.Next(0, MapWidth);
+                int y = _random.Next(0, MapHeight);
+                EventSystem.RaiseEvent($"Attempt to place item at {x}, {y}.");
+                
+                if (IsWalkable(x, y) && _loot.All(i => i.X != x && i.Y != y))
+                {
+                    EventSystem.RaiseEvent($"Placed item {item.Name} at ({x}, {y})");
+                    item.X = x;
+                    item.Y = y;
+                    _loot.Add(item);
+                    return;
+                }
+            }
+            
+            // If no valid spot found after attempts, just place at center
+            item.X = MapWidth / 2;
+            item.Y = MapHeight / 2;
+            EventSystem.RaiseEvent($"Placed item {item.Name} at ({item.X}, {item.Y})");
+            _loot.Add(item);
         }
 
         public List<(int x, int y)> GetPath((int x, int y) start, (int x, int y) end)

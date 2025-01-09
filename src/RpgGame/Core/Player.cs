@@ -21,6 +21,8 @@ namespace RpgGame.Core
         private Random _random;
         private GameWorld _world;
         private readonly CollisionSystem _collisionSystem;
+        private Weapon? _equippedWeapon;
+        private Armor? _equippedArmor;
         
         private const int FOVRadius = 5;
         private HashSet<(int x, int y)> _visibleTiles = new();
@@ -187,8 +189,10 @@ namespace RpgGame.Core
 
             EventSystem.RaiseEvent($"Player attacks {enemy.Name}!");
 
-            int damage = Strength;
-            enemy.TakeDamage(damage);
+            int baseDamage = Strength;
+            int weaponDamage = _equippedWeapon?.Damage ?? 0;
+            int totalDamage = baseDamage + weaponDamage;
+            enemy.TakeDamage(totalDamage);
 
             if (enemy.Health <= 0)
             {
@@ -201,7 +205,11 @@ namespace RpgGame.Core
             if (IsStunned()) return;
             EventSystem.RaiseEvent($"Player takes {damage} damage!");
 
-            int actualDamage = damage - Defense;
+            int baseDefense = Defense;
+            int armorDefense = _equippedArmor?.Defense ?? 0;
+            int totalDefense = baseDefense + armorDefense;
+            
+            int actualDamage = damage - totalDefense;
             if (actualDamage < 0) actualDamage = 0;
             Health -= actualDamage;
 
@@ -242,6 +250,26 @@ namespace RpgGame.Core
         public void AddItem(Item item)
         {
             _inventory.Add(item);
+        }
+
+        public void EquipWeapon(Weapon weapon)
+        {
+            if (_equippedWeapon != null)
+            {
+                _inventory.Add(_equippedWeapon);
+            }
+            _equippedWeapon = weapon;
+            EventSystem.RaiseEvent($"Equipped {weapon.Name}");
+        }
+
+        public void EquipArmor(Armor armor)
+        {
+            if (_equippedArmor != null)
+            {
+                _inventory.Add(_equippedArmor);
+            }
+            _equippedArmor = armor;
+            EventSystem.RaiseEvent($"Equipped {armor.Name}");
         }
 
         public void UseItem(int index)

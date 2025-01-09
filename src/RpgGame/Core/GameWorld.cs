@@ -168,24 +168,65 @@ namespace RpgGame.Core
         public void AddItem(Item item)
         {
             // Try to place item at random valid location
-            int attempts = 3;
-            while (attempts-- > 0)
+            int attempts = 10;
+            int startX = _random.Next(0, MapWidth);
+            int startY = _random.Next(0, MapHeight);
+            
+            // Spiral search pattern
+            int[] dx = { 1, 0, -1, 0 };
+            int[] dy = { 0, 1, 0, -1 };
+            int dir = 0;
+            int steps = 1;
+            int stepCount = 0;
+            
+            for (int i = 0; i < attempts; i++)
             {
-                int x = _random.Next(0, MapWidth);
-                int y = _random.Next(0, MapHeight);
-                EventSystem.RaiseEvent($"Attempt to place item at {x}, {y}.");
-                
-                if (IsWalkable(x, y) && _loot.All(i => i.X != x && i.Y != y))
+                // Check current position
+                if (IsWalkable(startX, startY) && _loot.All(i => i.X != startX && i.Y != startY))
                 {
-                    EventSystem.RaiseEvent($"Placed item {item.Name} at ({x}, {y})");
-                    item.X = x;
-                    item.Y = y;
+                    EventSystem.RaiseEvent($"Placed item {item.Name} at ({startX}, {startY})");
+                    item.X = startX;
+                    item.Y = startY;
                     _loot.Add(item);
                     return;
                 }
+                
+                // Move to next position in spiral
+                startX += dx[dir];
+                startY += dy[dir];
+                stepCount++;
+                
+                if (stepCount == steps)
+                {
+                    stepCount = 0;
+                    dir = (dir + 1) % 4;
+                    if (dir % 2 == 0) steps++;
+                }
+                
+                // Wrap around map edges
+                if (startX < 0) startX = MapWidth - 1;
+                if (startX >= MapWidth) startX = 0;
+                if (startY < 0) startY = MapHeight - 1;
+                if (startY >= MapHeight) startY = 0;
             }
             
-            // If no valid spot found after attempts, just place at center
+            // If still no valid spot, find first available walkable position
+            for (int y = 0; y < MapHeight; y++)
+            {
+                for (int x = 0; x < MapWidth; x++)
+                {
+                    if (IsWalkable(x, y) && _loot.All(i => i.X != x && i.Y != y))
+                    {
+                        EventSystem.RaiseEvent($"Placed item {item.Name} at ({x}, {y})");
+                        item.X = x;
+                        item.Y = y;
+                        _loot.Add(item);
+                        return;
+                    }
+                }
+            }
+            
+            // As last resort, place at center
             item.X = MapWidth / 2;
             item.Y = MapHeight / 2;
             EventSystem.RaiseEvent($"Placed item {item.Name} at ({item.X}, {item.Y})");

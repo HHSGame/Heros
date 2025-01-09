@@ -155,6 +155,16 @@ namespace RpgGame.Core
             return _enemies.FirstOrDefault(e => e.X == x && e.Y == y);
         }
 
+        public List<Item> GetItemsAt(int x, int y)
+        {
+            return _loot.Where(item => item.X == x && item.Y == y).ToList();
+        }
+
+        public void RemoveItemsAt(int x, int y)
+        {
+            _loot.RemoveAll(item => item.X == x && item.Y == y);
+        }
+
         public List<(int x, int y)> GetPath((int x, int y) start, (int x, int y) end)
         {
             return _pathfinder.FindPath(start, end);

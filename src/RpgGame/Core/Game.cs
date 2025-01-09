@@ -25,6 +25,7 @@ namespace RpgGame.Core
             _world = new GameWorld(mapStyle);
             _player = _world.NewPlayer();
             _drawingCtx.GameWorld = _world;
+            _player.AddItem(new HealthPotion(10));
 
             // Start game loop with refresh rate
             Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(TargetFrameTime), GameLoop);

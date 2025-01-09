@@ -10,8 +10,10 @@ namespace RpgGame.UI
         private readonly Game _game;
         private readonly Window mapWindow;
         private readonly Window messageWindow;
+        private readonly Window inventoryWindow;
         private readonly EventLogger eventLogger;
         private readonly MapViewDrawingContext drawingContext;
+        private readonly ListView inventoryList;
 
         public GameUI()
         {
@@ -19,7 +21,7 @@ namespace RpgGame.UI
             {
                 X = 0,
                 Y = 0,
-                Width = Dim.Fill(),
+                Width = Dim.Fill() - 20,
                 Height = Dim.Fill() - 10,
                 ColorScheme = new ColorScheme
                 {
@@ -27,6 +29,29 @@ namespace RpgGame.UI
                     Focus = Application.Driver.MakeAttribute(Color.White, Color.Black)
                 }
             };
+            
+            inventoryWindow = new Window("Inventory")
+            {
+                X = Pos.Right(mapWindow),
+                Y = 0,
+                Width = 20,
+                Height = Dim.Fill() - 10,
+                ColorScheme = new ColorScheme
+                {
+                    Normal = Application.Driver.MakeAttribute(Color.White, Color.Black),
+                    Focus = Application.Driver.MakeAttribute(Color.White, Color.Black)
+                }
+            };
+            
+            inventoryList = new ListView()
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill()
+            };
+            inventoryWindow.Add(inventoryList);
+            
             messageWindow = new Window("Messages")
             {
                 X = 0,
@@ -57,9 +82,21 @@ namespace RpgGame.UI
             mapWindow.Add(drawingContext.View);
             messageWindow.Add(eventLogger);
 
-            top.Add(mapWindow, messageWindow);
+            top.Add(mapWindow, inventoryWindow, messageWindow);
 
             _game.Start();
+            
+            // Update inventory display periodically
+            Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(500), _ => {
+                if (_game.Player != null)
+                {
+                    var items = _game.Player.GetInventory()
+                        .Select(i => i.Name)
+                        .ToList();
+                    inventoryList.SetSource(items);
+                }
+                return true;
+            });
 
             Application.RootKeyEvent += HandleKeyEvent;
 
@@ -69,6 +106,7 @@ namespace RpgGame.UI
 
         private bool HandleKeyEvent(KeyEvent args)
         {
+            EventSystem.RaiseEvent($"Key pressed: {args.Key}");
             // Process movement keys
             switch (args.Key)
             {
@@ -88,6 +126,9 @@ namespace RpgGame.UI
                     _game.Stop();
                     Application.RequestStop();
                     Application.Shutdown();
+                    return true;
+                case Key.g:
+                    _game.Player?.PickupItems();
                     return true;
                 default:
                     // Let other keys propagate

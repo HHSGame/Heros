@@ -253,6 +253,28 @@ namespace RpgGame.Core
             }
         }
 
+        public List<Item> GetInventory()
+        {
+            return _inventory;
+        }
+
+        public void PickupItems()
+        {
+            var items = _world.GetItemsAt(X, Y);
+            if (items.Count == 0)
+            {
+                EventSystem.RaiseEvent("No items here to pick up.");
+                return;
+            }
+
+            foreach (var item in items)
+            {
+                AddItem(item);
+                EventSystem.RaiseEvent($"Picked up {item.Name}");
+            }
+            _world.RemoveItemsAt(X, Y);
+        }
+
         public void ApplyEffect(ActiveEffect effect)
         {
             _activeEffects.Add(effect);

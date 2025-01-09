@@ -29,6 +29,12 @@ namespace RpgGame.Core
             { '╗', Colors.Terrain.Stone },    // Town walls
             { '╚', Colors.Terrain.Stone },    // Town walls
             { '╝', Colors.Terrain.Stone },    // Town walls
+            { '│', Colors.Terrain.Stone },    // House/Room walls
+            { '─', Colors.Terrain.Stone },    // House/Room walls
+            { '┌', Colors.Terrain.Stone },    // House/Room walls
+            { '┐', Colors.Terrain.Stone },    // House/Room walls
+            { '└', Colors.Terrain.Stone },    // House/Room walls
+            { '┘', Colors.Terrain.Stone },    // House/Room walls
             { '▒', Colors.Terrain.Grass },    // Town streets
         };
 

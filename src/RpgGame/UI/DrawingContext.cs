@@ -118,6 +118,10 @@ namespace RpgGame.UI {
                     // Visited but not visible - grey out
                     var (posX, posY) = _viewport.ToLocal(pos);
                     _mapView.SetCell(posX, posY, cell.Character, Colors.GreyedOut);
+                } else {
+                    // Visited but not visible - grey out
+                    var (posX, posY) = _viewport.ToLocal(pos);
+                    _mapView.SetCell(posX, posY, ' ', Colors.GreyedOut);
                 }
                 // Else - don't draw at all
             }

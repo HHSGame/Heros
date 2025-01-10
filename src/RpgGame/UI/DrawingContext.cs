@@ -65,6 +65,8 @@ namespace RpgGame.UI {
     {
         public char Character;
         public Terminal.Gui.Attribute Attribute;
+
+        public bool IsWalkable => Character == '.' || Character == '▒';
     }
 
     public class MapViewDrawingContext : IDrawingContext

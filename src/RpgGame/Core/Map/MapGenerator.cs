@@ -82,13 +82,21 @@ namespace RpgGame.Core
 
         private void PlaceRandomItems(Cell[,] map)
         {
-            int itemCount = _random.Next(3, 6); // Place some items
+            int itemCount = _random.Next(40, 50); // Place some items
             for (int i = 0; i < itemCount; i++)
             {
                 var item = ItemFactory.CreateRandomItem();
+                int x = _random.Next(1, _mapWidth - 1);
+                int y = _random.Next(1, _mapHeight - 1);
+                while (!map[y, x].IsWalkable)
+                {
+                    x = _random.Next(1, _mapWidth - 1);
+                    y = _random.Next(1, _mapHeight - 1);
+                }
+                item.X = x;
+                item.Y = y;
                 _gameWorld.AddItem(item);
             }
         }
-
     }
 }

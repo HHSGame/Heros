@@ -24,7 +24,7 @@ namespace RpgGame.Core
         private Weapon? _equippedWeapon;
         private Armor? _equippedArmor;
         
-        private const int FOVRadius = 5;
+        private const int FOVRadius = 7;
         private HashSet<(int x, int y)> _visibleTiles = new();
 
         public Player(int x, int y, GameWorld world, CollisionSystem collisionSystem)

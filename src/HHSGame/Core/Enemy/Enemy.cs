@@ -23,16 +23,18 @@ namespace HHSGame.Core
         private readonly EnemyAbilitySystem _abilitySystem;
         private readonly EnemyLootSystem _lootSystem;
         private readonly Pathfinder _pathfinder;
+        public int X { get; set; }
+        public int Y { get; set; }
         public int Health { get; private set; }
         public int MaxHealth { get; private set; }
         public int Strength { get; private set; }
         public int Defense { get; private set; }
         public int ExperienceValue { get; private set; }
-        public override string Name { get; }
+        public string Name { get; }
         public EnemyType Type { get; private set; }
         public EnemyState State { get; private set; }
-        public override char Glyph { get; }
-        public override Terminal.Gui.Attribute Attribute { get; } 
+        public char Glyph { get; }
+        public Terminal.Gui.Attribute Attribute { get; } 
         private int _attackCooldown;
         private int _specialAbilityCooldown;
         private readonly Random _random;

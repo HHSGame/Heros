@@ -1,9 +1,12 @@
+using HHSGame.Core.Combat;
 using Terminal.Gui;
 
 namespace HHSGame.Core
 {
     public class Player: GameActor
     {
+        public int X { get; set; }
+        public int Y { get; set; }
         public int Health { get; private set; }
         public int MaxHealth { get; private set; }
         public int Strength { get; private set; }
@@ -11,24 +14,24 @@ namespace HHSGame.Core
         public int Experience { get; private set; }
         public int Level { get; private set; }
 
-        public override char Glyph => '@';
-        public override string Name => "Hero";
+        public char Glyph => '☭';
+        public string Name => "Hero";
 
-        public override Terminal.Gui.Attribute Attribute => Terminal.Gui.Attribute.Make(Color.BrightYellow, Color.Red);
+        public Terminal.Gui.Attribute Attribute => Terminal.Gui.Attribute.Make(Color.BrightYellow, Color.Red);
 
         private List<ActiveEffect> _activeEffects;
-        private GameWorld _world;
         private readonly CollisionSystem _collisionSystem;
         private readonly InventoryManager _inventoryManager;
         private readonly ItemManager _itemManager;
         private readonly MapState _mapState;
         private Weapon? _equippedWeapon;
         private Armor? _equippedArmor;
+        private TurnManager _turnManager;
         
         private const int FOVRadius = 7;
         private HashSet<(int x, int y)> _visibleTiles = new();
 
-        public Player(int x, int y, GameWorld world, GameContext context)
+        public Player(int x, int y, GameContext context)
         {
             X = x;
             Y = y;
@@ -39,11 +42,11 @@ namespace HHSGame.Core
             Experience = 0;
             Level = 1;
             _activeEffects = new List<ActiveEffect>();
-            _world = world;
             _collisionSystem = context.CollisionSystem;
             _inventoryManager = context.InventoryManager;
             _itemManager = context.ItemManager;
             _mapState = context.MapState;
+            _turnManager = context.TurnManager;
             UpdateFOV();
         }
 
@@ -121,7 +124,6 @@ namespace HHSGame.Core
 
         public void Update()
         {
-            // Update FOV every turn
             UpdateFOV();
             
             foreach (var effect in _activeEffects.ToArray())
@@ -140,9 +142,8 @@ namespace HHSGame.Core
 
         public void Move(int dx, int dy)
         {
-            if (_world.CurrentTurn != TurnState.PlayerTurn)
+            if (!_turnManager.IsPlayerTurn())
             {
-                EventSystem.RaiseEvent("Not your turn!");
                 return;
             }
 
@@ -170,15 +171,7 @@ namespace HHSGame.Core
             {
                 EventSystem.RaiseEvent(_collisionSystem.GetCollisionMessage(newX, newY, this));
             }
-            EndPlayerTurn();
-        }
-
-        private void EndPlayerTurn()
-        {
-            if (_world.CurrentTurn == TurnState.PlayerTurn)
-            {
-                EventSystem.RaiseTurnChanged(TurnState.EnemyTurn);
-            }
+            _turnManager.EndPlayerTurn();
         }
 
         public void Attack(Enemy enemy)

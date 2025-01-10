@@ -46,7 +46,7 @@ namespace HHSGame.Core
             drawingContext.Viewport.UpdateViewport(_player.X, _player.Y, GameWorld.MapWidth, GameWorld.MapHeight);
 
             _world.Draw(drawingContext);
-            _player.Draw(drawingContext);
+            (_player as GameActor).Draw(drawingContext);
             
             // Render to view
             drawingContext.Render();

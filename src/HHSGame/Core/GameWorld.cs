@@ -6,10 +6,6 @@ namespace HHSGame.Core
     {
         public static int MapWidth { get; } = 500;
         public static int MapHeight { get; } = 500;
-        
-        private TurnState _currentTurn = TurnState.PlayerTurn;
-        
-        public TurnState CurrentTurn => _currentTurn;
 
         GameContext _gameContext;
 
@@ -18,13 +14,6 @@ namespace HHSGame.Core
         public GameWorld(GameContext context)
         {
             _gameContext = context;
-
-            EventSystem.OnTurnChanged += HandleTurnChange;
-        }
-
-        private void HandleTurnChange(object? sender, TurnEvent e)
-        {
-            _currentTurn = e.State;
         }
 
         public Player NewPlayer() {
@@ -37,21 +26,13 @@ namespace HHSGame.Core
                 y = Context.Random.Next(y - round, y + round);
                 round ++;
             }
-            return new Player(x, y, this, Context);
+            return new Player(x, y, Context);
         }
 
         public void Update(Player player)
         {
             // Update all enemies
-            Context.EnemyManager.UpdateEnemies(player, _currentTurn == TurnState.EnemyTurn);
-            EndEnemyTurn();
-        }
-
-        private void EndEnemyTurn()
-        {
-            if (_currentTurn == TurnState.EnemyTurn) {
-                EventSystem.RaiseTurnChanged(TurnState.PlayerTurn);
-            }
+            Context.EnemyManager.UpdateEnemies(player);
         }
         
         public void Draw(IDrawingContext ctx)

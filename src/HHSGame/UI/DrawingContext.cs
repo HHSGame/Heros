@@ -64,7 +64,7 @@ namespace HHSGame.UI {
     }
 
     public interface IDrawable {
-        void Draw(IDrawingContext ctx);
+        void Draw(IDrawingContext ctx) {}
     }
 
 

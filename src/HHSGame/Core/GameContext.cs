@@ -1,4 +1,5 @@
 
+using HHSGame.Core.Combat;
 using HHSGame.UI;
 
 namespace HHSGame.Core {
@@ -22,6 +23,7 @@ namespace HHSGame.Core {
         private readonly ItemFactory _itemFactory;
         private readonly SurroundingsManager _surroundingsManager;
         private readonly InventoryManager _inventoryManager;
+        private readonly TurnManager _turnManager;
         private IDrawingContext? _drawingContext;
 
         public Random Random => _random;
@@ -34,6 +36,7 @@ namespace HHSGame.Core {
         public ItemFactory ItemFactory => _itemFactory;
         public SurroundingsManager SurroundingsManager => _surroundingsManager;
         public InventoryManager InventoryManager => _inventoryManager;
+        public TurnManager TurnManager => _turnManager;
 
         public IDrawingContext DrawingContext {
             get => _drawingContext ?? throw new InvalidOperationException("Drawing context not initialized");
@@ -46,11 +49,12 @@ namespace HHSGame.Core {
 
             _itemManager = new ItemManager();
             _inventoryManager = new InventoryManager();
+            _turnManager = new TurnManager();
             _itemFactory = new ItemFactory(_random);
             _mapGenerator = new MapGenerator(MapWidth, MapHeight, _random, _itemManager,_itemFactory, mapStyle);            
             _mapState = new MapState(MapWidth, MapHeight);
             _mapState.Init(_mapGenerator.GenerateDungeon());
-            _enemyManager = new EnemyManager(_itemManager);
+            _enemyManager = new EnemyManager(_itemManager, _turnManager);
             _collisionSystem = new CollisionSystem(_enemyManager, _mapState);
             _enemyFactory = new EnemyFactory(MapWidth, MapHeight, _random, _collisionSystem, _mapState);
             _enemyManager.SetEnemies(_enemyFactory.SpawnEnemies());

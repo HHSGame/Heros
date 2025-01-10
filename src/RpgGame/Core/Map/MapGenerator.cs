@@ -82,7 +82,7 @@ namespace RpgGame.Core
 
         private void PlaceRandomItems(Cell[,] map)
         {
-            int itemCount = _random.Next(40, 50); // Place some items
+            int itemCount = _random.Next(700, 1000); // Place some items
             for (int i = 0; i < itemCount; i++)
             {
                 var item = ItemFactory.CreateRandomItem();

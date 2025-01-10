@@ -19,15 +19,15 @@ namespace RpgGame.Core
         {
             { 
                 EnemyType.Goblin, 
-                new EnemyConfig("Goblin", 30, 5, 2, 50, 'g', Colors.Enemies.Goblin)
+                new EnemyConfig("Goblin", 30, 5, 2, 50, 'g', ColorPresets.Enemies.Goblin)
             },
             { 
                 EnemyType.Orc, 
-                new EnemyConfig("Orc", 60, 8, 5, 100, 'o', Colors.Enemies.Orc) 
+                new EnemyConfig("Orc", 60, 8, 5, 100, 'o', ColorPresets.Enemies.Orc) 
             },
             { 
                 EnemyType.Troll, 
-                new EnemyConfig("Troll", 100, 12, 8, 200, 'T', Colors.Enemies.Troll) 
+                new EnemyConfig("Troll", 100, 12, 8, 200, 'T', ColorPresets.Enemies.Troll) 
             }
         };
 

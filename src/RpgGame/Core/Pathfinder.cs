@@ -4,11 +4,11 @@ namespace RpgGame.Core
 {
     public class Pathfinder
     {
-        private readonly GameWorld _world;
+        private readonly MapState _mapState;
 
-        public Pathfinder(GameWorld world)
+        public Pathfinder(MapState mapState)
         {
-            _world = world;
+            _mapState = mapState;
         }
 
         public List<(int x, int y)> FindPath((int x, int y) start, (int x, int y) end)
@@ -74,10 +74,10 @@ namespace RpgGame.Core
             var neighbors = new List<(int x, int y)>();
             
             // Check four directions
-            if (_world.IsWalkable(pos.x - 1, pos.y)) neighbors.Add((pos.x - 1, pos.y));
-            if (_world.IsWalkable(pos.x + 1, pos.y)) neighbors.Add((pos.x + 1, pos.y));
-            if (_world.IsWalkable(pos.x, pos.y - 1)) neighbors.Add((pos.x, pos.y - 1));
-            if (_world.IsWalkable(pos.x, pos.y + 1)) neighbors.Add((pos.x, pos.y + 1));
+            if (_mapState.IsWalkable(pos.x - 1, pos.y)) neighbors.Add((pos.x - 1, pos.y));
+            if (_mapState.IsWalkable(pos.x + 1, pos.y)) neighbors.Add((pos.x + 1, pos.y));
+            if (_mapState.IsWalkable(pos.x, pos.y - 1)) neighbors.Add((pos.x, pos.y - 1));
+            if (_mapState.IsWalkable(pos.x, pos.y + 1)) neighbors.Add((pos.x, pos.y + 1));
 
             return neighbors;
         }

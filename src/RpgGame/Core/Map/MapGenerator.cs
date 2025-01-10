@@ -16,47 +16,47 @@ namespace RpgGame.Core
     {
         private static readonly Dictionary<char, Attribute> _terrainColors = new()
         {
-            { '#', Colors.Terrain.Stone },    // Walls
-            { '.', Colors.Terrain.Grass },    // Floors
-            { '~', Colors.Terrain.Water },    // Water
-            { '^', Colors.Terrain.Lava },     // Lava/Hills
-            { '*', Colors.Terrain.Forest },   // Vegetation
-            { 'H', Colors.Terrain.Stone },    // Houses
-            { 'S', Colors.Terrain.Sand },     // Shops
-            { '║', Colors.Terrain.Stone },    // Town walls
-            { '═', Colors.Terrain.Stone },    // Town walls
-            { '╔', Colors.Terrain.Stone },    // Town walls
-            { '╗', Colors.Terrain.Stone },    // Town walls
-            { '╚', Colors.Terrain.Stone },    // Town walls
-            { '╝', Colors.Terrain.Stone },    // Town walls
-            { '│', Colors.Terrain.Stone },    // House/Room walls
-            { '─', Colors.Terrain.Stone },    // House/Room walls
-            { '┌', Colors.Terrain.Stone },    // House/Room walls
-            { '┐', Colors.Terrain.Stone },    // House/Room walls
-            { '└', Colors.Terrain.Stone },    // House/Room walls
-            { '┘', Colors.Terrain.Stone },    // House/Room walls
-            { '▒', Colors.Terrain.Grass },    // Town streets
+            { '#', ColorPresets.Terrain.Stone },    // Walls
+            { '.', ColorPresets.Terrain.Grass },    // Floors
+            { '~', ColorPresets.Terrain.Water },    // Water
+            { '^', ColorPresets.Terrain.Lava },     // Lava/Hills
+            { '*', ColorPresets.Terrain.Forest },   // Vegetation
+            { 'H', ColorPresets.Terrain.Stone },    // Houses
+            { 'S', ColorPresets.Terrain.Sand },     // Shops
+            { '║', ColorPresets.Terrain.Stone },    // Town walls
+            { '═', ColorPresets.Terrain.Stone },    // Town walls
+            { '╔', ColorPresets.Terrain.Stone },    // Town walls
+            { '╗', ColorPresets.Terrain.Stone },    // Town walls
+            { '╚', ColorPresets.Terrain.Stone },    // Town walls
+            { '╝', ColorPresets.Terrain.Stone },    // Town walls
+            { '│', ColorPresets.Terrain.Stone },    // House/Room walls
+            { '─', ColorPresets.Terrain.Stone },    // House/Room walls
+            { '┌', ColorPresets.Terrain.Stone },    // House/Room walls
+            { '┐', ColorPresets.Terrain.Stone },    // House/Room walls
+            { '└', ColorPresets.Terrain.Stone },    // House/Room walls
+            { '┘', ColorPresets.Terrain.Stone },    // House/Room walls
+            { '▒', ColorPresets.Terrain.Grass },    // Town streets
         };
 
         public static Attribute GetTerrainColor(char terrainChar)
         {
             return _terrainColors.TryGetValue(terrainChar, out var color) 
                 ? color 
-                : Colors.Terrain.Grass;
+                : ColorPresets.Terrain.Grass;
         }
     
         private readonly Random _random;
         private readonly int _mapWidth;
         private readonly int _mapHeight;
         private readonly MapStyle _style;
-        private readonly GameWorld _gameWorld;
+        private readonly ItemManager _itemManager;
         
-        public MapGenerator(int mapWidth, int mapHeight, Random random, GameWorld gameWorld, MapStyle style = MapStyle.Cave)
+        public MapGenerator(int mapWidth, int mapHeight, Random random, ItemManager itemManager, MapStyle style = MapStyle.Cave)
         {
             _mapWidth = mapWidth;
             _mapHeight = mapHeight;
             _random = random;
-            _gameWorld = gameWorld;
+            _itemManager = itemManager;
             _style = style;
         }
 
@@ -95,7 +95,7 @@ namespace RpgGame.Core
                 }
                 item.X = x;
                 item.Y = y;
-                _gameWorld.AddItem(item);
+                _itemManager.AddItem(item);
             }
         }
     }

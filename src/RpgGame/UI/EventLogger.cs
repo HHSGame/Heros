@@ -1,5 +1,6 @@
 
 using Terminal.Gui;
+using RpgGame.Core;
 
 namespace RpgGame.UI
 {
@@ -10,6 +11,8 @@ namespace RpgGame.UI
 
         public EventLogger()
         {
+            Width = Dim.Fill();
+            Height = Dim.Fill();
             _eventMessages = new List<string>();
             Height = MaxEventMessages + 2;
             EventSystem.OnGameEvent += HandleGameEvent;

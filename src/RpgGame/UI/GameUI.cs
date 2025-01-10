@@ -8,98 +8,62 @@ namespace RpgGame.UI
     {
 
         private readonly Game _game;
-        private readonly Window mapWindow;
-        private readonly Window messageWindow;
-        private readonly Window inventoryWindow;
-        private readonly EventLogger eventLogger;
-        private readonly MapViewDrawingContext drawingContext;
-        private readonly ListView inventoryList;
+        private readonly MapWindow mapWindow;
+        private readonly MessageWindow messageWindow;
+        private readonly InventoryWindow inventoryWindow;
+        private readonly SurroundingsWindow surroundingsWindow;
 
         public GameUI()
         {
-            mapWindow = new Window("Main Map")
+            var context = new GameContext(new GameParameters{mapStyle = MapStyle.Cave});
+
+            mapWindow = new MapWindow("Main Map")
             {
                 X = 0,
                 Y = 0,
                 Width = Dim.Fill() - 20,
                 Height = Dim.Fill() - 10,
-                ColorScheme = new ColorScheme
-                {
-                    Normal = Application.Driver.MakeAttribute(Color.White, Color.Black),
-                    Focus = Application.Driver.MakeAttribute(Color.White, Color.Black)
-                }
             };
-            
-            inventoryWindow = new Window("Inventory")
-            {
-                X = Pos.Right(mapWindow),
-                Y = 0,
-                Width = 20,
-                Height = Dim.Fill() - 10,
-                ColorScheme = new ColorScheme
-                {
-                    Normal = Application.Driver.MakeAttribute(Color.White, Color.Black),
-                    Focus = Application.Driver.MakeAttribute(Color.White, Color.Black)
-                }
-            };
-            
-            inventoryList = new ListView()
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Fill(),
-                Height = Dim.Fill()
-            };
-            inventoryWindow.Add(inventoryList);
-            
-            messageWindow = new Window("Messages")
+
+            messageWindow = new MessageWindow("Messages")
             {
                 X = 0,
                 Y = Pos.Bottom(mapWindow),
                 Width = Dim.Fill(),
                 Height = 10,
-                ColorScheme = new ColorScheme
-                {
-                    Normal = Application.Driver.MakeAttribute(Color.White, Color.Black),
-                    Focus = Application.Driver.MakeAttribute(Color.White, Color.Black)
-                }
             };
-            eventLogger = new EventLogger()
+            
+            inventoryWindow = new InventoryWindow("Inventory", context)
             {
-                X = 0,
+                X = Pos.Right(mapWindow),
                 Y = 0,
-                Width = Dim.Fill(),
-                Height = 10
+                Width = 20,
+                Height = Dim.Fill(10) - Dim.Percent(50),
             };
-            drawingContext = new MapViewDrawingContext(Viewport.DefaultWidth, Viewport.DefaultHeight);
-            _game = new Game(drawingContext);
+
+            surroundingsWindow = new SurroundingsWindow("Surroundings", context)
+            {
+                X = Pos.Right(mapWindow),
+                Y = Pos.Bottom(inventoryWindow),
+                Width = 20,
+                Height = Dim.Percent(50),
+            };
+
+            context.InitializeDrawingContext(mapWindow.DrawingContext);
+
+            _game = new Game(context);
         }
 
         public void Start()
         {
             // Create main window
             var top = Application.Top;
-            mapWindow.Add(drawingContext.View);
-            messageWindow.Add(eventLogger);
 
-            top.Add(mapWindow, inventoryWindow, messageWindow);
+            top.Add(mapWindow, inventoryWindow, surroundingsWindow, messageWindow);
 
             _game.Start();
-            
-            // Update inventory display periodically
-            Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(500), _ => {
-                if (_game.Player != null)
-                {
-                    var items = _game.Player.GetInventory()
-                        .Select(i => i.Name)
-                        .ToList();
-                    inventoryList.SetSource(items);
-                }
-                return true;
-            });
 
             Application.RootKeyEvent += HandleKeyEvent;
-
             Application.Run();
             Application.Shutdown();
         }

@@ -7,35 +7,17 @@ namespace RpgGame.Core
         public static int MapWidth { get; } = 500;
         public static int MapHeight { get; } = 500;
         
-        private Cell[,] _map;
-        private List<Enemy> _enemies;
-        private List<Item> _loot;
-        private readonly Random _random;
-        private readonly MapGenerator _mapGenerator;
-        private readonly EnemyFactory _enemyFactory;
-        private readonly Pathfinder _pathfinder;
-        private readonly CollisionSystem _collisionSystem;
-        private readonly MapStyle _mapStyle;
-
         private TurnState _currentTurn = TurnState.PlayerTurn;
         
         public TurnState CurrentTurn => _currentTurn;
 
-        public GameWorld(MapStyle mapStyle = MapStyle.Cave)
+        GameContext _gameContext;
+
+        public GameContext Context => _gameContext;
+
+        public GameWorld(GameContext context)
         {
-            _mapStyle = mapStyle;
-            _map = new Cell[MapHeight, MapWidth];
-            _enemies = new List<Enemy>();
-            _loot = new List<Item>();
-            _random = new Random();
-            
-            _collisionSystem = new CollisionSystem(this);
-            _pathfinder = new Pathfinder(this);
-            _mapGenerator = new MapGenerator(MapWidth, MapHeight, _random, this, _mapStyle);
-            _enemyFactory = new EnemyFactory(MapWidth, MapHeight, _random, this, _collisionSystem, _pathfinder);
-            
-            _map = _mapGenerator.GenerateDungeon();
-            _enemies = _enemyFactory.SpawnEnemies();
+            _gameContext = context;
 
             EventSystem.OnTurnChanged += HandleTurnChange;
         }
@@ -49,40 +31,20 @@ namespace RpgGame.Core
             // create a player at the center of the map but avoid any obstacles
             int x = MapWidth / 2, y = MapHeight / 2;
             int round = 0;
-            while (!IsWalkable(x, y))
+            while (!Context.MapState.IsWalkable(x, y))
             {
-                x = _random.Next(x - round, x + round);
-                y = _random.Next(y - round, y + round);
+                x = Context.Random.Next(x - round, x + round);
+                y = Context.Random.Next(y - round, y + round);
                 round ++;
             }
-            return new Player(x, y, this, _collisionSystem);
+            return new Player(x, y, this, Context);
         }
 
         public void Update(Player player)
         {
             // Update all enemies
-            foreach (var enemy in _enemies.ToArray())
-            {
-                if (enemy.Health <= 0)
-                {
-                    // Handle enemy death
-                    _enemies.Remove(enemy);
-                    DropLoot(enemy);
-                    continue;
-                }
-
-                enemy.Update(player, _currentTurn == TurnState.EnemyTurn);
-
-            }
+            Context.EnemyManager.UpdateEnemies(player, _currentTurn == TurnState.EnemyTurn);
             EndEnemyTurn();
-
-            // Check for loot collection
-            var lootAtPlayer = _loot.FirstOrDefault(l => l.X == player.X && l.Y == player.Y);
-            if (lootAtPlayer != null)
-            {
-                player.AddItem(lootAtPlayer);
-                _loot.Remove(lootAtPlayer);
-            }
         }
 
         private void EndEnemyTurn()
@@ -91,124 +53,15 @@ namespace RpgGame.Core
                 EventSystem.RaiseTurnChanged(TurnState.PlayerTurn);
             }
         }
-
-        private void DropLoot(Enemy enemy)
-        {
-            var loot = enemy.GenerateLoot();
-            foreach (var item in loot)
-            {
-                item.X = enemy.X;
-                item.Y = enemy.Y;
-                _loot.Add(item);
-            }
-        }
-
-        private bool[,] _visitedTiles = new bool[MapHeight, MapWidth];
-        private HashSet<(int x, int y)> _currentVisibleTiles = new();
-
-        public bool IsWalkable(int x, int y)
-        {
-            if (x < 0 || y < 0 || x >= MapWidth || y >= MapHeight)
-                return false;
-
-            return _map[y, x].IsWalkable;
-        }
-
-        public bool IsInBounds(int x, int y)
-        {
-            return x >= 0 && y >= 0 && x < MapWidth && y < MapHeight;
-        }
-
-        public bool IsTransparent(int x, int y)
-        {
-            if (!IsInBounds(x, y)) return false;
-            return _map[y, x].IsWalkable;
-        }
-
-        public void MarkVisibleTiles(HashSet<(int x, int y)> visibleTiles)
-        {
-            // Only mark tiles within FOV radius as visible
-            _currentVisibleTiles.Clear();
-            
-            foreach (var (x, y) in visibleTiles)
-            {
-                if (IsInBounds(x, y))
-                {
-                    _visitedTiles[y, x] = true;
-                    _currentVisibleTiles.Add((x, y));
-                }
-            }
-        }
-
-        public bool IsVisible(int x, int y)
-        {
-            return _currentVisibleTiles.Contains((x, y));
-        }
-
-        public bool WasVisited(int x, int y)
-        {
-            return IsInBounds(x, y) && _visitedTiles[y, x];
-        }
-
-        public Enemy? GetEnemyAt(int x, int y)
-        {
-            return _enemies.FirstOrDefault(e => e.X == x && e.Y == y);
-        }
-
-        public List<Item> GetItemsAt(int x, int y)
-        {
-            return _loot.Where(item => item.X == x && item.Y == y).ToList();
-        }
-
-        public void RemoveItemsAt(int x, int y)
-        {
-            _loot.RemoveAll(item => item.X == x && item.Y == y);
-        }
-
-        public void AddItem(Item item)
-        {
-            EventSystem.RaiseEvent($"Dropped {item.Name} at ({item.X}, {item.Y}).");
-            _loot.Add(item);
-        }
-
-        public List<(int x, int y)> GetPath((int x, int y) start, (int x, int y) end)
-        {
-            return _pathfinder.FindPath(start, end);
-        }
-
+        
         public void Draw(IDrawingContext ctx)
         {
-            var viewport = ctx.Viewport;
-
             // Draw map tiles within viewport
-            for (int y = viewport.Y; y < viewport.Y + viewport.Height; y++)
-            {
-                for (int x = viewport.X; x < viewport.X + viewport.Width; x++)
-                {
-                    if (x >= 0 && x < MapWidth && y >= 0 && y < MapHeight)
-                    {
-                        ctx.DrawAt((x, y), _map[y, x]);
-                    }
-                }
-            }
-
+            Context.MapState.Draw(ctx);
             // Draw enemies within viewport
-            foreach (var enemy in _enemies)
-            {
-                if (viewport.Contains((enemy.X, enemy.Y)))
-                {
-                    enemy.Draw(ctx);
-                }
-            }
-
+            Context.EnemyManager.Draw(ctx);
             // Draw loot within viewport
-            foreach (var item in _loot)
-            {
-                if (viewport.Contains((item.X, item.Y)))
-                {
-                    ctx.DrawAt((item.X, item.Y), '*');
-                }
-            }
+            Context.ItemManager.Draw(ctx);
         }
     }
 }

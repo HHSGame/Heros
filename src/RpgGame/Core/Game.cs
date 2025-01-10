@@ -3,28 +3,29 @@ using RpgGame.UI;
 
 namespace RpgGame.Core
 {
-    public class Game(MapViewDrawingContext _drawingCtx) : IDisposable
+    public class Game(GameContext _context) : IDisposable
     {
         public Player? Player => _player;
 
+        public GameWorld? World => _world;
         private GameWorld? _world;
         private Player? _player;
         private bool _isRunning = false;
         private DateTime _lastFrameTime;
         private const double TargetFrameTime = 1000.0 / 60.0; // 60 FPS
+        public GameContext Context => _context;
 
-        public void Start(MapStyle mapStyle = MapStyle.Town)
+        public void Start()
         {
             _isRunning = true;
-            StartNewGame(mapStyle);
+            StartNewGame();
         }
 
-        private void StartNewGame(MapStyle mapStyle)
+        private void StartNewGame()
         {
             // Initialize game world and player
-            _world = new GameWorld(mapStyle);
+            _world = new GameWorld(_context);
             _player = _world.NewPlayer();
-            _drawingCtx.GameWorld = _world;
             _player.AddItem(new HealthPotion(10));
 
             // Start game loop with refresh rate
@@ -33,6 +34,7 @@ namespace RpgGame.Core
         
         private bool GameLoop(MainLoop arg)
         {
+            var drawingContext = _context.DrawingContext;
             if (!_isRunning || _world == null || _player == null)
                 return false;
 
@@ -41,18 +43,19 @@ namespace RpgGame.Core
             
             UpdateGame(deltaTime);
             
-            _drawingCtx.Viewport.UpdateViewport(_player.X, _player.Y, GameWorld.MapWidth, GameWorld.MapHeight);
-            _world.Draw(_drawingCtx);
-            _player.Draw(_drawingCtx);
+            drawingContext.Viewport.UpdateViewport(_player.X, _player.Y, GameWorld.MapWidth, GameWorld.MapHeight);
+            
+            _world.Draw(drawingContext);
+            _player.Draw(drawingContext);
             
             // Render to view
-            _drawingCtx.Render();
+            drawingContext.Render();
 
             // Maintain consistent frame rate
             double frameTime = (DateTime.Now - _lastFrameTime).TotalMilliseconds;
             if (frameTime < TargetFrameTime)
             {
-                _drawingCtx.Clear();
+                drawingContext.Clear();
                 Thread.Sleep((int)(TargetFrameTime - frameTime));
             }
             

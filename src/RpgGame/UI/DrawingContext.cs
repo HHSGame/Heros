@@ -13,8 +13,8 @@ namespace RpgGame.UI {
         public static int DefaultHeight => 35;
         public int X { get; private set; }
         public int Y { get; private set; }
-        public int Width { get; }
-        public int Height { get; }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
 
         public Viewport(int x, int y, int width, int height) {
             X = x;
@@ -44,11 +44,18 @@ namespace RpgGame.UI {
             else if (y - Y > Height - margin)
                 Y = Math.Min(mapHeight - Height, y - Height + margin);
         }
+
+        public void Resize(int width, int height) {
+            Width = width;
+            Height = height;
+        }
     }
 
     public interface IDrawingContext {
 
         Viewport Viewport { get;}
+        View View { get; }
+        MapState? MapState { get; set; }
 
         void DrawAt(Position pos, char tile);
         void DrawAt(Position pos, Cell cell);
@@ -71,59 +78,55 @@ namespace RpgGame.UI {
 
     public class MapViewDrawingContext : IDrawingContext
     {
-        public int Width { get; }
-        public int Height { get; }
         private readonly MapView _mapView;
         private readonly Viewport _viewport;
-        private GameWorld? _gameWorld;
-
-        public GameWorld? GameWorld
-        {
-            get => _gameWorld;
-            set => _gameWorld = value;
-        }
-
+        public MapState? MapState { get; set; }
         public View View => _mapView;
 
         public Viewport Viewport => _viewport;
+        public int Width => View.Frame.Width;
+        public int Height => View.Frame.Height;
 
-        public MapViewDrawingContext(int width, int height)
+
+        public MapViewDrawingContext(Dim width, Dim height)
         {
-            Width = width;
-            Height = height;
             _mapView = new MapView(width, height);
-            _viewport = new Viewport(0, 0, width, height);
+            _viewport = new Viewport(0, 0, Width, Height);
         }
 
         // Explicit interface implementation for original method
         public void DrawAt((int X, int Y) pos, char tile)
         {
-            this.DrawAt(pos, new Cell {Character = tile, Attribute = Colors.Terrain.Stone});
+            this.DrawAt(pos, new Cell {Character = tile, Attribute = ColorPresets.Terrain.Stone});
         }
 
         public void DrawAt((int X, int Y) pos, Cell cell)
         {
+            if (_viewport.Width != Width || _viewport.Height != Height)
+            {
+                _viewport.Resize(Width, Height);
+            }
             if (!_viewport.Contains(pos))
                 return;
 
             // Check visibility
-            if (_gameWorld != null)
+            if (MapState != null)
             {
-                if (_gameWorld.IsVisible(pos.X, pos.Y))
+                if (MapState.IsVisible(pos.X, pos.Y))
                 {
                     // Visible - use normal colors
                     var (posX, posY) = _viewport.ToLocal(pos);
                     _mapView.SetCell(posX, posY, cell.Character, cell.Attribute);
                 }
-                else if (_gameWorld.WasVisited(pos.X, pos.Y))
+                else if (MapState.WasVisited(pos.X, pos.Y))
                 {
                     // Visited but not visible - grey out
                     var (posX, posY) = _viewport.ToLocal(pos);
-                    _mapView.SetCell(posX, posY, cell.Character, Colors.GreyedOut);
+                    _mapView.SetCell(posX, posY, cell.Character, ColorPresets.GreyedOut);
                 } else {
                     // Visited but not visible - grey out
                     var (posX, posY) = _viewport.ToLocal(pos);
-                    _mapView.SetCell(posX, posY, ' ', Colors.GreyedOut);
+                    _mapView.SetCell(posX, posY, ' ', ColorPresets.GreyedOut);
                 }
                 // Else - don't draw at all
             }

@@ -4,11 +4,13 @@ namespace RpgGame.Core
 {
     public class CollisionSystem
     {
-        private readonly GameWorld _world;
+        private readonly EnemyManager _enemyManager;
+        private readonly MapState _mapState;
 
-        public CollisionSystem(GameWorld world)
+        public CollisionSystem(EnemyManager enemyManager, MapState mapState)
         {
-            _world = world;
+            _enemyManager = enemyManager;
+            _mapState = mapState;
         }
 
         public bool CanMoveTo(int x, int y, GameActor actor)
@@ -18,13 +20,13 @@ namespace RpgGame.Core
                 return false;
 
             // Check if tile is walkable
-            if (!_world.IsWalkable(x, y))
+            if (!_mapState.IsWalkable(x, y))
                 return false;
 
             // Check for other enemies (except self)
             if (actor is Enemy)
             {
-                var enemyAtTarget = _world.GetEnemyAt(x, y);
+                var enemyAtTarget = _enemyManager.GetEnemyAt(x, y);
                 if (enemyAtTarget != null && enemyAtTarget != actor)
                     return false;
             }
@@ -35,7 +37,7 @@ namespace RpgGame.Core
         public GameActor? GetCollisionAt(int x, int y)
         {
             // Check for enemies first
-            var enemy = _world.GetEnemyAt(x, y);
+            var enemy = _enemyManager.GetEnemyAt(x, y);
             if (enemy != null)
                 return enemy;
 
@@ -45,7 +47,7 @@ namespace RpgGame.Core
 
         public string GetCollisionMessage(int x, int y, GameActor actor)
         {
-            if (!_world.IsWalkable(x, y))
+            if (!_mapState.IsWalkable(x, y))
                 return $"Collision: {actor.Name} blocked by terrain at ({x}, {y})";
 
             var collision = GetCollisionAt(x, y);

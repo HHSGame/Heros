@@ -3,7 +3,7 @@ using Attribute = Terminal.Gui.Attribute;
 
 namespace RpgGame.UI
 {
-    public static class Colors
+    public static class ColorPresets
     {
         public static Attribute GreyedOut = new(Color.DarkGray, Color.Black);
         

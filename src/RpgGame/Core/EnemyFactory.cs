@@ -8,18 +8,16 @@ namespace RpgGame.Core
         private readonly Random _random;
         private readonly int _mapWidth;
         private readonly int _mapHeight;
-        private readonly GameWorld _world;
         private readonly CollisionSystem _collisionSystem;
-        private readonly Pathfinder _pathfinder;
+        private readonly MapState _mapState;
 
-        public EnemyFactory(int mapWidth, int mapHeight, Random random, GameWorld world, CollisionSystem collisionSystem, Pathfinder pathfinder)
+        public EnemyFactory(int mapWidth, int mapHeight, Random random, CollisionSystem collisionSystem, MapState mapState)
         {
             _mapWidth = mapWidth;
             _mapHeight = mapHeight;
             _random = random;
-            _world = world;
             _collisionSystem = collisionSystem;
-            _pathfinder = pathfinder;
+            _mapState = mapState;
         }
 
         public List<Enemy> SpawnEnemies()
@@ -29,8 +27,8 @@ namespace RpgGame.Core
             var enemies = new List<Enemy>();
             
             // Spawn different enemy types
-            SpawnEnemyType(enemies, EnemyType.Goblin, 15);
-            SpawnEnemyType(enemies, EnemyType.Orc, 10);
+            SpawnEnemyType(enemies, EnemyType.Goblin, 100);
+            SpawnEnemyType(enemies, EnemyType.Orc, 30);
             SpawnEnemyType(enemies, EnemyType.Troll, 1);
             
             EventSystem.RaiseEvent("Enemies spawned: 3 Goblins, 2 Orcs, 1 Troll");
@@ -46,9 +44,9 @@ namespace RpgGame.Core
                 {
                     x = _random.Next(1, _mapWidth - 1);
                     y = _random.Next(1, _mapHeight - 1);
-                } while (!_world.IsWalkable(x, y) || GetEnemyAt(enemies, x, y) != null);
+                } while (!_mapState.IsWalkable(x, y) || GetEnemyAt(enemies, x, y) != null);
                 
-                enemies.Add(new Enemy(type, x, y, _collisionSystem, _pathfinder));
+                enemies.Add(new Enemy(type, x, y, _collisionSystem, _mapState.Pathfinder));
             }
         }
 

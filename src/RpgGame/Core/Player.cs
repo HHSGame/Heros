@@ -16,18 +16,19 @@ namespace RpgGame.Core
 
         public override Terminal.Gui.Attribute Attribute => Terminal.Gui.Attribute.Make(Color.BrightCyan, Color.Magenta);
 
-        private List<Item> _inventory;
         private List<ActiveEffect> _activeEffects;
-        private Random _random;
         private GameWorld _world;
         private readonly CollisionSystem _collisionSystem;
+        private readonly InventoryManager _inventoryManager;
+        private readonly ItemManager _itemManager;
+        private readonly MapState _mapState;
         private Weapon? _equippedWeapon;
         private Armor? _equippedArmor;
         
         private const int FOVRadius = 7;
         private HashSet<(int x, int y)> _visibleTiles = new();
 
-        public Player(int x, int y, GameWorld world, CollisionSystem collisionSystem)
+        public Player(int x, int y, GameWorld world, GameContext context)
         {
             X = x;
             Y = y;
@@ -37,11 +38,12 @@ namespace RpgGame.Core
             Defense = 5;
             Experience = 0;
             Level = 1;
-            _inventory = new List<Item>();
             _activeEffects = new List<ActiveEffect>();
-            _random = new Random();
             _world = world;
-            _collisionSystem = collisionSystem;
+            _collisionSystem = context.CollisionSystem;
+            _inventoryManager = context.InventoryManager;
+            _itemManager = context.ItemManager;
+            _mapState = context.MapState;
             UpdateFOV();
         }
 
@@ -49,7 +51,8 @@ namespace RpgGame.Core
         {
             _visibleTiles.Clear();
             CalculateFOV(X, Y, FOVRadius);
-            _world.MarkVisibleTiles(_visibleTiles);
+            _mapState.MarkVisibleTiles(_visibleTiles);
+            EventSystem.RaiseSurroundingsChange((X, Y), FOVRadius, SurroundingsChangeType.Movement);
         }
 
         private void CalculateFOV(int x, int y, int radius)
@@ -67,7 +70,7 @@ namespace RpgGame.Core
                     int targetX = x + dx;
                     int targetY = y + dy;
                     
-                    if (!_world.IsInBounds(targetX, targetY)) continue;
+                    if (!_mapState.IsInBounds(targetX, targetY)) continue;
                     
                     // Check line of sight
                     if (HasLineOfSight(x, y, targetX, targetY))
@@ -95,7 +98,7 @@ namespace RpgGame.Core
                 _visibleTiles.Add((x0, y0));
                 
                 // If we hit an opaque tile, stop here but include it
-                if (!_world.IsTransparent(x0, y0))
+                if (!_mapState.IsTransparent(x0, y0))
                     return true;
                     
                 // If we reached the target, we have line of sight
@@ -133,11 +136,6 @@ namespace RpgGame.Core
                     effect.ApplyEffect(this);
                 }
             }
-        }
-
-        public bool IsInFOV(int x, int y)
-        {
-            return _visibleTiles.Contains((x, y));
         }
 
         public void Move(int dx, int dy)
@@ -249,14 +247,14 @@ namespace RpgGame.Core
 
         public void AddItem(Item item)
         {
-            _inventory.Add(item);
+            _inventoryManager.AddItem(item);
         }
 
         public void EquipWeapon(Weapon weapon)
         {
             if (_equippedWeapon != null)
             {
-                _inventory.Add(_equippedWeapon);
+                _inventoryManager.AddItem(_equippedWeapon);
             }
             _equippedWeapon = weapon;
             EventSystem.RaiseEvent($"Equipped {weapon.Name}");
@@ -266,41 +264,28 @@ namespace RpgGame.Core
         {
             if (_equippedArmor != null)
             {
-                _inventory.Add(_equippedArmor);
+                _inventoryManager.AddItem(_equippedArmor);
             }
             _equippedArmor = armor;
             EventSystem.RaiseEvent($"Equipped {armor.Name}");
         }
 
-        public void UseItem(int index)
-        {
-            if (index >= 0 && index < _inventory.Count)
-            {
-                _inventory[index].Use(this);
-                _inventory.RemoveAt(index);
-            }
-        }
-
-        public List<Item> GetInventory()
-        {
-            return _inventory;
-        }
-
         public void PickupItems()
         {
-            var items = _world.GetItemsAt(X, Y);
+            var items = _itemManager.GetItemsAt(X, Y);
             if (items.Count == 0)
             {
                 EventSystem.RaiseEvent("No items here to pick up.");
                 return;
             }
 
+            _itemManager.RemoveItemsAt(X, Y);
             foreach (var item in items)
             {
                 AddItem(item);
                 EventSystem.RaiseEvent($"Picked up {item.Name}");
             }
-            _world.RemoveItemsAt(X, Y);
+            EventSystem.RaiseSurroundingsChange((X, Y), FOVRadius, SurroundingsChangeType.PickUpLoot);
         }
 
         public void ApplyEffect(ActiveEffect effect)

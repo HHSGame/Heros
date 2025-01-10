@@ -42,9 +42,9 @@ namespace RpgGame.Core
             }
 
             // Add water features
-            map = AddRandomFeature(map, new Cell{Character = '~', Attribute = Colors.Terrain.Water}, 10, 5); // Water
-            map = AddRandomFeature(map, new Cell{Character = '^', Attribute = Colors.Terrain.Lava}, 5, 3);  // Lava
-            map = AddRandomFeature(map, new Cell{Character = '*', Attribute = Colors.Terrain.Forest}, 15, 7); // Vegetation
+            map = AddRandomFeature(map, new Cell{Character = '~', Attribute = ColorPresets.Terrain.Water}, 10, 5); // Water
+            map = AddRandomFeature(map, new Cell{Character = '^', Attribute = ColorPresets.Terrain.Lava}, 5, 3);  // Lava
+            map = AddRandomFeature(map, new Cell{Character = '*', Attribute = ColorPresets.Terrain.Forest}, 15, 7); // Vegetation
 
             return map;
         }

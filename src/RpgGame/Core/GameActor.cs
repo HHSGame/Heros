@@ -11,7 +11,7 @@ namespace RpgGame.Core {
         
         public abstract char Glyph { get; }
 
-        public virtual Terminal.Gui.Attribute Attribute => Colors.Terrain.Grass;
+        public virtual Terminal.Gui.Attribute Attribute => ColorPresets.Terrain.Grass;
 
         public void Draw(IDrawingContext ctx) {
             ctx.DrawAt((X, Y), new Cell {Character = Glyph, Attribute = Attribute});

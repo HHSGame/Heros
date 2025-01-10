@@ -9,20 +9,20 @@ namespace RpgGame.Core
     {
         protected static readonly Dictionary<char, Attribute> _terrainColors = new()
         {
-            { '#', Colors.Terrain.Stone },    // Walls
-            { '.', Colors.Terrain.Grass },    // Floors
-            { '~', Colors.Terrain.Water },    // Water
-            { '^', Colors.Terrain.Lava },     // Lava/Hills
-            { '*', Colors.Terrain.Forest },   // Vegetation
-            { 'H', Colors.Terrain.Stone },    // Houses
-            { 'S', Colors.Terrain.Sand },     // Shops
-            { '║', Colors.Terrain.Stone },    // Town walls
-            { '═', Colors.Terrain.Stone },    // Town walls
-            { '╔', Colors.Terrain.Stone },    // Town walls
-            { '╗', Colors.Terrain.Stone },    // Town walls
-            { '╚', Colors.Terrain.Stone },    // Town walls
-            { '╝', Colors.Terrain.Stone },    // Town walls
-            { '▒', Colors.Terrain.Grass },    // Town streets
+            { '#', ColorPresets.Terrain.Stone },    // Walls
+            { '.', ColorPresets.Terrain.Grass },    // Floors
+            { '~', ColorPresets.Terrain.Water },    // Water
+            { '^', ColorPresets.Terrain.Lava },     // Lava/Hills
+            { '*', ColorPresets.Terrain.Forest },   // Vegetation
+            { 'H', ColorPresets.Terrain.Stone },    // Houses
+            { 'S', ColorPresets.Terrain.Sand },     // Shops
+            { '║', ColorPresets.Terrain.Stone },    // Town walls
+            { '═', ColorPresets.Terrain.Stone },    // Town walls
+            { '╔', ColorPresets.Terrain.Stone },    // Town walls
+            { '╗', ColorPresets.Terrain.Stone },    // Town walls
+            { '╚', ColorPresets.Terrain.Stone },    // Town walls
+            { '╝', ColorPresets.Terrain.Stone },    // Town walls
+            { '▒', ColorPresets.Terrain.Grass },    // Town streets
         };
 
         protected readonly Random _random;
@@ -42,7 +42,7 @@ namespace RpgGame.Core
         {
             return _terrainColors.TryGetValue(terrainChar, out var color) 
                 ? color 
-                : Colors.Terrain.Grass;
+                : ColorPresets.Terrain.Grass;
         }
 
         protected Cell[,] SmoothMap(Cell[,] map, char wallChar = '#')
@@ -58,7 +58,7 @@ namespace RpgGame.Core
                     if (neighborCount > 4)
                         newMap[y, x] = new Cell {Character = wallChar, Attribute = GetTerrainColor(wallChar)};
                     else if (neighborCount < 4)
-                        newMap[y, x] = new Cell {Character = '.', Attribute = Colors.Terrain.Grass};
+                        newMap[y, x] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
                     else
                         newMap[y, x] = map[y, x];
                 }

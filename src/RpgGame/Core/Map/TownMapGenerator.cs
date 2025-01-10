@@ -20,8 +20,8 @@ namespace RpgGame.Core
         {
             Cell[,] map = GenerateTown();
 
-            map = AddRandomFeature(map, new Cell{Character = '~', Attribute = Colors.Terrain.Water}, 2, 1);  // Wells
-            map = AddRandomFeature(map, new Cell{Character = '*', Attribute = Colors.Terrain.Forest}, 5, 2); // Trees
+            map = AddRandomFeature(map, new Cell{Character = '~', Attribute = ColorPresets.Terrain.Water}, 2, 1);  // Wells
+            map = AddRandomFeature(map, new Cell{Character = '*', Attribute = ColorPresets.Terrain.Forest}, 5, 2); // Trees
 
 
             return map;
@@ -36,7 +36,7 @@ namespace RpgGame.Core
             {
                 for (int x = 0; x < _mapWidth; x++)
                 {
-                    map[y, x] = new Cell {Character = '.', Attribute = Colors.Terrain.Grass};
+                    map[y, x] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
                 }
             }
 
@@ -59,8 +59,8 @@ namespace RpgGame.Core
                     rightChar = '╝';
                 }
                 
-                map[y, 0] = new Cell {Character = leftChar, Attribute = Colors.Terrain.Stone};
-                map[y, _mapWidth - 1] = new Cell {Character = rightChar, Attribute = Colors.Terrain.Stone};
+                map[y, 0] = new Cell {Character = leftChar, Attribute = ColorPresets.Terrain.Stone};
+                map[y, _mapWidth - 1] = new Cell {Character = rightChar, Attribute = ColorPresets.Terrain.Stone};
             }
             
             for (int x = 0; x < _mapWidth; x++)
@@ -81,8 +81,8 @@ namespace RpgGame.Core
                     bottomChar = '╝';
                 }
                 
-                map[0, x] = new Cell {Character = topChar, Attribute = Colors.Terrain.Stone};
-                map[_mapHeight - 1, x] = new Cell {Character = bottomChar, Attribute = Colors.Terrain.Stone};
+                map[0, x] = new Cell {Character = topChar, Attribute = ColorPresets.Terrain.Stone};
+                map[_mapHeight - 1, x] = new Cell {Character = bottomChar, Attribute = ColorPresets.Terrain.Stone};
             }
 
             // Create street grid
@@ -91,14 +91,14 @@ namespace RpgGame.Core
             {
                 for (int x = 0; x < _mapWidth; x++)
                 {
-                    map[y, x] = new Cell {Character = '▒', Attribute = Colors.Terrain.Grass};
+                    map[y, x] = new Cell {Character = '▒', Attribute = ColorPresets.Terrain.Grass};
                 }
             }
             for (int x = streetSpacing; x < _mapWidth - streetSpacing; x += streetSpacing)
             {
                 for (int y = 0; y < _mapHeight; y++)
                 {
-                    map[y, x] = new Cell {Character = '▒', Attribute = Colors.Terrain.Grass};
+                    map[y, x] = new Cell {Character = '▒', Attribute = ColorPresets.Terrain.Grass};
                 }
             }
 
@@ -136,8 +136,8 @@ namespace RpgGame.Core
                             rightChar = '┘';
                         }
                         
-                        map[y, blockX] = new Cell {Character = leftChar, Attribute = Colors.Terrain.Stone};
-                        map[y, blockX + houseWidth - 1] = new Cell {Character = rightChar, Attribute = Colors.Terrain.Stone};
+                        map[y, blockX] = new Cell {Character = leftChar, Attribute = ColorPresets.Terrain.Stone};
+                        map[y, blockX + houseWidth - 1] = new Cell {Character = rightChar, Attribute = ColorPresets.Terrain.Stone};
                     }
                     
                     for (int x = blockX; x < blockX + houseWidth; x++)
@@ -158,8 +158,8 @@ namespace RpgGame.Core
                             bottomChar = '┘';
                         }
                         
-                        map[blockY, x] = new Cell {Character = topChar, Attribute = Colors.Terrain.Stone};
-                        map[blockY + houseHeight - 1, x] = new Cell {Character = bottomChar, Attribute = Colors.Terrain.Stone};
+                        map[blockY, x] = new Cell {Character = topChar, Attribute = ColorPresets.Terrain.Stone};
+                        map[blockY + houseHeight - 1, x] = new Cell {Character = bottomChar, Attribute = ColorPresets.Terrain.Stone};
                     }
                     
                     // House interior
@@ -167,7 +167,7 @@ namespace RpgGame.Core
                     {
                         for (int x = blockX + 1; x < blockX + houseWidth - 1; x++)
                         {
-                            map[y, x] = new Cell {Character = '.', Attribute = Colors.Terrain.Grass};
+                            map[y, x] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
                         }
                     }
                     
@@ -179,16 +179,16 @@ namespace RpgGame.Core
                     switch (doorSide)
                     {
                         case 0: // Top
-                            map[blockY, doorX] = new Cell {Character = '.', Attribute = Colors.Terrain.Grass};
+                            map[blockY, doorX] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
                             break;
                         case 1: // Bottom
-                            map[blockY + houseHeight - 1, doorX] = new Cell {Character = '.', Attribute = Colors.Terrain.Grass};
+                            map[blockY + houseHeight - 1, doorX] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
                             break;
                         case 2: // Left
-                            map[doorY, blockX] = new Cell {Character = '.', Attribute = Colors.Terrain.Grass};
+                            map[doorY, blockX] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
                             break;
                         case 3: // Right
-                            map[doorY, blockX + houseWidth - 1] = new Cell {Character = '.', Attribute = Colors.Terrain.Grass};
+                            map[doorY, blockX + houseWidth - 1] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
                             break;
                     }
                 }

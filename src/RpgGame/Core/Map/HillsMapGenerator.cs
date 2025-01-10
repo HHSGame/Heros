@@ -45,8 +45,8 @@ namespace RpgGame.Core
                 }
             }
 
-            map = AddRandomFeature(map, new Cell{Character = '~', Attribute = Colors.Terrain.Water}, 5, 3);  // Streams
-            map = AddRandomFeature(map, new Cell{Character = '*', Attribute = Colors.Terrain.Forest}, 10, 5); // Scrub
+            map = AddRandomFeature(map, new Cell{Character = '~', Attribute = ColorPresets.Terrain.Water}, 5, 3);  // Streams
+            map = AddRandomFeature(map, new Cell{Character = '*', Attribute = ColorPresets.Terrain.Forest}, 10, 5); // Scrub
 
             return map;
         }

@@ -7,7 +7,7 @@ namespace RpgGame.Core
 
         private static readonly Dictionary<EnemyType, (int Chance, int Amount)> _lootTable = new()
         {
-            { EnemyType.Goblin, (30, 10) },
+            { EnemyType.Goblin, (100, 10) },
             { EnemyType.Orc, (50, 20) },
             { EnemyType.Troll, (70, 30) }
         };

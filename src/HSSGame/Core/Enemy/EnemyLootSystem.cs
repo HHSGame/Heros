@@ -7,9 +7,9 @@ namespace HHSGame.Core
 
         private static readonly Dictionary<EnemyType, (int Chance, int Amount)> _lootTable = new()
         {
-            { EnemyType.Goblin, (100, 10) },
-            { EnemyType.Orc, (50, 20) },
-            { EnemyType.Troll, (70, 30) }
+            { EnemyType.Gangster, (100, 10) },
+            { EnemyType.Bandit, (50, 20) },
+            { EnemyType.BanditLeader, (70, 30) }
         };
 
         public EnemyLootSystem(EnemyType enemyType, Random random)

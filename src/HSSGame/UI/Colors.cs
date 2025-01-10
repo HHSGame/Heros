@@ -23,14 +23,14 @@ namespace HHSGame.UI
         // Enemy colors
         public static class Enemies
         {
-            public static Attribute Goblin = new(Color.Gray, Color.BrightGreen);
-            public static Attribute Orc = new(Color.Blue, Color.BrightGreen);
-            public static Attribute Troll = new(Color.DarkGray, Color.BrightGreen);
-            public static Attribute Dragon = new(Color.Red, Color.White);
-            public static Attribute Skeleton = new(Color.White, Color.Black);
-            public static Attribute Slime = new(Color.BrightCyan, Color.Black);
-            public static Attribute Demon = new(Color.BrightRed, Color.Black);
-            public static Attribute Ghost = new(Color.BrightMagenta, Color.Black);
+            public static Attribute Gangster = new(Color.Gray, Color.BrightGreen);
+            public static Attribute Bandit = new(Color.Blue, Color.BrightGreen);
+            public static Attribute BanditLeader = new(Color.DarkGray, Color.BrightGreen);
+            // public static Attribute Dragon = new(Color.Red, Color.White);
+            // public static Attribute Skeleton = new(Color.White, Color.Black);
+            // public static Attribute Slime = new(Color.BrightCyan, Color.Black);
+            // public static Attribute Demon = new(Color.BrightRed, Color.Black);
+            // public static Attribute Ghost = new(Color.BrightMagenta, Color.Black);
         }
 
         // Player color

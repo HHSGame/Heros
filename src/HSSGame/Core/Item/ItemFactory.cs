@@ -1,91 +1,10 @@
+
 namespace HHSGame.Core {
 
-    public enum ItemRarity
+    public class ItemFactory(Random _random)
     {
-        Common,
-        Uncommon,
-        Rare,
-        Epic,
-        Legendary
-    }
-
-    public abstract class Item
-    {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public string Name { get; protected set; }
-        public ItemRarity Rarity { get; protected set; }
-        public int Value { get; protected set; }
-        public float Weight { get; protected set; }
         
-        public Item(string name, ItemRarity rarity, int value, float weight)
-        {
-            Name = name;
-            Rarity = rarity;
-            Value = value;
-            Weight = weight;
-        }
-
-        public abstract void Use(Player player);
-    }
-
-    public class HealthPotion : Item
-    {
-        private int _healAmount;
-
-        public HealthPotion(int healAmount) 
-            : base("Health Potion", ItemRarity.Common, 50, 0.5f)
-        {
-            _healAmount = healAmount;
-        }
-
-        public override void Use(Player player)
-        {
-            player.Heal(_healAmount);
-        }
-    }
-
-    public class Weapon : Item
-    {
-        public int Damage { get; private set; }
-        public float AttackSpeed { get; private set; }
-
-        public Weapon(string name, ItemRarity rarity, int value, float weight, 
-            int damage, float attackSpeed) 
-            : base(name, rarity, value, weight)
-        {
-            Damage = damage;
-            AttackSpeed = attackSpeed;
-        }
-
-        public override void Use(Player player)
-        {
-            player.EquipWeapon(this);
-        }
-    }
-
-    public class Armor : Item
-    {
-        public int Defense { get; private set; }
-
-        public Armor(string name, ItemRarity rarity, int value, float weight, 
-            int defense) 
-            : base(name, rarity, value, weight)
-        {
-            Defense = defense;
-        }
-
-        public override void Use(Player player)
-        {
-            player.EquipArmor(this);
-        }
-    }
-
-    public static class ItemFactory
-    {
-        private static readonly Random _random = new();
-        
-        public static Item CreateRandomItem()
+        public Item CreateRandomItem()
         {
             int itemType = _random.Next(3);
             ItemRarity rarity = GetRandomRarity();
@@ -99,7 +18,7 @@ namespace HHSGame.Core {
             };
         }
 
-        private static ItemRarity GetRandomRarity()
+        private ItemRarity GetRandomRarity()
         {
             double chance = _random.NextDouble();
             return chance switch
@@ -112,7 +31,7 @@ namespace HHSGame.Core {
             };
         }
 
-        private static Item CreateRandomPotion(ItemRarity rarity)
+        private Item CreateRandomPotion(ItemRarity rarity)
         {
             int healAmount = rarity switch
             {
@@ -127,7 +46,7 @@ namespace HHSGame.Core {
             return new HealthPotion(healAmount);
         }
 
-        private static Item CreateRandomWeapon(ItemRarity rarity)
+        private Item CreateRandomWeapon(ItemRarity rarity)
         {
             string[] weaponNames = { "Sword", "Axe", "Mace", "Dagger", "Spear" };
             string name = $"{rarity} {weaponNames[_random.Next(weaponNames.Length)]}";
@@ -149,7 +68,7 @@ namespace HHSGame.Core {
             return new Weapon(name, rarity, value, weight, damage, attackSpeed);
         }
 
-        private static Item CreateRandomArmor(ItemRarity rarity)
+        private Item CreateRandomArmor(ItemRarity rarity)
         {
             string[] armorNames = { "Helmet", "Chestplate", "Leggings", "Boots", "Shield" };
             string name = $"{rarity} {armorNames[_random.Next(armorNames.Length)]}";

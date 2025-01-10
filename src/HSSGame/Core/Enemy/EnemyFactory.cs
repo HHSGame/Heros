@@ -27,11 +27,11 @@ namespace HHSGame.Core
             var enemies = new List<Enemy>();
             
             // Spawn different enemy types
-            SpawnEnemyType(enemies, EnemyType.Goblin, 100);
-            SpawnEnemyType(enemies, EnemyType.Orc, 30);
-            SpawnEnemyType(enemies, EnemyType.Troll, 1);
+            SpawnEnemyType(enemies, EnemyType.Gangster, 100);
+            SpawnEnemyType(enemies, EnemyType.Bandit, 30);
+            SpawnEnemyType(enemies, EnemyType.BanditLeader, 1);
             
-            EventSystem.RaiseEvent("Enemies spawned: 3 Goblins, 2 Orcs, 1 Troll");
+            EventSystem.RaiseEvent("Enemies spawned: 3 Gangsters, 2 Bandits, 1 Bandit Leader");
             return enemies;
         }
 

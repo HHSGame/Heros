@@ -18,16 +18,16 @@ namespace HHSGame.Core
         private static readonly Dictionary<EnemyType, EnemyConfig> _enemyConfigs = new()
         {
             { 
-                EnemyType.Goblin, 
-                new EnemyConfig("Goblin", 30, 5, 2, 50, 'g', ColorPresets.Enemies.Goblin)
+                EnemyType.Gangster, 
+                new EnemyConfig("Gangster", 30, 5, 2, 50, 'g', ColorPresets.Enemies.Gangster)
             },
             { 
-                EnemyType.Orc, 
-                new EnemyConfig("Orc", 60, 8, 5, 100, 'o', ColorPresets.Enemies.Orc) 
+                EnemyType.Bandit, 
+                new EnemyConfig("Bandit", 60, 8, 5, 100, 'b', ColorPresets.Enemies.Bandit) 
             },
             { 
-                EnemyType.Troll, 
-                new EnemyConfig("Troll", 100, 12, 8, 200, 'T', ColorPresets.Enemies.Troll) 
+                EnemyType.BanditLeader, 
+                new EnemyConfig("Bandit Leader", 100, 12, 8, 200, 'L', ColorPresets.Enemies.BanditLeader) 
             }
         };
 

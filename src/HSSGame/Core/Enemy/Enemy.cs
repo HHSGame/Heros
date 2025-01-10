@@ -4,9 +4,9 @@ namespace HHSGame.Core
 {
     public enum EnemyType
     {
-        Goblin,
-        Orc,
-        Troll
+        Gangster,
+        Bandit,
+        BanditLeader
     }
 
     public enum EnemyState

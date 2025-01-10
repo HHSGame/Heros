@@ -19,6 +19,7 @@ namespace HHSGame.Core {
         private readonly MapState _mapState;
         private readonly EnemyManager _enemyManager;
         private readonly ItemManager _itemManager;
+        private readonly ItemFactory _itemFactory;
         private readonly SurroundingsManager _surroundingsManager;
         private readonly InventoryManager _inventoryManager;
         private IDrawingContext? _drawingContext;
@@ -30,6 +31,7 @@ namespace HHSGame.Core {
         public MapState MapState => _mapState;
         public EnemyManager EnemyManager => _enemyManager;
         public ItemManager ItemManager => _itemManager;
+        public ItemFactory ItemFactory => _itemFactory;
         public SurroundingsManager SurroundingsManager => _surroundingsManager;
         public InventoryManager InventoryManager => _inventoryManager;
 
@@ -44,7 +46,8 @@ namespace HHSGame.Core {
 
             _itemManager = new ItemManager();
             _inventoryManager = new InventoryManager();
-            _mapGenerator = new MapGenerator(MapWidth, MapHeight, _random, _itemManager, mapStyle);            
+            _itemFactory = new ItemFactory(_random);
+            _mapGenerator = new MapGenerator(MapWidth, MapHeight, _random, _itemManager,_itemFactory, mapStyle);            
             _mapState = new MapState(MapWidth, MapHeight);
             _mapState.Init(_mapGenerator.GenerateDungeon());
             _enemyManager = new EnemyManager(_itemManager);

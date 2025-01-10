@@ -50,13 +50,15 @@ namespace HHSGame.Core
         private readonly int _mapHeight;
         private readonly MapStyle _style;
         private readonly ItemManager _itemManager;
+        private readonly ItemFactory _itemFactory;
         
-        public MapGenerator(int mapWidth, int mapHeight, Random random, ItemManager itemManager, MapStyle style = MapStyle.Cave)
+        public MapGenerator(int mapWidth, int mapHeight, Random random, ItemManager itemManager, ItemFactory itemFactory, MapStyle style = MapStyle.Cave)
         {
             _mapWidth = mapWidth;
             _mapHeight = mapHeight;
             _random = random;
             _itemManager = itemManager;
+            _itemFactory = itemFactory;
             _style = style;
         }
 
@@ -85,7 +87,7 @@ namespace HHSGame.Core
             int itemCount = _random.Next(700, 1000); // Place some items
             for (int i = 0; i < itemCount; i++)
             {
-                var item = ItemFactory.CreateRandomItem();
+                var item = _itemFactory.CreateRandomItem();
                 int x = _random.Next(1, _mapWidth - 1);
                 int y = _random.Next(1, _mapHeight - 1);
                 while (!map[y, x].IsWalkable)

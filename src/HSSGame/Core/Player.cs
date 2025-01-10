@@ -12,9 +12,9 @@ namespace HHSGame.Core
         public int Level { get; private set; }
 
         public override char Glyph => '@';
-        public override string Name => "Player";
+        public override string Name => "Hero";
 
-        public override Terminal.Gui.Attribute Attribute => Terminal.Gui.Attribute.Make(Color.BrightCyan, Color.Magenta);
+        public override Terminal.Gui.Attribute Attribute => Terminal.Gui.Attribute.Make(Color.BrightYellow, Color.Red);
 
         private List<ActiveEffect> _activeEffects;
         private GameWorld _world;

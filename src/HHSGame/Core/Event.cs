@@ -1,10 +1,10 @@
 namespace HHSGame.Core
 {
-    public class GameEvent : EventArgs
+    public class GameMessageEvent : EventArgs
     {
         public string Message { get; }
 
-        public GameEvent(string message)
+        public GameMessageEvent(string message)
         {
             Message = message;
         }
@@ -72,15 +72,15 @@ namespace HHSGame.Core
     public static class EventSystem
     {
 
-        public static event EventHandler<GameEvent>? OnGameEvent;
+        public static event EventHandler<GameMessageEvent>? OnGameMessageEvent;
         public static event EventHandler<TurnEvent>? OnTurnChanged;
         public static event EventHandler<InventoryChangeEvent>? OnInventoryChange;
 
         public static event EventHandler<SurroundingsChangeEvent>? OnSurroundingsChange;
 
-        public static void RaiseEvent(string message)
+        public static void RaiseGameMessage(string message)
         {
-            OnGameEvent?.Invoke(null, new GameEvent(message));
+            OnGameMessageEvent?.Invoke(null, new GameMessageEvent(message));
         }
 
         public static void RaiseTurnChanged(TurnState state)

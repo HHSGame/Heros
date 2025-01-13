@@ -22,7 +22,7 @@ namespace HHSGame.Core
 
         public List<Enemy> SpawnEnemies()
         {
-            EventSystem.RaiseEvent("Spawning enemies...");
+            EventSystem.RaiseGameMessage("Spawning enemies...");
             
             var enemies = new List<Enemy>();
             
@@ -31,7 +31,7 @@ namespace HHSGame.Core
             SpawnEnemyType(enemies, EnemyType.Bandit, 30);
             SpawnEnemyType(enemies, EnemyType.BanditLeader, 1);
             
-            EventSystem.RaiseEvent("Enemies spawned: 3 Gangsters, 2 Bandits, 1 Bandit Leader");
+            EventSystem.RaiseGameMessage("Enemies spawned: 3 Gangsters, 2 Bandits, 1 Bandit Leader");
             return enemies;
         }
 

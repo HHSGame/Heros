@@ -1,3 +1,4 @@
+using HHSGame.Services;
 
 namespace HHSGame.Core
 {
@@ -14,7 +15,7 @@ namespace HHSGame.Core
         public void AddItem(Item item)
         {
             Items.Add(item);
-            EventSystem.RaiseEvent($"You picked up a {item.Name}");
+            EventSystem.RaiseGameMessage(LocalizationService.GetString("PickedUpItem", item.Name));
             EventSystem.RaiseInventoryChange(InventoryEventType.PickUp, item);
         }
 

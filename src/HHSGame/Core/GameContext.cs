@@ -25,6 +25,7 @@ namespace HHSGame.Core {
         private readonly InventoryManager _inventoryManager;
         private readonly TurnManager _turnManager;
         private IDrawingContext? _drawingContext;
+        private Player? _player;
 
         public Random Random => _random;
         public MapGenerator MapGenerator => _mapGenerator;
@@ -41,6 +42,7 @@ namespace HHSGame.Core {
         public IDrawingContext DrawingContext {
             get => _drawingContext ?? throw new InvalidOperationException("Drawing context not initialized");
         }
+        public Player Player { get => _player!; internal set => _player = value; }
 
         public GameContext(GameParameters parameters) {
             Parameters = parameters;
@@ -64,6 +66,10 @@ namespace HHSGame.Core {
         public void InitializeDrawingContext(IDrawingContext drawingContext) {
             _drawingContext = drawingContext;
             drawingContext.MapState = _mapState;
+        }
+
+        public void SetPlayer(Player player) {
+            _player = player;
         }
     }
 }

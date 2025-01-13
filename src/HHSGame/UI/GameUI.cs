@@ -11,7 +11,15 @@ namespace HHSGame.UI
         private readonly MapWindow mapWindow;
         private readonly MessageWindow messageWindow;
         private readonly InventoryWindow inventoryWindow;
+        private readonly UtilityWindow itemUsageWindow;
         private readonly SurroundingsWindow surroundingsWindow;
+
+        public MapWindow MapWindow => mapWindow;
+        public MessageWindow MessageWindow => messageWindow;
+        public InventoryWindow InventoryWindow => inventoryWindow;
+        public UtilityWindow ItemUsageWindow => itemUsageWindow;
+        public SurroundingsWindow SurroundingsWindow => surroundingsWindow;
+
 
         public GameUI()
         {
@@ -49,6 +57,12 @@ namespace HHSGame.UI
                 Height = Dim.Percent(50),
             };
 
+            itemUsageWindow = new UtilityWindow("Utilities", context, this) {
+                X = Pos.Right(mapWindow),
+                Y = 0,
+                Visible = false
+            };
+
             context.InitializeDrawingContext(mapWindow.DrawingContext);
 
             _game = new Game(context);
@@ -57,20 +71,21 @@ namespace HHSGame.UI
         public void Start()
         {
             // Create main window
-            var top = Application.Top;
+            var top = new Toplevel();
 
-            top.Add(mapWindow, inventoryWindow, surroundingsWindow, messageWindow);
+            top.Add(mapWindow, inventoryWindow, surroundingsWindow, messageWindow, itemUsageWindow);
 
             _game.Start();
 
             Application.RootKeyEvent += HandleKeyEvent;
-            Application.Run();
+            Application.Run(top);
+            top.Dispose();
             Application.Shutdown();
         }
 
         private bool HandleKeyEvent(KeyEvent args)
         {
-            EventSystem.RaiseEvent($"Key pressed: {args.Key}");
+            EventSystem.RaiseGameMessage($"Key pressed: {args.Key}");
             // Process movement keys
             switch (args.Key)
             {
@@ -94,6 +109,9 @@ namespace HHSGame.UI
                 case Key.g:
                     _game.Player?.PickupItems();
                     return true;
+                case Key.u:
+                    itemUsageWindow.ToggleUtilityWindow();
+                    break;
                 default:
                     // Let other keys propagate
                     return false;

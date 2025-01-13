@@ -1,5 +1,6 @@
 using HHSGame.Core.Combat;
 using Terminal.Gui;
+using HHSGame.Services;
 
 namespace HHSGame.Core
 {
@@ -15,7 +16,7 @@ namespace HHSGame.Core
         public int Level { get; private set; }
 
         public char Glyph => '☭';
-        public string Name => "Hero";
+        public string Name => LocalizationService.GetString("PlayerName");
 
         public Terminal.Gui.Attribute Attribute => Terminal.Gui.Attribute.Make(Color.BrightYellow, Color.Red);
 
@@ -164,12 +165,12 @@ namespace HHSGame.Core
                     X = newX;
                     Y = newY;
                     UpdateFOV();
-                    EventSystem.RaiseEvent(_collisionSystem.GetCollisionMessage(newX, newY, this));
+                    EventSystem.RaiseGameMessage(_collisionSystem.GetCollisionMessage(newX, newY, this));
                 }
             }
             else
             {
-                EventSystem.RaiseEvent(_collisionSystem.GetCollisionMessage(newX, newY, this));
+                EventSystem.RaiseGameMessage(_collisionSystem.GetCollisionMessage(newX, newY, this));
             }
             _turnManager.EndPlayerTurn();
         }
@@ -178,7 +179,7 @@ namespace HHSGame.Core
         {
             if (IsStunned()) return;
 
-            EventSystem.RaiseEvent($"Player attacks {enemy.Name}!");
+            EventSystem.RaiseGameMessage(LocalizationService.GetString("PlayerAttacks", enemy.Name));
 
             int baseDamage = Strength;
             int weaponDamage = _equippedWeapon?.Damage ?? 0;
@@ -194,7 +195,7 @@ namespace HHSGame.Core
         public void TakeDamage(int damage)
         {
             if (IsStunned()) return;
-            EventSystem.RaiseEvent($"Player takes {damage} damage!");
+            EventSystem.RaiseGameMessage(LocalizationService.GetString("PlayerTakesDamage", damage));
 
             int baseDefense = Defense;
             int armorDefense = _equippedArmor?.Defense ?? 0;
@@ -207,7 +208,7 @@ namespace HHSGame.Core
             if (Health <= 0)
             {
                 Health = 0;
-                EventSystem.RaiseEvent("Player has been defeated!");
+                EventSystem.RaiseGameMessage(LocalizationService.GetString("PlayerDefeated"));
                 Die();
             }
         }
@@ -250,7 +251,7 @@ namespace HHSGame.Core
                 _inventoryManager.AddItem(_equippedWeapon);
             }
             _equippedWeapon = weapon;
-            EventSystem.RaiseEvent($"Equipped {weapon.Name}");
+            EventSystem.RaiseGameMessage(LocalizationService.GetString("EquippedWeapon", weapon.Name));
         }
 
         public void EquipArmor(Armor armor)
@@ -260,15 +261,14 @@ namespace HHSGame.Core
                 _inventoryManager.AddItem(_equippedArmor);
             }
             _equippedArmor = armor;
-            EventSystem.RaiseEvent($"Equipped {armor.Name}");
+            EventSystem.RaiseGameMessage(LocalizationService.GetString("EquippedArmor", armor.Name));
         }
 
         public void PickupItems()
         {
             var items = _itemManager.GetItemsAt(X, Y);
-            if (items.Count == 0)
-            {
-                EventSystem.RaiseEvent("No items here to pick up.");
+            if (items.Count == 0)            {
+                EventSystem.RaiseGameMessage(LocalizationService.GetString("NoItemsToPickUp"));
                 return;
             }
 
@@ -276,7 +276,6 @@ namespace HHSGame.Core
             foreach (var item in items)
             {
                 AddItem(item);
-                EventSystem.RaiseEvent($"Picked up {item.Name}");
             }
             EventSystem.RaiseSurroundingsChange((X, Y), FOVRadius, SurroundingsChangeType.PickUpLoot);
         }

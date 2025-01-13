@@ -121,7 +121,7 @@ namespace HHSGame.Core
         public void Attack(Player player)
         {
             int damage = Strength;
-            EventSystem.RaiseEvent($"{Name} attacks the player for {damage} damage!");
+            EventSystem.RaiseGameMessage($"{Name} attacks the player for {damage} damage!");
             
             _abilitySystem.TryApplySpecialEffect(player);
             player.TakeDamage(damage);
@@ -136,12 +136,12 @@ namespace HHSGame.Core
             if (Health <= 0)
             {
                 Health = 0;
-                EventSystem.RaiseEvent($"{Name} was defeated!");
+                EventSystem.RaiseGameMessage($"{Name} was defeated!");
                 Die();
             }
             else
             {
-                EventSystem.RaiseEvent($"{Name} took {actualDamage} damage! HP remains {Health}.");
+                EventSystem.RaiseGameMessage($"{Name} took {actualDamage} damage! HP remains {Health}.");
             }
         }
 
@@ -160,11 +160,11 @@ namespace HHSGame.Core
             {
                 X = newX;
                 Y = newY;
-                EventSystem.RaiseEvent(_collisionSystem.GetCollisionMessage(newX, newY, this));
+                EventSystem.RaiseGameMessage(_collisionSystem.GetCollisionMessage(newX, newY, this));
             }
             else
             {
-                EventSystem.RaiseEvent(_collisionSystem.GetCollisionMessage(newX, newY, this));
+                EventSystem.RaiseGameMessage(_collisionSystem.GetCollisionMessage(newX, newY, this));
             }
         }
 

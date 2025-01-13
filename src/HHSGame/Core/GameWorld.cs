@@ -26,7 +26,9 @@ namespace HHSGame.Core
                 y = Context.Random.Next(y - round, y + round);
                 round ++;
             }
-            return new Player(x, y, Context);
+            var player = new Player(x, y, Context);
+            Context.Player = player;
+            return player;
         }
 
         public void Update(Player player)

@@ -15,10 +15,10 @@ namespace HHSGame.UI
             Height = Dim.Fill();
             _eventMessages = new List<string>();
             Height = MaxEventMessages + 2;
-            EventSystem.OnGameEvent += HandleGameEvent;
+            EventSystem.OnGameMessageEvent += HandleGameEvent;
         }
 
-        private void HandleGameEvent(object? sender, GameEvent e)
+        private void HandleGameEvent(object? sender, GameMessageEvent e)
         {
             LogEvent(e.Message);
         }

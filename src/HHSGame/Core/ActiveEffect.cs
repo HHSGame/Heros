@@ -24,7 +24,7 @@ namespace HHSGame.Core {
 
         public override void ApplyEffect(Player player)
         {
-            EventSystem.RaiseEvent($"Player is poisoned!");
+            EventSystem.RaiseGameMessage($"Player is poisoned!");
             player.TakeDamage(_damagePerTurn);
         }
     }
@@ -37,7 +37,7 @@ namespace HHSGame.Core {
 
         public override void ApplyEffect(Player player)
         {
-            EventSystem.RaiseEvent($"Player is is stunned!");
+            EventSystem.RaiseGameMessage($"Player is is stunned!");
             // Stun prevents actions but doesn't deal damage
         }
     }

@@ -17,14 +17,12 @@ namespace HHSGame.Core.Combat {
 
         public void EndPlayerTurn() {
             if (_currentTurnState == TurnState.PlayerTurn) {
-                EventSystem.RaiseEvent("Ending player turn...");
                 EventSystem.RaiseTurnChanged(TurnState.EnemyTurn);
             }
         }
 
         public void EndEnemyTurn() {
             if (_currentTurnState == TurnState.EnemyTurn) {
-                EventSystem.RaiseEvent("Ending enemy turn...");
                 EventSystem.RaiseTurnChanged(TurnState.PlayerTurn);
             }
         }

@@ -64,7 +64,7 @@ namespace HHSGame.Core
 
         public Cell[,] GenerateDungeon()
         {
-            EventSystem.RaiseEvent($"Generating {_style.ToString().ToLower()} map...");
+            EventSystem.RaiseGameMessage($"Generating {_style.ToString().ToLower()} map...");
             
             BaseMapGenerator generator = _style switch
             {
@@ -78,7 +78,7 @@ namespace HHSGame.Core
             // Place random items in the dungeon
             PlaceRandomItems(map);
             
-            EventSystem.RaiseEvent($"{_style} map generated successfully");
+            EventSystem.RaiseGameMessage($"{_style} map generated successfully");
             return map;
         }
 

@@ -3,51 +3,42 @@ using HHSGame.UI;
 
 namespace HHSGame.Core
 {
-    public class Game(GameContext _context) : IDisposable
-    {
-        public Player? Player => _player;
+    using Items;
 
-        public GameWorld? World => _world;
-        private GameWorld? _world;
-        private Player? _player;
-        private bool _isRunning = false;
+    public class Game(GameContext context, GameWorld world, Player player)
+    {
+        public Player Player => player;
+        private bool _isRunning;
         private DateTime _lastFrameTime;
         private const double TargetFrameTime = 1000.0 / 60.0; // 60 FPS
-        public GameContext Context => _context;
 
         public void Start()
         {
+            context.InitializeContext();
             _isRunning = true;
-            StartNewGame();
-        }
 
-        private void StartNewGame()
-        {
-            // Initialize game world and player
-            _world = new GameWorld(_context);
-            _player = _world.NewPlayer();
-            _player.AddItem(new HealthPotion(10));
+            player.AddItem(new HealthPotion(10));
 
             // Start game loop with refresh rate
             Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(TargetFrameTime), GameLoop);
         }
-        
+
         private bool GameLoop(MainLoop arg)
         {
-            var drawingContext = _context.DrawingContext;
-            if (!_isRunning || _world == null || _player == null)
+            if (!_isRunning || world == null || player == null)
                 return false;
+            var drawingContext = context.DrawingContext;
 
             // Calculate frame timing
             double deltaTime = CalculateDeltaTime();
-            
-            UpdateGame(deltaTime);
-            
-            drawingContext.Viewport.UpdateViewport(_player.X, _player.Y, GameWorld.MapWidth, GameWorld.MapHeight);
 
-            _world.Draw(drawingContext);
-            (_player as GameActor).Draw(drawingContext);
-            
+            UpdateGame(deltaTime);
+
+            drawingContext.Viewport.UpdateViewport(player.X, player.Y, GameWorld.MapWidth, GameWorld.MapHeight);
+
+            world.Draw(drawingContext);
+            (player as IGameActor).Draw(drawingContext);
+
             // Render to view
             drawingContext.Render();
 
@@ -58,18 +49,13 @@ namespace HHSGame.Core
                 drawingContext.Clear();
                 Thread.Sleep((int)(TargetFrameTime - frameTime));
             }
-            
+
             return _isRunning;
         }
 
         public void Stop()
         {
             _isRunning = false;
-        }
-
-        public void Dispose()
-        {
-            Stop();
         }
 
         private double CalculateDeltaTime()
@@ -82,10 +68,10 @@ namespace HHSGame.Core
 
         private void UpdateGame(double deltaTime)
         {
-            if (_world == null || _player == null)
+            if (world == null || player == null)
                 return;
 
-            _world.Update(_player);
+            world.Update(player);
         }
     }
 }

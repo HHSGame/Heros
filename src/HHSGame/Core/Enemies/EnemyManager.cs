@@ -3,11 +3,15 @@ using System.Collections.Immutable;
 using HHSGame.Core.Combat;
 using HHSGame.UI;
 
-namespace HHSGame.Core {
-    public class EnemyManager(ItemManager _itemManager, TurnManager _turnManager) : IDrawable {
-        private readonly List<Enemy> _enemies = [];
+namespace HHSGame.Core.Enemies
+{
+    using Items;
 
-        public ImmutableList<Enemy> Enemies => [.. _enemies];
+    public class EnemyManager(ItemManager itemManager, TurnManager turnManager) : IDrawable
+    {
+        private readonly List<Enemy> enemies = [];
+
+        public ImmutableList<Enemy> Enemies => [.. enemies];
 
         private void DropLoot(Enemy enemy)
         {
@@ -16,7 +20,7 @@ namespace HHSGame.Core {
             {
                 item.X = enemy.X;
                 item.Y = enemy.Y;
-                _itemManager.AddLoot(item);
+                itemManager.AddLoot(item);
             }
             EventSystem.RaiseSurroundingsChange((enemy.X, enemy.Y), 1, SurroundingsChangeType.DropLoot);
         }
@@ -24,29 +28,30 @@ namespace HHSGame.Core {
 
         public void UpdateEnemies(Player player)
         {
-            foreach (var enemy in _enemies.ToArray())
+            foreach (var enemy in enemies.ToArray())
             {
                 if (enemy.Health <= 0)
                 {
                     // Handle enemy death
-                    _enemies.Remove(enemy);
+                    enemies.Remove(enemy);
                     DropLoot(enemy);
                     continue;
                 }
 
-                enemy.Update(player, _turnManager.IsEnemyTurn());
+                enemy.Update(player, turnManager.IsEnemyTurn());
             }
-            _turnManager.EndEnemyTurn();
+            turnManager.EndEnemyTurn();
         }
 
-        public void Draw(IDrawingContext ctx) {
+        public void Draw(IDrawingContext ctx)
+        {
             var viewport = ctx.Viewport;
 
-            foreach (var enemy in _enemies)
+            foreach (var enemy in enemies)
             {
                 if (viewport.Contains((enemy.X, enemy.Y)))
                 {
-                    (enemy as GameActor).Draw(ctx);
+                    (enemy as IGameActor).Draw(ctx);
                 }
             }
 
@@ -54,13 +59,13 @@ namespace HHSGame.Core {
 
         public Enemy? GetEnemyAt(int x, int y)
         {
-            return _enemies.FirstOrDefault(e => e.X == x && e.Y == y);
+            return enemies.FirstOrDefault(e => e.X == x && e.Y == y);
         }
 
         public void SetEnemies(List<Enemy> enemies)
         {
-            _enemies.Clear();
-            _enemies.AddRange(enemies);
+            this.enemies.Clear();
+            this.enemies.AddRange(enemies);
         }
 
     }

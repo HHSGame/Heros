@@ -1,4 +1,4 @@
-namespace HHSGame.Core
+namespace HHSGame.Core.Enemies
 {
     public class EnemyAbilitySystem
     {
@@ -7,17 +7,17 @@ namespace HHSGame.Core
 
         private static readonly Dictionary<EnemyType, (int Chance, Action<Player, Enemy> Effect)> _attackEffects = new()
         {
-            { 
-                EnemyType.Gangster, 
-                (20, (Player player, Enemy self) => player.ApplyEffect(new PoisonEffect(3))) 
+            {
+                EnemyType.Gangster,
+                (20, (Player player, Enemy self) => player.ApplyEffect(new PoisonEffect(3)))
             },
-            { 
-                EnemyType.Bandit, 
-                (10, (Player player, Enemy self) => player.ApplyEffect(new StunEffect(1))) 
+            {
+                EnemyType.Bandit,
+                (10, (Player player, Enemy self) => player.ApplyEffect(new StunEffect(1)))
             },
-            { 
-                EnemyType.BanditLeader, 
-                (30, (Player player, Enemy self) => self.Heal(10)) 
+            {
+                EnemyType.BanditLeader,
+                (30, (Player player, Enemy self) => self.Heal(10))
             }
         };
 
@@ -29,7 +29,7 @@ namespace HHSGame.Core
 
         public void TryApplySpecialEffect(Player player)
         {
-            if (_attackEffects.TryGetValue(_enemy.Type, out var effectData) && 
+            if (_attackEffects.TryGetValue(_enemy.Type, out var effectData) &&
                 _random.Next(100) < effectData.Chance)
             {
                 effectData.Effect(player, _enemy);

@@ -1,6 +1,6 @@
 using HHSGame.UI;
 
-namespace HHSGame.Core
+namespace HHSGame.Core.Items
 {
     public class ItemManager : IDrawable
     {

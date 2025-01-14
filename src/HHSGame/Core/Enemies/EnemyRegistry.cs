@@ -1,7 +1,7 @@
 using HHSGame.UI;
 using Attribute = Terminal.Gui.Attribute;
 
-namespace HHSGame.Core
+namespace HHSGame.Core.Enemies
 {
     public class EnemyRegistry
     {
@@ -15,25 +15,25 @@ namespace HHSGame.Core
             Attribute Attribute
         );
 
-        private static readonly Dictionary<EnemyType, EnemyConfig> _enemyConfigs = new()
+        private static readonly Dictionary<EnemyType, EnemyConfig> enemyConfigs = new()
         {
-            { 
-                EnemyType.Gangster, 
+            {
+                EnemyType.Gangster,
                 new EnemyConfig("Gangster", 30, 5, 2, 50, 'g', ColorPresets.Enemies.Gangster)
             },
-            { 
-                EnemyType.Bandit, 
-                new EnemyConfig("Bandit", 60, 8, 5, 100, 'b', ColorPresets.Enemies.Bandit) 
+            {
+                EnemyType.Bandit,
+                new EnemyConfig("Bandit", 60, 8, 5, 100, 'b', ColorPresets.Enemies.Bandit)
             },
-            { 
-                EnemyType.BanditLeader, 
-                new EnemyConfig("Bandit Leader", 100, 12, 8, 200, 'L', ColorPresets.Enemies.BanditLeader) 
+            {
+                EnemyType.BanditLeader,
+                new EnemyConfig("Bandit Leader", 100, 12, 8, 200, 'L', ColorPresets.Enemies.BanditLeader)
             }
         };
 
         public static EnemyConfig GetConfig(EnemyType type)
         {
-            if (_enemyConfigs.TryGetValue(type, out var config))
+            if (enemyConfigs.TryGetValue(type, out var config))
             {
                 return config;
             }

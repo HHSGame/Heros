@@ -1,4 +1,5 @@
-namespace HHSGame.Core {
+namespace HHSGame.Core.Items
+{
 
     public enum ItemRarity
     {
@@ -17,7 +18,7 @@ namespace HHSGame.Core {
         public ItemRarity Rarity { get; protected set; }
         public int Value { get; protected set; }
         public float Weight { get; protected set; }
-        
+
         public Item(string name, ItemRarity rarity, int value, float weight)
         {
             Name = name;
@@ -33,7 +34,7 @@ namespace HHSGame.Core {
     {
         private int _healAmount;
 
-        public HealthPotion(int healAmount) 
+        public HealthPotion(int healAmount)
             : base("Health Potion", ItemRarity.Common, 50, 0.5f)
         {
             _healAmount = healAmount;
@@ -50,8 +51,8 @@ namespace HHSGame.Core {
         public int Damage { get; private set; }
         public float AttackSpeed { get; private set; }
 
-        public Weapon(string name, ItemRarity rarity, int value, float weight, 
-            int damage, float attackSpeed) 
+        public Weapon(string name, ItemRarity rarity, int value, float weight,
+            int damage, float attackSpeed)
             : base(name, rarity, value, weight)
         {
             Damage = damage;
@@ -68,8 +69,8 @@ namespace HHSGame.Core {
     {
         public int Defense { get; private set; }
 
-        public Armor(string name, ItemRarity rarity, int value, float weight, 
-            int defense) 
+        public Armor(string name, ItemRarity rarity, int value, float weight,
+            int defense)
             : base(name, rarity, value, weight)
         {
             Defense = defense;

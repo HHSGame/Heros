@@ -1,6 +1,11 @@
-namespace HHSGame.Core {
 
-    public class SurroundingsManager(ItemManager itemManager, EnemyManager enemyManager, MapState mapState) {
+namespace HHSGame.Core.Map
+{
+    using Enemies;
+    using Items;
+
+    public class SurroundingsManager(ItemManager itemManager, EnemyManager enemyManager, MapState mapState)
+    {
 
 
         public List<(string Name, (int x, int y) Position)> GetVisibleItemsAndEnemies()

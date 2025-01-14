@@ -1,13 +1,16 @@
-using HHSGame.Core;
+using HHSGame.Core.Map;
 using Terminal.Gui;
 
 
-namespace HHSGame.UI {
+namespace HHSGame.UI
+{
+    using Views;
 
     using Position = (int X, int Y);
 
 
-    public class Viewport {
+    public class Viewport
+    {
 
         public static int DefaultWidth => 150;
         public static int DefaultHeight => 35;
@@ -16,24 +19,28 @@ namespace HHSGame.UI {
         public int Width { get; private set; }
         public int Height { get; private set; }
 
-        public Viewport(int x, int y, int width, int height) {
+        public Viewport(int x, int y, int width, int height)
+        {
             X = x;
             Y = y;
             Width = width;
             Height = height;
         }
 
-        public bool Contains(Position pos) {
+        public bool Contains(Position pos)
+        {
             return pos.X >= X && pos.X < X + Width && pos.Y >= Y && pos.Y < Y + Height;
         }
 
-        public Position ToLocal(Position pos) {
+        public Position ToLocal(Position pos)
+        {
             return (pos.X - X, pos.Y - Y);
         }
 
-        public void UpdateViewport(int x, int y, int mapWidth, int mapHeight) {
+        public void UpdateViewport(int x, int y, int mapWidth, int mapHeight)
+        {
             int margin = 5;
-            
+
             if (x - X < margin)
                 X = Math.Max(0, x - margin);
             else if (x - X > Width - margin)
@@ -45,15 +52,17 @@ namespace HHSGame.UI {
                 Y = Math.Min(mapHeight - Height, y - Height + margin);
         }
 
-        public void Resize(int width, int height) {
+        public void Resize(int width, int height)
+        {
             Width = width;
             Height = height;
         }
     }
 
-    public interface IDrawingContext {
+    public interface IDrawingContext
+    {
 
-        Viewport Viewport { get;}
+        Viewport Viewport { get; }
         View View { get; }
         MapState? MapState { get; set; }
 
@@ -63,15 +72,16 @@ namespace HHSGame.UI {
         void Render();
     }
 
-    public interface IDrawable {
-        void Draw(IDrawingContext ctx) {}
+    public interface IDrawable
+    {
+        void Draw(IDrawingContext ctx) { }
     }
 
 
     public struct Cell
     {
-        public char Character;
-        public Terminal.Gui.Attribute Attribute;
+        public char Character {get; set;}
+        public Terminal.Gui.Attribute Attribute {get; set;}
 
         public bool IsWalkable => Character == '.' || Character == '▒';
     }
@@ -88,16 +98,17 @@ namespace HHSGame.UI {
         public int Height => View.Frame.Height;
 
 
-        public MapViewDrawingContext(Dim width, Dim height)
+        public MapViewDrawingContext(MapView mapView, MapState mapState)
         {
-            _mapView = new MapView(width, height);
+            _mapView = mapView;
             _viewport = new Viewport(0, 0, Width, Height);
+            MapState = mapState;
         }
 
         // Explicit interface implementation for original method
         public void DrawAt((int X, int Y) pos, char tile)
         {
-            this.DrawAt(pos, new Cell {Character = tile, Attribute = ColorPresets.Terrain.Stone});
+            this.DrawAt(pos, new Cell { Character = tile, Attribute = ColorPresets.Terrain.Stone });
         }
 
         public void DrawAt((int X, int Y) pos, Cell cell)
@@ -123,7 +134,9 @@ namespace HHSGame.UI {
                     // Visited but not visible - grey out
                     var (posX, posY) = _viewport.ToLocal(pos);
                     _mapView.SetCell(posX, posY, cell.Character, ColorPresets.GreyedOut);
-                } else {
+                }
+                else
+                {
                     // Visited but not visible - grey out
                     var (posX, posY) = _viewport.ToLocal(pos);
                     _mapView.SetCell(posX, posY, ' ', ColorPresets.GreyedOut);

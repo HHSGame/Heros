@@ -16,7 +16,8 @@ namespace HHSGame.Core
             _gameContext = context;
         }
 
-        public Player NewPlayer() {
+        public Player NewPlayer()
+        {
             // create a player at the center of the map but avoid any obstacles
             int x = MapWidth / 2, y = MapHeight / 2;
             int round = 0;
@@ -24,10 +25,10 @@ namespace HHSGame.Core
             {
                 x = Context.Random.Next(x - round, x + round);
                 y = Context.Random.Next(y - round, y + round);
-                round ++;
+                round++;
             }
             var player = new Player(x, y, Context);
-            Context.Player = player;
+            player.UpdateFOV();
             return player;
         }
 
@@ -36,7 +37,7 @@ namespace HHSGame.Core
             // Update all enemies
             Context.EnemyManager.UpdateEnemies(player);
         }
-        
+
         public void Draw(IDrawingContext ctx)
         {
             // Draw map tiles within viewport

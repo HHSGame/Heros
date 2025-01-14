@@ -1,23 +1,25 @@
 using Terminal.Gui;
 using HHSGame.Core;
+using HHSGame.Core.Items;
 
-namespace HHSGame.UI
+namespace HHSGame.UI.Windows
 {
     public class UtilityWindow : Window
     {
         private readonly InventoryManager _inventoryManager;
         private readonly Lazy<Player> _playerHolder;
         private readonly ListView _listView;
-        private  readonly MapWindow _mapWindow;
+        private readonly MapWindow _mapWindow;
 
-        public UtilityWindow(string title, GameContext context, GameUI gameUI): base(title)
+        public UtilityWindow(GameContext context, MapWindow mapWindow) : base(GUISettings.UtilityWindowTitle)
         {
             _inventoryManager = context.InventoryManager;
-            _playerHolder = new (() => context.Player);
-            Title = "Use Item";
-            Height = Dim.Fill() - 10;
+            _playerHolder = new(() => context.Player);
+            X = Pos.Right(mapWindow);
+            Y = 0;
+            Height = Dim.Fill() - GUISettings.MessageWindowHeight;
             Visible = false;
-            _mapWindow = gameUI.MapWindow;
+            _mapWindow = mapWindow;
 
             _listView = new ListView
             {
@@ -46,20 +48,23 @@ namespace HHSGame.UI
             _inventoryManager.RemoveItem(item);
         }
 
-        private void HandleInventoryChange(object? sender, InventoryChangeEvent e)
+        private void HandleInventoryChange(object? sender, InventoryChangeEventArgs e)
         {
             _listView.SetSource(_inventoryManager.Items);
         }
 
         public void ToggleUtilityWindow()
         {
-            if (!Visible) {
+            if (!Visible)
+            {
                 Visible = true;
                 _mapWindow.Width = Dim.Percent(75);
                 _mapWindow.SetNeedsDisplay();
                 Width = Dim.Percent(25);
                 this.SetNeedsDisplay();
-            } else {
+            }
+            else
+            {
                 Visible = false;
                 _mapWindow.Width = Dim.Fill() - 20;
                 _mapWindow.SetNeedsDisplay();

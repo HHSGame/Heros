@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using HHSGame.UI;
 using Attribute = Terminal.Gui.Attribute;
 
-namespace HHSGame.Core
+namespace HHSGame.Core.Map
 {
     public abstract class BaseMapGenerator
     {
-        protected static readonly Dictionary<char, Attribute> _terrainColors = new()
+        protected static readonly Dictionary<char, Attribute> terrainColors = new()
         {
             { '#', ColorPresets.Terrain.Stone },    // Walls
             { '.', ColorPresets.Terrain.Grass },    // Floors
@@ -25,45 +25,49 @@ namespace HHSGame.Core
             { '▒', ColorPresets.Terrain.Grass },    // Town streets
         };
 
-        protected readonly Random _random;
-        protected readonly int _mapWidth;
-        protected readonly int _mapHeight;
-        
+        private readonly Random random;
+        private readonly int mapWidth;
+        private readonly int mapHeight;
+
+        protected Random Random => random;
+        protected int MapWidth => mapWidth;
+        protected int MapHeight => mapHeight;
+
         protected BaseMapGenerator(int mapWidth, int mapHeight, Random random)
         {
-            _mapWidth = mapWidth;
-            _mapHeight = mapHeight;
-            _random = random;
+            this.mapWidth = mapWidth;
+            this.mapHeight = mapHeight;
+            this.random = random;
         }
 
         public abstract Cell[,] Generate();
 
         public static Attribute GetTerrainColor(char terrainChar)
         {
-            return _terrainColors.TryGetValue(terrainChar, out var color) 
-                ? color 
+            return terrainColors.TryGetValue(terrainChar, out var color)
+                ? color
                 : ColorPresets.Terrain.Grass;
         }
 
         protected Cell[,] SmoothMap(Cell[,] map, char wallChar = '#')
         {
-            Cell[,] newMap = new Cell[_mapHeight, _mapWidth];
-            
-            for (int y = 0; y < _mapHeight; y++)
+            Cell[,] newMap = new Cell[mapHeight, mapWidth];
+
+            for (int y = 0; y < mapHeight; y++)
             {
-                for (int x = 0; x < _mapWidth; x++)
+                for (int x = 0; x < mapWidth; x++)
                 {
                     int neighborCount = GetSurroundingCount(map, x, y, wallChar);
 
                     if (neighborCount > 4)
-                        newMap[y, x] = new Cell {Character = wallChar, Attribute = GetTerrainColor(wallChar)};
+                        newMap[y, x] = new Cell { Character = wallChar, Attribute = GetTerrainColor(wallChar) };
                     else if (neighborCount < 4)
-                        newMap[y, x] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
+                        newMap[y, x] = new Cell { Character = '.', Attribute = ColorPresets.Terrain.Grass };
                     else
                         newMap[y, x] = map[y, x];
                 }
             }
-            
+
             return newMap;
         }
 
@@ -74,8 +78,8 @@ namespace HHSGame.Core
             {
                 for (int neighborX = x - 1; neighborX <= x + 1; neighborX++)
                 {
-                    if (neighborX >= 0 && neighborX < _mapWidth && 
-                        neighborY >= 0 && neighborY < _mapHeight)
+                    if (neighborX >= 0 && neighborX < mapWidth &&
+                        neighborY >= 0 && neighborY < mapHeight)
                     {
                         if (neighborX != x || neighborY != y)
                         {
@@ -95,9 +99,9 @@ namespace HHSGame.Core
         {
             for (int i = 0; i < count; i++)
             {
-                int startX = _random.Next(1, _mapWidth - 1);
-                int startY = _random.Next(1, _mapHeight - 1);
-                
+                int startX = random.Next(1, mapWidth - 1);
+                int startY = random.Next(1, mapHeight - 1);
+
                 if (map[startY, startX].Character == '.')
                 {
                     map = FloodFillFeature(map, startX, startY, feature, maxSize);
@@ -115,17 +119,17 @@ namespace HHSGame.Core
             while (queue.Count > 0 && filled < maxSize)
             {
                 var (currentX, currentY) = queue.Dequeue();
-                
+
                 if (map[currentY, currentX].Character == '.')
                 {
                     map[currentY, currentX] = feature;
                     filled++;
-                    
+
                     // Add neighbors
                     if (currentX > 1) queue.Enqueue((currentX - 1, currentY));
-                    if (currentX < _mapWidth - 2) queue.Enqueue((currentX + 1, currentY));
+                    if (currentX < mapWidth - 2) queue.Enqueue((currentX + 1, currentY));
                     if (currentY > 1) queue.Enqueue((currentX, currentY - 1));
-                    if (currentY < _mapHeight - 2) queue.Enqueue((currentX, currentY + 1));
+                    if (currentY < mapHeight - 2) queue.Enqueue((currentX, currentY + 1));
                 }
             }
             return map;
@@ -133,31 +137,31 @@ namespace HHSGame.Core
 
         protected float[,] SmoothHeightMap(float[,] heightMap)
         {
-            float[,] newMap = new float[_mapHeight, _mapWidth];
-            
-            for (int y = 0; y < _mapHeight; y++)
+            float[,] newMap = new float[mapHeight, mapWidth];
+
+            for (int y = 0; y < mapHeight; y++)
             {
-                for (int x = 0; x < _mapWidth; x++)
+                for (int x = 0; x < mapWidth; x++)
                 {
                     float sum = 0;
                     int count = 0;
-                    
+
                     for (int ny = y - 1; ny <= y + 1; ny++)
                     {
                         for (int nx = x - 1; nx <= x + 1; nx++)
                         {
-                            if (nx >= 0 && nx < _mapWidth && ny >= 0 && ny < _mapHeight)
+                            if (nx >= 0 && nx < mapWidth && ny >= 0 && ny < mapHeight)
                             {
                                 sum += heightMap[ny, nx];
                                 count++;
                             }
                         }
                     }
-                    
+
                     newMap[y, x] = sum / count;
                 }
             }
-            
+
             return newMap;
         }
     }

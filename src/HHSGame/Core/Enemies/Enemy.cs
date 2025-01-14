@@ -1,7 +1,10 @@
+using HHSGame.Core.Map;
 
-
-namespace HHSGame.Core
+namespace HHSGame.Core.Enemies
 {
+    using HHSGame.Utils;
+    using Items;
+    
     public enum EnemyType
     {
         Gangster,
@@ -17,12 +20,12 @@ namespace HHSGame.Core
         Fleeing
     }
 
-    public class Enemy : GameActor
+    public class Enemy : IGameActor
     {
-        private readonly CollisionSystem _collisionSystem;
-        private readonly EnemyAbilitySystem _abilitySystem;
-        private readonly EnemyLootSystem _lootSystem;
-        private readonly Pathfinder _pathfinder;
+        private readonly CollisionSystem collisionSystem;
+        private readonly EnemyAbilitySystem abilitySystem;
+        private readonly EnemyLootSystem lootSystem;
+        private readonly Pathfinder pathfinder;
         public int X { get; set; }
         public int Y { get; set; }
         public int Health { get; private set; }
@@ -34,19 +37,19 @@ namespace HHSGame.Core
         public EnemyType Type { get; private set; }
         public EnemyState State { get; private set; }
         public char Glyph { get; }
-        public Terminal.Gui.Attribute Attribute { get; } 
-        private int _attackCooldown;
-        private int _specialAbilityCooldown;
-        private readonly Random _random;
+        public Terminal.Gui.Attribute Attribute { get; }
+        private int attackCooldown;
+        private int specialAbilityCooldown;
+        private readonly Random random;
 
         public Enemy(EnemyType type, int x, int y, CollisionSystem collisionSystem, Pathfinder pathfinder)
         {
-            _random = new Random();
+            random = new Random();
             Type = type;
             X = x;
             Y = y;
-            _collisionSystem = collisionSystem;
-            _pathfinder = pathfinder;
+            this.collisionSystem = collisionSystem;
+            this.pathfinder = pathfinder;
             State = EnemyState.Chasing;
 
             var config = EnemyRegistry.GetConfig(type);
@@ -57,22 +60,22 @@ namespace HHSGame.Core
             ExperienceValue = config.ExperienceValue;
             Glyph = config.Glyph;
             Attribute = config.Attribute;
-            
-            Health = MaxHealth;
-            _attackCooldown = 0;
-            _specialAbilityCooldown = 0;
 
-            _abilitySystem = new EnemyAbilitySystem(this, _random);
-            _lootSystem = new EnemyLootSystem(type, _random);
+            Health = MaxHealth;
+            attackCooldown = 0;
+            specialAbilityCooldown = 0;
+
+            abilitySystem = new EnemyAbilitySystem(this, random);
+            lootSystem = new EnemyLootSystem(type, random);
         }
 
         public void Update(Player player, bool isEnemyTurn)
         {
             if (!isEnemyTurn) return;
 
-            if (_attackCooldown > 0) _attackCooldown--;
-            if (_specialAbilityCooldown > 0) _specialAbilityCooldown--;
-            
+            if (attackCooldown > 0) attackCooldown--;
+            if (specialAbilityCooldown > 0) specialAbilityCooldown--;
+
             // Calculate squared distance to player (avoid expensive sqrt)
             int dx = player.X - X;
             int dy = player.Y - Y;
@@ -96,17 +99,17 @@ namespace HHSGame.Core
             switch (State)
             {
                 case EnemyState.Attacking:
-                    if (_attackCooldown <= 0)
+                    if (attackCooldown <= 0)
                     {
                         Attack(player);
-                        _attackCooldown = 2; // 2 turn cooldown
+                        attackCooldown = 2; // 2 turn cooldown
                     }
                     break;
-                    
+
                 case EnemyState.Chasing:
                     // Get path to player
-                    var path = _pathfinder.FindPath((X, Y), (player.X, player.Y));
-                    
+                    var path = pathfinder.FindPath((X, Y), (player.X, player.Y));
+
                     if (path.Count > 1) // First element is current position
                     {
                         var nextStep = path[1];
@@ -121,9 +124,9 @@ namespace HHSGame.Core
         public void Attack(Player player)
         {
             int damage = Strength;
-            EventSystem.RaiseGameMessage($"{Name} attacks the player for {damage} damage!");
-            
-            _abilitySystem.TryApplySpecialEffect(player);
+            EventSystem.RaiseGameMessage(I18n.GetString("HHS.Core.Enemies.Enemy.Attack", Name, damage));
+
+            abilitySystem.TryApplySpecialEffect(player);
             player.TakeDamage(damage);
         }
 
@@ -132,16 +135,16 @@ namespace HHSGame.Core
             int actualDamage = damage - Defense;
             if (actualDamage < 0) actualDamage = 0;
             Health -= actualDamage;
-            
+
             if (Health <= 0)
             {
                 Health = 0;
-                EventSystem.RaiseGameMessage($"{Name} was defeated!");
+                EventSystem.RaiseGameMessage(I18n.GetString("HHS.Core.Enemies.Enemy.Defeated", Name));
                 Die();
             }
             else
             {
-                EventSystem.RaiseGameMessage($"{Name} took {actualDamage} damage! HP remains {Health}.");
+                EventSystem.RaiseGameMessage(I18n.GetString("HHS.Core.Enemies.Enemy.TakeDamage", Name, actualDamage, Health));
             }
         }
 
@@ -156,15 +159,15 @@ namespace HHSGame.Core
             int newX = X + dx;
             int newY = Y + dy;
 
-            if (_collisionSystem.CanMoveTo(newX, newY, this))
+            if (collisionSystem.CanMoveTo(newX, newY, this))
             {
                 X = newX;
                 Y = newY;
-                EventSystem.RaiseGameMessage(_collisionSystem.GetCollisionMessage(newX, newY, this));
+                EventSystem.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
             }
             else
             {
-                EventSystem.RaiseGameMessage(_collisionSystem.GetCollisionMessage(newX, newY, this));
+                EventSystem.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
             }
         }
 
@@ -175,6 +178,6 @@ namespace HHSGame.Core
             // TODO: Add loot to game world
         }
 
-        public List<Item> GenerateLoot() => _lootSystem.GenerateLoot();
+        public List<Item> GenerateLoot() => lootSystem.GenerateLoot();
     }
 }

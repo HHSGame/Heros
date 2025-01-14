@@ -1,7 +1,10 @@
 using System;
 
-namespace HHSGame.Core
+namespace HHSGame.Core.Map
 {
+    using Enemies;
+    using HHSGame.Utils;
+
     public class CollisionSystem
     {
         private readonly EnemyManager _enemyManager;
@@ -13,7 +16,7 @@ namespace HHSGame.Core
             _mapState = mapState;
         }
 
-        public bool CanMoveTo(int x, int y, GameActor actor)
+        public bool CanMoveTo(int x, int y, IGameActor actor)
         {
             // Check map boundaries
             if (x < 0 || y < 0 || x >= GameWorld.MapWidth || y >= GameWorld.MapHeight)
@@ -34,7 +37,7 @@ namespace HHSGame.Core
             return true;
         }
 
-        public GameActor? GetCollisionAt(int x, int y)
+        public IGameActor? GetCollisionAt(int x, int y)
         {
             // Check for enemies first
             var enemy = _enemyManager.GetEnemyAt(x, y);
@@ -45,16 +48,16 @@ namespace HHSGame.Core
             return null;
         }
 
-        public string GetCollisionMessage(int x, int y, GameActor actor)
+        public string GetCollisionMessage(int x, int y, IGameActor actor)
         {
             if (!_mapState.IsWalkable(x, y))
-                return $"Collision: {actor.Name} blocked by terrain at ({x}, {y})";
+                return I18n.GetString("HHS.Core.Map.CollisionSystem.BlockedByTerrain", actor.Name, x, y);
 
             var collision = GetCollisionAt(x, y);
             if (collision != null && collision != actor)
-                return $"Collision: {actor.Name} blocked by {collision.Name} at ({x}, {y})";
+                return I18n.GetString("HHS.Core.Map.CollisionSystem.BlockedByOthers", actor.Name, collision.Name, x, y);
 
-            return $"Movement: {actor.Name} moved to ({x}, {y})";
+            return I18n.GetString("HHS.Core.Map.CollisionSystem.Movement", actor.Name, x, y);
         }
     }
 }

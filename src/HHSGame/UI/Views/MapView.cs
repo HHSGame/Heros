@@ -1,6 +1,6 @@
 using Terminal.Gui;
 
-namespace HHSGame.UI
+namespace HHSGame.UI.Views
 {
 
     using Attribute = Terminal.Gui.Attribute;
@@ -8,16 +8,18 @@ namespace HHSGame.UI
     {
         private Cell[,] _backBuffer;
 
-        public MapView(Dim width, Dim height)
+        public MapView()
         {
-            Width = width;
-            Height = height;
+            Width = Dim.Fill();
+            Height = Dim.Fill();
             _backBuffer = new Cell[Frame.Height, Frame.Width];
             Visible = true;
         }
 
-        private void ResizeBackBuffer() {
-            if (_backBuffer.GetLength(0) != Frame.Height || _backBuffer.GetLength(1) != Frame.Width) {
+        private void ResizeBackBuffer()
+        {
+            if (_backBuffer.GetLength(0) != Frame.Height || _backBuffer.GetLength(1) != Frame.Width)
+            {
                 _backBuffer = new Cell[Frame.Height, Frame.Width];
             }
         }

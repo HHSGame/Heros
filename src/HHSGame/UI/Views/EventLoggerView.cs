@@ -2,14 +2,14 @@
 using Terminal.Gui;
 using HHSGame.Core;
 
-namespace HHSGame.UI
+namespace HHSGame.UI.Views
 {
-    public class EventLogger : View
+    public class EventLoggerView : View
     {
         private readonly List<string> _eventMessages;
         private const int MaxEventMessages = 10;
 
-        public EventLogger()
+        public EventLoggerView()
         {
             Width = Dim.Fill();
             Height = Dim.Fill();
@@ -18,7 +18,7 @@ namespace HHSGame.UI
             EventSystem.OnGameMessageEvent += HandleGameEvent;
         }
 
-        private void HandleGameEvent(object? sender, GameMessageEvent e)
+        private void HandleGameEvent(object? sender, GameMessageEventArgs e)
         {
             LogEvent(e.Message);
         }
@@ -33,7 +33,7 @@ namespace HHSGame.UI
             SetNeedsDisplay();
         }
 
-        public override void Redraw(Rect region)
+        public override void Redraw(Rect bounds)
         {
             for (int i = 0; i < _eventMessages.Count; i++)
             {

@@ -3,84 +3,32 @@ using HHSGame.Core;
 
 namespace HHSGame.UI
 {
+    using Windows;
 
-    public class GameUI : IDisposable
+    public class GameUI(MapWindow mapWindow,
+            MessageWindow messageWindow,
+            InventoryWindow inventoryWindow,
+            SurroundingsWindow surroundingsWindow,
+            UtilityWindow utilityWindow,
+            Game game) : IDisposable
     {
-
-        private readonly Game _game;
-        private readonly MapWindow mapWindow;
-        private readonly MessageWindow messageWindow;
-        private readonly InventoryWindow inventoryWindow;
-        private readonly UtilityWindow itemUsageWindow;
-        private readonly SurroundingsWindow surroundingsWindow;
 
         public MapWindow MapWindow => mapWindow;
         public MessageWindow MessageWindow => messageWindow;
         public InventoryWindow InventoryWindow => inventoryWindow;
-        public UtilityWindow ItemUsageWindow => itemUsageWindow;
+        public UtilityWindow ItemUsageWindow => utilityWindow;
         public SurroundingsWindow SurroundingsWindow => surroundingsWindow;
 
-
-        public GameUI()
-        {
-            var context = new GameContext(new GameParameters{mapStyle = MapStyle.Cave});
-
-            mapWindow = new MapWindow("Main Map")
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Fill() - 20,
-                Height = Dim.Fill() - 10,
-            };
-
-            messageWindow = new MessageWindow("Messages")
-            {
-                X = 0,
-                Y = Pos.Bottom(mapWindow),
-                Width = Dim.Fill(),
-                Height = 10,
-            };
-            
-            inventoryWindow = new InventoryWindow("Inventory", context)
-            {
-                X = Pos.Right(mapWindow),
-                Y = 0,
-                Width = 20,
-                Height = Dim.Fill(10) - Dim.Percent(50),
-            };
-
-            surroundingsWindow = new SurroundingsWindow("Surroundings", context)
-            {
-                X = Pos.Right(mapWindow),
-                Y = Pos.Bottom(inventoryWindow),
-                Width = 20,
-                Height = Dim.Percent(50),
-            };
-
-            itemUsageWindow = new UtilityWindow("Utilities", context, this) {
-                X = Pos.Right(mapWindow),
-                Y = 0,
-                Visible = false
-            };
-
-            context.InitializeDrawingContext(mapWindow.DrawingContext);
-
-            _game = new Game(context);
-        }
-
-        public void Start()
+        public Toplevel Start()
         {
             // Create main window
             var top = new Toplevel();
+            top.Add(mapWindow, inventoryWindow, surroundingsWindow, messageWindow, utilityWindow);
 
-            top.Add(mapWindow, inventoryWindow, surroundingsWindow, messageWindow, itemUsageWindow);
-
-            _game.Start();
+            game.Start();
 
             Application.RootKeyEvent += HandleKeyEvent;
-            Application.Run(top);
-            top.Dispose();
-            Application.Shutdown();
+            return top;
         }
 
         private bool HandleKeyEvent(KeyEvent args)
@@ -90,27 +38,26 @@ namespace HHSGame.UI
             switch (args.Key)
             {
                 case Key.CursorUp:
-                    _game.Player?.Move(0, -1);
+                    game.Player.Move(0, -1);
                     break;
                 case Key.CursorDown:
-                    _game.Player?.Move(0, 1);
+                    game.Player.Move(0, 1);
                     break;
                 case Key.CursorLeft:
-                    _game.Player?.Move(-1, 0);
+                    game.Player.Move(-1, 0);
                     break;
                 case Key.CursorRight:
-                    _game.Player?.Move(1, 0);
+                    game.Player.Move(1, 0);
                     break;
                 case Key.Q:
-                    _game.Stop();
-                    Application.RequestStop();
+                    game.Stop();
                     Application.Shutdown();
                     return true;
                 case Key.g:
-                    _game.Player?.PickupItems();
+                    game.Player.PickupItems();
                     return true;
                 case Key.u:
-                    itemUsageWindow.ToggleUtilityWindow();
+                    utilityWindow.ToggleUtilityWindow();
                     break;
                 default:
                     // Let other keys propagate
@@ -122,9 +69,8 @@ namespace HHSGame.UI
 
         public void Dispose()
         {
-            GC.SuppressFinalize(this);
-            Application.RequestStop();
             Application.Shutdown();
+            GC.SuppressFinalize(this);
         }
     }
 }

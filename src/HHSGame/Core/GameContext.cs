@@ -1,75 +1,61 @@
 
-using HHSGame.Core.Combat;
 using HHSGame.UI;
 
-namespace HHSGame.Core {
+namespace HHSGame.Core
+{
+    using Combat;
+    using Map;
+    using Enemies;
+    using Items;
 
-    public struct GameParameters {
-        public MapStyle mapStyle;
+    public class GameParameters
+    {
+        public MapStyle MapStyle { get; set; }
+        public int MapWidth { get; set; }
+        public int MapHeight { get; set; }
+        public bool InitialItems { get; set; } = true;
     }
 
-    public class GameContext {
-        public static int MapWidth { get; } = 500;
-        public static int MapHeight { get; } = 500;
-        public GameParameters Parameters { get; }
+    public class GameContext(
+        GameParameters parameters,
+        Random random,
+        MapGenerator mapGenerator,
+        EnemyFactory enemyFactory,
+        CollisionSystem collisionSystem,
+        MapState mapState,
+        EnemyManager enemyManager,
+        ItemManager itemManager,
+        ItemFactory itemFactory,
+        SurroundingsManager surroundingsManager,
+        InventoryManager inventoryManager,
+        TurnManager turnManager,
+        IDrawingContext drawingContext
+    )
+    {
+        private Player? player;
+        public GameParameters Parameters => parameters;
+        public Random Random => random;
+        public MapGenerator MapGenerator => mapGenerator;
+        public EnemyFactory EnemyFactory => enemyFactory;
+        public CollisionSystem CollisionSystem => collisionSystem;
+        public MapState MapState => mapState;
+        public EnemyManager EnemyManager => enemyManager;
+        public ItemManager ItemManager => itemManager;
+        public ItemFactory ItemFactory => itemFactory;
+        public SurroundingsManager SurroundingsManager => surroundingsManager;
+        public InventoryManager InventoryManager => inventoryManager;
+        public TurnManager TurnManager => turnManager;
+        public IDrawingContext DrawingContext => drawingContext;
+        public Player Player => player!;
 
-        private readonly Random _random;
-        private readonly MapGenerator _mapGenerator;
-        private readonly EnemyFactory _enemyFactory;
-        private readonly CollisionSystem _collisionSystem;
-        private readonly MapState _mapState;
-        private readonly EnemyManager _enemyManager;
-        private readonly ItemManager _itemManager;
-        private readonly ItemFactory _itemFactory;
-        private readonly SurroundingsManager _surroundingsManager;
-        private readonly InventoryManager _inventoryManager;
-        private readonly TurnManager _turnManager;
-        private IDrawingContext? _drawingContext;
-        private Player? _player;
-
-        public Random Random => _random;
-        public MapGenerator MapGenerator => _mapGenerator;
-        public EnemyFactory EnemyFactory => _enemyFactory;
-        public CollisionSystem CollisionSystem => _collisionSystem;
-        public MapState MapState => _mapState;
-        public EnemyManager EnemyManager => _enemyManager;
-        public ItemManager ItemManager => _itemManager;
-        public ItemFactory ItemFactory => _itemFactory;
-        public SurroundingsManager SurroundingsManager => _surroundingsManager;
-        public InventoryManager InventoryManager => _inventoryManager;
-        public TurnManager TurnManager => _turnManager;
-
-        public IDrawingContext DrawingContext {
-            get => _drawingContext ?? throw new InvalidOperationException("Drawing context not initialized");
-        }
-        public Player Player { get => _player!; internal set => _player = value; }
-
-        public GameContext(GameParameters parameters) {
-            Parameters = parameters;
-            var mapStyle = parameters.mapStyle;
-            _random = new Random();
-
-            _itemManager = new ItemManager();
-            _inventoryManager = new InventoryManager();
-            _turnManager = new TurnManager();
-            _itemFactory = new ItemFactory(_random);
-            _mapGenerator = new MapGenerator(MapWidth, MapHeight, _random, _itemManager,_itemFactory, mapStyle);            
-            _mapState = new MapState(MapWidth, MapHeight);
-            _mapState.Init(_mapGenerator.GenerateDungeon());
-            _enemyManager = new EnemyManager(_itemManager, _turnManager);
-            _collisionSystem = new CollisionSystem(_enemyManager, _mapState);
-            _enemyFactory = new EnemyFactory(MapWidth, MapHeight, _random, _collisionSystem, _mapState);
-            _enemyManager.SetEnemies(_enemyFactory.SpawnEnemies());
-            _surroundingsManager = new SurroundingsManager(_itemManager, _enemyManager, _mapState);
+        public void InitializeContext()
+        {
+            enemyManager.SetEnemies(enemyFactory.SpawnEnemies());
         }
 
-        public void InitializeDrawingContext(IDrawingContext drawingContext) {
-            _drawingContext = drawingContext;
-            drawingContext.MapState = _mapState;
-        }
-
-        public void SetPlayer(Player player) {
-            _player = player;
+        public void SetPlayer(Player player)
+        {
+            this.player = player;
         }
     }
 }

@@ -1,5 +1,7 @@
-namespace HHSGame.Core
+namespace HHSGame.Core.Enemies
 {
+    using Items;
+    
     public class EnemyLootSystem
     {
         private readonly Random _random;
@@ -22,12 +24,12 @@ namespace HHSGame.Core
         {
             var loot = new List<Item>();
             var roll = _random.Next(100);
-            
+
             if (_lootTable.TryGetValue(_enemyType, out var lootData) && roll < lootData.Chance)
             {
                 loot.Add(new HealthPotion(lootData.Amount));
             }
-            
+
             return loot;
         }
     }

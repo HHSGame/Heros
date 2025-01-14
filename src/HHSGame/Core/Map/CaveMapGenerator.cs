@@ -1,34 +1,33 @@
-using System;
 using HHSGame.UI;
 
-namespace HHSGame.Core
+namespace HHSGame.Core.Map
 {
     public class CaveMapGenerator : BaseMapGenerator
     {
         private const int InitialFillPercent = 45;
         private const int SmoothingIterations = 5;
-        
-        public CaveMapGenerator(int mapWidth, int mapHeight, Random random) 
-            : base(mapWidth, mapHeight, random)
+
+        public CaveMapGenerator(int MapWidth, int MapHeight, Random random)
+            : base(MapWidth, MapHeight, random)
         {
         }
 
         public override Cell[,] Generate()
         {
-            Cell[,] map = new Cell[_mapHeight, _mapWidth];
-            
+            Cell[,] map = new Cell[MapHeight, MapWidth];
+
             // Random fill the map
-            for (int y = 0; y < _mapHeight; y++)
+            for (int y = 0; y < MapHeight; y++)
             {
-                for (int x = 0; x < _mapWidth; x++)
+                for (int x = 0; x < MapWidth; x++)
                 {
-                    if (x == 0 || x == _mapWidth - 1 || y == 0 || y == _mapHeight - 1)
+                    if (x == 0 || x == MapWidth - 1 || y == 0 || y == MapHeight - 1)
                     {
                         map[y, x] = new Cell { Character = '#', Attribute = GetTerrainColor('#') };
                     }
                     else
                     {
-                        map[y, x] = _random.Next(0, 100) < InitialFillPercent
+                        map[y, x] = Random.Next(0, 100) < InitialFillPercent
                             ? new Cell { Character = '#', Attribute = GetTerrainColor('#') }
                             : new Cell { Character = '.', Attribute = GetTerrainColor('.') };
                     }
@@ -42,9 +41,9 @@ namespace HHSGame.Core
             }
 
             // Add water features
-            map = AddRandomFeature(map, new Cell{Character = '~', Attribute = ColorPresets.Terrain.Water}, 10, 5); // Water
-            map = AddRandomFeature(map, new Cell{Character = '^', Attribute = ColorPresets.Terrain.Lava}, 5, 3);  // Lava
-            map = AddRandomFeature(map, new Cell{Character = '*', Attribute = ColorPresets.Terrain.Forest}, 15, 7); // Vegetation
+            map = AddRandomFeature(map, new Cell { Character = '~', Attribute = ColorPresets.Terrain.Water }, 10, 5); // Water
+            map = AddRandomFeature(map, new Cell { Character = '^', Attribute = ColorPresets.Terrain.Lava }, 5, 3);  // Lava
+            map = AddRandomFeature(map, new Cell { Character = '*', Attribute = ColorPresets.Terrain.Forest }, 15, 7); // Vegetation
 
             return map;
         }

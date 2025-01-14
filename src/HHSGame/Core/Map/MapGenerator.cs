@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
 using HHSGame.UI;
 
-namespace HHSGame.Core
+namespace HHSGame.Core.Map
 {
+    using System.Globalization;
+    using Items;
     using Attribute = Terminal.Gui.Attribute;
     public enum MapStyle
     {
@@ -12,7 +12,7 @@ namespace HHSGame.Core
         Town,
     }
 
-    public class MapGenerator
+    public class MapGenerator(GameParameters parameters, Random random, ItemManager itemManager, ItemFactory itemFactory)
     {
         private static readonly Dictionary<char, Attribute> _terrainColors = new()
         {
@@ -40,64 +40,51 @@ namespace HHSGame.Core
 
         public static Attribute GetTerrainColor(char terrainChar)
         {
-            return _terrainColors.TryGetValue(terrainChar, out var color) 
-                ? color 
+            return _terrainColors.TryGetValue(terrainChar, out var color)
+                ? color
                 : ColorPresets.Terrain.Grass;
         }
-    
-        private readonly Random _random;
-        private readonly int _mapWidth;
-        private readonly int _mapHeight;
-        private readonly MapStyle _style;
-        private readonly ItemManager _itemManager;
-        private readonly ItemFactory _itemFactory;
-        
-        public MapGenerator(int mapWidth, int mapHeight, Random random, ItemManager itemManager, ItemFactory itemFactory, MapStyle style = MapStyle.Cave)
-        {
-            _mapWidth = mapWidth;
-            _mapHeight = mapHeight;
-            _random = random;
-            _itemManager = itemManager;
-            _itemFactory = itemFactory;
-            _style = style;
-        }
+
+        private readonly int mapWidth = parameters.MapWidth;
+        private readonly int mapHeight = parameters.MapHeight;
+        private readonly MapStyle style = parameters.MapStyle;
 
         public Cell[,] GenerateDungeon()
         {
-            EventSystem.RaiseGameMessage($"Generating {_style.ToString().ToLower()} map...");
-            
-            BaseMapGenerator generator = _style switch
+            EventSystem.RaiseGameMessage($"Generating {style.ToString().ToLower(CultureInfo.InvariantCulture)} map...");
+
+            BaseMapGenerator generator = style switch
             {
-                MapStyle.Hills => new HillsMapGenerator(_mapWidth, _mapHeight, _random),
-                MapStyle.Town => new TownMapGenerator(_mapWidth, _mapHeight, _random),
-                _ => new CaveMapGenerator(_mapWidth, _mapHeight, _random)
+                MapStyle.Hills => new HillsMapGenerator(mapWidth, mapHeight, random),
+                MapStyle.Town => new TownMapGenerator(mapWidth, mapHeight, random),
+                _ => new CaveMapGenerator(mapWidth, mapHeight, random)
             };
 
             var map = generator.Generate();
-            
+
             // Place random items in the dungeon
             PlaceRandomItems(map);
-            
-            EventSystem.RaiseGameMessage($"{_style} map generated successfully");
+
+            EventSystem.RaiseGameMessage($"{style} map generated successfully");
             return map;
         }
 
         private void PlaceRandomItems(Cell[,] map)
         {
-            int itemCount = _random.Next(700, 1000); // Place some items
+            int itemCount = random.Next(700, 1000); // Place some items
             for (int i = 0; i < itemCount; i++)
             {
-                var item = _itemFactory.CreateRandomItem();
-                int x = _random.Next(1, _mapWidth - 1);
-                int y = _random.Next(1, _mapHeight - 1);
+                var item = itemFactory.CreateRandomItem();
+                int x = random.Next(1, mapWidth - 1);
+                int y = random.Next(1, mapHeight - 1);
                 while (!map[y, x].IsWalkable)
                 {
-                    x = _random.Next(1, _mapWidth - 1);
-                    y = _random.Next(1, _mapHeight - 1);
+                    x = random.Next(1, mapWidth - 1);
+                    y = random.Next(1, mapHeight - 1);
                 }
                 item.X = x;
                 item.Y = y;
-                _itemManager.AddItem(item);
+                itemManager.AddItem(item);
             }
         }
     }

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace HHSGame.Core
+namespace HHSGame.Core.Map
 {
     public class Pathfinder
     {
@@ -26,7 +26,7 @@ namespace HHSGame.Core
             while (openSet.Count > 0)
             {
                 var current = openSet.Dequeue();
-                
+
                 if (current.Position == end)
                 {
                     return ReconstructPath(cameFrom, current.Position);
@@ -41,12 +41,13 @@ namespace HHSGame.Core
 
                     var tentativeGScore = gScore[current.Position] + 1;
 
-                    if (!gScore.ContainsKey(neighbor) || tentativeGScore < gScore[neighbor])
+                    if (!gScore.TryGetValue(neighbor, out float value) || tentativeGScore < value)
                     {
                         cameFrom[neighbor] = current.Position;
-                        gScore[neighbor] = tentativeGScore;
+                        value = tentativeGScore;
+                        gScore[neighbor] = value;
                         fScore[neighbor] = tentativeGScore + HeuristicCostEstimate(neighbor, end);
-                        
+
                         if (!openSet.UnorderedItems.Any(n => n.Element.Position == neighbor))
                         {
                             openSet.Enqueue(new Node(neighbor.x, neighbor.y), fScore[neighbor]);
@@ -55,10 +56,10 @@ namespace HHSGame.Core
                 }
             }
 
-            return new List<(int x, int y)>(); // No path found
+            return []; // No path found
         }
 
-        private List<(int x, int y)> ReconstructPath(Dictionary<(int x, int y), (int x, int y)> cameFrom, (int x, int y) current)
+        private static List<(int x, int y)> ReconstructPath(Dictionary<(int x, int y), (int x, int y)> cameFrom, (int x, int y) current)
         {
             var path = new List<(int x, int y)> { current };
             while (cameFrom.ContainsKey(current))
@@ -69,10 +70,10 @@ namespace HHSGame.Core
             return path;
         }
 
-        private IEnumerable<(int x, int y)> GetNeighbors((int x, int y) pos)
+        private List<(int x, int y)> GetNeighbors((int x, int y) pos)
         {
             var neighbors = new List<(int x, int y)>();
-            
+
             // Check four directions
             if (_mapState.IsWalkable(pos.x - 1, pos.y)) neighbors.Add((pos.x - 1, pos.y));
             if (_mapState.IsWalkable(pos.x + 1, pos.y)) neighbors.Add((pos.x + 1, pos.y));
@@ -82,15 +83,15 @@ namespace HHSGame.Core
             return neighbors;
         }
 
-        private float HeuristicCostEstimate((int x, int y) a, (int x, int y) b)
+        private static float HeuristicCostEstimate((int x, int y) a, (int x, int y) b)
         {
             // Manhattan distance
             return Math.Abs(a.x - b.x) + Math.Abs(a.y - b.y);
         }
 
-        private record Node(int x, int y)
+        private sealed record Node(int X, int Y)
         {
-            public (int x, int y) Position => (x, y);
+            public (int x, int y) Position => (X, Y);
         }
     }
 }

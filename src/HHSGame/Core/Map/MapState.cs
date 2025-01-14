@@ -1,8 +1,10 @@
 using System.Collections.Immutable;
 using HHSGame.UI;
 
-namespace HHSGame.Core {
-    public class MapState : IDrawable {
+namespace HHSGame.Core.Map
+{
+    public class MapState : IDrawable
+    {
         private Cell[,] _map;
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -10,30 +12,31 @@ namespace HHSGame.Core {
         private readonly bool[,] _visitedTiles;
         private readonly HashSet<(int x, int y)> _currentVisibleTiles = [];
 
-        private readonly Pathfinder _pathfinder;
-
         public ImmutableHashSet<(int x, int y)> CurrentVisibleTiles => [.. _currentVisibleTiles];
-        public Pathfinder Pathfinder => _pathfinder;
 
-        public MapState(int width, int height) {
-            Width = width;
-            Height = height;
-            _map = new Cell[height, width];
+        public MapState(GameParameters parameters, MapGenerator generator)
+        {
+            Width = parameters.MapWidth;
+            Height = parameters.MapWidth;
+            _map = new Cell[Height, Width];
             _visitedTiles = new bool[Height, Width];
-            _pathfinder = new Pathfinder(this);
+            Init(generator.GenerateDungeon());
         }
 
-        public void Init(Cell[,] map) {
+        public void Init(Cell[,] map)
+        {
             _map = map;
             _visitedTiles.Initialize();
             _currentVisibleTiles.Clear();
         }
 
-        public Cell GetCell(int x, int y) {
+        public Cell GetCell(int x, int y)
+        {
             return _map[y, x];
         }
 
-        public void SetCell(int x, int y, Cell cell) {
+        public void SetCell(int x, int y, Cell cell)
+        {
             _map[y, x] = cell;
         }
 
@@ -74,11 +77,6 @@ namespace HHSGame.Core {
         public bool WasVisited(int x, int y)
         {
             return IsInBounds(x, y) && _visitedTiles[y, x];
-        }
-
-        public List<(int x, int y)> GetPath((int x, int y) start, (int x, int y) end)
-        {
-            return _pathfinder.FindPath(start, end);
         }
 
         public void Draw(IDrawingContext ctx)

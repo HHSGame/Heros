@@ -1,5 +1,8 @@
 
-namespace HHSGame.Core {
+using HHSGame.Utils;
+
+namespace HHSGame.Core
+{
 
     public abstract class ActiveEffect
     {
@@ -24,7 +27,7 @@ namespace HHSGame.Core {
 
         public override void ApplyEffect(Player player)
         {
-            EventSystem.RaiseGameMessage($"Player is poisoned!");
+            EventSystem.RaiseGameMessage(I18n.GetString("HHS.Core.PoisonEffect.Message", player.Name));
             player.TakeDamage(_damagePerTurn);
         }
     }
@@ -37,7 +40,7 @@ namespace HHSGame.Core {
 
         public override void ApplyEffect(Player player)
         {
-            EventSystem.RaiseGameMessage($"Player is is stunned!");
+            EventSystem.RaiseGameMessage(I18n.GetString("HHS.Core.StunEffect.Message", player.Name));
             // Stun prevents actions but doesn't deal damage
         }
     }

@@ -1,7 +1,7 @@
 using System;
 using HHSGame.UI;
 
-namespace HHSGame.Core
+namespace HHSGame.Core.Map
 {
     public class TownMapGenerator : BaseMapGenerator
     {
@@ -10,9 +10,9 @@ namespace HHSGame.Core
         private const int StreetWidth = 2;
         private const int MinBuildings = 5;
         private const int MaxBuildings = 10;
-        
-        public TownMapGenerator(int mapWidth, int mapHeight, Random random) 
-            : base(mapWidth, mapHeight, random)
+
+        public TownMapGenerator(int MapWidth, int MapHeight, Random Random)
+            : base(MapWidth, MapHeight, Random)
         {
         }
 
@@ -20,8 +20,8 @@ namespace HHSGame.Core
         {
             Cell[,] map = GenerateTown();
 
-            map = AddRandomFeature(map, new Cell{Character = '~', Attribute = ColorPresets.Terrain.Water}, 2, 1);  // Wells
-            map = AddRandomFeature(map, new Cell{Character = '*', Attribute = ColorPresets.Terrain.Forest}, 5, 2); // Trees
+            map = AddRandomFeature(map, new Cell { Character = '~', Attribute = ColorPresets.Terrain.Water }, 2, 1);  // Wells
+            map = AddRandomFeature(map, new Cell { Character = '*', Attribute = ColorPresets.Terrain.Forest }, 5, 2); // Trees
 
 
             return map;
@@ -29,93 +29,93 @@ namespace HHSGame.Core
 
         private Cell[,] GenerateTown()
         {
-            var map = new Cell[_mapHeight, _mapWidth];
-            
+            var map = new Cell[MapHeight, MapWidth];
+
             // Initialize with grass
-            for (int y = 0; y < _mapHeight; y++)
+            for (int y = 0; y < MapHeight; y++)
             {
-                for (int x = 0; x < _mapWidth; x++)
+                for (int x = 0; x < MapWidth; x++)
                 {
-                    map[y, x] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
+                    map[y, x] = new Cell { Character = '.', Attribute = ColorPresets.Terrain.Grass };
                 }
             }
 
             // Create town walls with proper connections
-            for (int y = 0; y < _mapHeight; y++)
+            for (int y = 0; y < MapHeight; y++)
             {
                 // Left and right walls
                 char leftChar = '║';
                 char rightChar = '║';
-                
+
                 // Top and bottom corners
                 if (y == 0)
                 {
                     leftChar = '╔';
                     rightChar = '╗';
                 }
-                else if (y == _mapHeight - 1)
+                else if (y == MapHeight - 1)
                 {
                     leftChar = '╚';
                     rightChar = '╝';
                 }
-                
-                map[y, 0] = new Cell {Character = leftChar, Attribute = ColorPresets.Terrain.Stone};
-                map[y, _mapWidth - 1] = new Cell {Character = rightChar, Attribute = ColorPresets.Terrain.Stone};
+
+                map[y, 0] = new Cell { Character = leftChar, Attribute = ColorPresets.Terrain.Stone };
+                map[y, MapWidth - 1] = new Cell { Character = rightChar, Attribute = ColorPresets.Terrain.Stone };
             }
-            
-            for (int x = 0; x < _mapWidth; x++)
+
+            for (int x = 0; x < MapWidth; x++)
             {
                 // Top and bottom walls
                 char topChar = '═';
                 char bottomChar = '═';
-                
+
                 // Left and right corners
                 if (x == 0)
                 {
                     topChar = '╔';
                     bottomChar = '╚';
                 }
-                else if (x == _mapWidth - 1)
+                else if (x == MapWidth - 1)
                 {
                     topChar = '╗';
                     bottomChar = '╝';
                 }
-                
-                map[0, x] = new Cell {Character = topChar, Attribute = ColorPresets.Terrain.Stone};
-                map[_mapHeight - 1, x] = new Cell {Character = bottomChar, Attribute = ColorPresets.Terrain.Stone};
+
+                map[0, x] = new Cell { Character = topChar, Attribute = ColorPresets.Terrain.Stone };
+                map[MapHeight - 1, x] = new Cell { Character = bottomChar, Attribute = ColorPresets.Terrain.Stone };
             }
 
             // Create street grid
             int streetSpacing = 8;
-            for (int y = streetSpacing; y < _mapHeight - streetSpacing; y += streetSpacing)
+            for (int y = streetSpacing; y < MapHeight - streetSpacing; y += streetSpacing)
             {
-                for (int x = 0; x < _mapWidth; x++)
+                for (int x = 0; x < MapWidth; x++)
                 {
-                    map[y, x] = new Cell {Character = '▒', Attribute = ColorPresets.Terrain.Grass};
+                    map[y, x] = new Cell { Character = '▒', Attribute = ColorPresets.Terrain.Grass };
                 }
             }
-            for (int x = streetSpacing; x < _mapWidth - streetSpacing; x += streetSpacing)
+            for (int x = streetSpacing; x < MapWidth - streetSpacing; x += streetSpacing)
             {
-                for (int y = 0; y < _mapHeight; y++)
+                for (int y = 0; y < MapHeight; y++)
                 {
-                    map[y, x] = new Cell {Character = '▒', Attribute = ColorPresets.Terrain.Grass};
+                    map[y, x] = new Cell { Character = '▒', Attribute = ColorPresets.Terrain.Grass };
                 }
             }
 
             // Generate houses
-            int houseCount = (_mapWidth / streetSpacing) * (_mapHeight / streetSpacing) / 2;
+            int houseCount = (MapWidth / streetSpacing) * (MapHeight / streetSpacing) / 2;
             for (int i = 0; i < houseCount; i++)
             {
-                int blockX = _random.Next(1, (_mapWidth - 2) / streetSpacing) * streetSpacing;
-                int blockY = _random.Next(1, (_mapHeight - 2) / streetSpacing) * streetSpacing;
-                
+                int blockX = Random.Next(1, (MapWidth - 2) / streetSpacing) * streetSpacing;
+                int blockY = Random.Next(1, (MapHeight - 2) / streetSpacing) * streetSpacing;
+
                 // House size
-                int houseWidth = _random.Next(6, 9);
-                int houseHeight = Math.Max(_random.Next(houseWidth - 2, houseWidth + 2), 5);
-                
+                int houseWidth = Random.Next(6, 9);
+                int houseHeight = Math.Max(Random.Next(houseWidth - 2, houseWidth + 2), 5);
+
                 // Place house if space is available
-                if (blockX + houseWidth < _mapWidth - 1 && 
-                    blockY + houseHeight < _mapHeight - 1)
+                if (blockX + houseWidth < MapWidth - 1 &&
+                    blockY + houseHeight < MapHeight - 1)
                 {
                     // House walls with proper connections
                     for (int y = blockY; y < blockY + houseHeight; y++)
@@ -123,7 +123,7 @@ namespace HHSGame.Core
                         // Vertical walls
                         char leftChar = '│';
                         char rightChar = '│';
-                        
+
                         // Top and bottom corners
                         if (y == blockY)
                         {
@@ -135,17 +135,17 @@ namespace HHSGame.Core
                             leftChar = '└';
                             rightChar = '┘';
                         }
-                        
-                        map[y, blockX] = new Cell {Character = leftChar, Attribute = ColorPresets.Terrain.Stone};
-                        map[y, blockX + houseWidth - 1] = new Cell {Character = rightChar, Attribute = ColorPresets.Terrain.Stone};
+
+                        map[y, blockX] = new Cell { Character = leftChar, Attribute = ColorPresets.Terrain.Stone };
+                        map[y, blockX + houseWidth - 1] = new Cell { Character = rightChar, Attribute = ColorPresets.Terrain.Stone };
                     }
-                    
+
                     for (int x = blockX; x < blockX + houseWidth; x++)
                     {
                         // Horizontal walls
                         char topChar = '─';
                         char bottomChar = '─';
-                        
+
                         // Left and right corners
                         if (x == blockX)
                         {
@@ -157,38 +157,38 @@ namespace HHSGame.Core
                             topChar = '┐';
                             bottomChar = '┘';
                         }
-                        
-                        map[blockY, x] = new Cell {Character = topChar, Attribute = ColorPresets.Terrain.Stone};
-                        map[blockY + houseHeight - 1, x] = new Cell {Character = bottomChar, Attribute = ColorPresets.Terrain.Stone};
+
+                        map[blockY, x] = new Cell { Character = topChar, Attribute = ColorPresets.Terrain.Stone };
+                        map[blockY + houseHeight - 1, x] = new Cell { Character = bottomChar, Attribute = ColorPresets.Terrain.Stone };
                     }
-                    
+
                     // House interior
                     for (int y = blockY + 1; y < blockY + houseHeight - 1; y++)
                     {
                         for (int x = blockX + 1; x < blockX + houseWidth - 1; x++)
                         {
-                            map[y, x] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
+                            map[y, x] = new Cell { Character = '.', Attribute = ColorPresets.Terrain.Grass };
                         }
                     }
-                    
+
                     // Door
-                    int doorSide = _random.Next(4);
-                    int doorX = blockX + _random.Next(1, houseWidth - 1);
-                    int doorY = blockY + _random.Next(1, houseHeight - 1);
-                    
+                    int doorSide = Random.Next(4);
+                    int doorX = blockX + Random.Next(1, houseWidth - 1);
+                    int doorY = blockY + Random.Next(1, houseHeight - 1);
+
                     switch (doorSide)
                     {
                         case 0: // Top
-                            map[blockY, doorX] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
+                            map[blockY, doorX] = new Cell { Character = '.', Attribute = ColorPresets.Terrain.Grass };
                             break;
                         case 1: // Bottom
-                            map[blockY + houseHeight - 1, doorX] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
+                            map[blockY + houseHeight - 1, doorX] = new Cell { Character = '.', Attribute = ColorPresets.Terrain.Grass };
                             break;
                         case 2: // Left
-                            map[doorY, blockX] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
+                            map[doorY, blockX] = new Cell { Character = '.', Attribute = ColorPresets.Terrain.Grass };
                             break;
                         case 3: // Right
-                            map[doorY, blockX + houseWidth - 1] = new Cell {Character = '.', Attribute = ColorPresets.Terrain.Grass};
+                            map[doorY, blockX + houseWidth - 1] = new Cell { Character = '.', Attribute = ColorPresets.Terrain.Grass };
                             break;
                     }
                 }

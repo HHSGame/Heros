@@ -1,7 +1,7 @@
 using System;
 using HHSGame.UI;
 
-namespace HHSGame.Core
+namespace HHSGame.Core.Map
 {
     public class HillsMapGenerator : BaseMapGenerator
     {
@@ -9,23 +9,23 @@ namespace HHSGame.Core
         private const float MountainThreshold = 0.7f;
         private const float HillThreshold = 0.5f;
         private const float ForestThreshold = 0.3f;
-        
-        public HillsMapGenerator(int mapWidth, int mapHeight, Random random) 
-            : base(mapWidth, mapHeight, random)
+
+        public HillsMapGenerator(int MapWidth, int MapHeight, Random Random)
+            : base(MapWidth, MapHeight, Random)
         {
         }
 
         public override Cell[,] Generate()
         {
-            Cell[,] map = new Cell[_mapHeight, _mapWidth];
+            Cell[,] map = new Cell[MapHeight, MapWidth];
             float[,] heightMap = GenerateHeightMap();
-            
-            for (int y = 0; y < _mapHeight; y++)
+
+            for (int y = 0; y < MapHeight; y++)
             {
-                for (int x = 0; x < _mapWidth; x++)
+                for (int x = 0; x < MapWidth; x++)
                 {
                     float height = heightMap[y, x];
-                    
+
                     if (height > MountainThreshold)
                     {
                         map[y, x] = new Cell { Character = '^', Attribute = GetTerrainColor('^') };
@@ -45,22 +45,22 @@ namespace HHSGame.Core
                 }
             }
 
-            map = AddRandomFeature(map, new Cell{Character = '~', Attribute = ColorPresets.Terrain.Water}, 5, 3);  // Streams
-            map = AddRandomFeature(map, new Cell{Character = '*', Attribute = ColorPresets.Terrain.Forest}, 10, 5); // Scrub
+            map = AddRandomFeature(map, new Cell { Character = '~', Attribute = ColorPresets.Terrain.Water }, 5, 3);  // Streams
+            map = AddRandomFeature(map, new Cell { Character = '*', Attribute = ColorPresets.Terrain.Forest }, 10, 5); // Scrub
 
             return map;
         }
 
         private float[,] GenerateHeightMap()
         {
-            float[,] heightMap = new float[_mapHeight, _mapWidth];
-            
-            // Initialize with random values
-            for (int y = 0; y < _mapHeight; y++)
+            float[,] heightMap = new float[MapHeight, MapWidth];
+
+            // Initialize with Random values
+            for (int y = 0; y < MapHeight; y++)
             {
-                for (int x = 0; x < _mapWidth; x++)
+                for (int x = 0; x < MapWidth; x++)
                 {
-                    heightMap[y, x] = (float)_random.NextDouble();
+                    heightMap[y, x] = (float)Random.NextDouble();
                 }
             }
 

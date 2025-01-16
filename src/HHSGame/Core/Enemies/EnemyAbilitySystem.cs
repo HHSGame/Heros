@@ -1,11 +1,8 @@
 namespace HHSGame.Core.Enemies
 {
-    public class EnemyAbilitySystem
+    public class EnemyAbilitySystem(Enemy enemy, Random random)
     {
-        private readonly Random _random;
-        private readonly Enemy _enemy;
-
-        private static readonly Dictionary<EnemyType, (int Chance, Action<Player, Enemy> Effect)> _attackEffects = new()
+        private static readonly Dictionary<EnemyType, (int Chance, Action<Player, Enemy> Effect)> attackEffects = new()
         {
             {
                 EnemyType.Gangster,
@@ -21,24 +18,18 @@ namespace HHSGame.Core.Enemies
             }
         };
 
-        public EnemyAbilitySystem(Enemy enemy, Random random)
-        {
-            _enemy = enemy;
-            _random = random;
-        }
-
         public void TryApplySpecialEffect(Player player)
         {
-            if (_attackEffects.TryGetValue(_enemy.Type, out var effectData) &&
-                _random.Next(100) < effectData.Chance)
+            if (attackEffects.TryGetValue(enemy.Type, out var effectData) &&
+                random.Next(100) < effectData.Chance)
             {
-                effectData.Effect(player, _enemy);
-                string abilityMessage = _enemy.Type switch
+                effectData.Effect(player, enemy);
+                string abilityMessage = enemy.Type switch
                 {
-                    EnemyType.Gangster => $"{_enemy.Name} poisons the player!",
-                    EnemyType.Bandit => $"{_enemy.Name} stuns the player!",
-                    EnemyType.BanditLeader => $"{_enemy.Name} heals itself!",
-                    _ => $"{_enemy.Name} uses a special ability!"
+                    EnemyType.Gangster => $"{enemy.Name} poisons the player!",
+                    EnemyType.Bandit => $"{enemy.Name} stuns the player!",
+                    EnemyType.BanditLeader => $"{enemy.Name} heals itself!",
+                    _ => $"{enemy.Name} uses a special ability!"
                 };
                 EventSystem.RaiseGameMessage(abilityMessage);
             }

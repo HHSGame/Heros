@@ -5,7 +5,7 @@ using Attribute = Terminal.Gui.Attribute;
 
 namespace HHSGame.Core.Map
 {
-    public abstract class BaseMapGenerator
+    public abstract class BaseMapGenerator(int mapWidth, int mapHeight, Random random)
     {
         protected static readonly Dictionary<char, Attribute> terrainColors = new()
         {
@@ -18,27 +18,20 @@ namespace HHSGame.Core.Map
             { 'S', ColorPresets.Terrain.Sand },     // Shops
             { '║', ColorPresets.Terrain.Stone },    // Town walls
             { '═', ColorPresets.Terrain.Stone },    // Town walls
-            { '╔', ColorPresets.Terrain.Stone },    // Town walls
+            { '╔', ColorPresets.Terrain.Stone },    // Town walls`
             { '╗', ColorPresets.Terrain.Stone },    // Town walls
             { '╚', ColorPresets.Terrain.Stone },    // Town walls
             { '╝', ColorPresets.Terrain.Stone },    // Town walls
             { '▒', ColorPresets.Terrain.Grass },    // Town streets
         };
 
-        private readonly Random random;
-        private readonly int mapWidth;
-        private readonly int mapHeight;
+        private readonly Random random = random;
+        private readonly int mapWidth = mapWidth;
+        private readonly int mapHeight = mapHeight;
 
         protected Random Random => random;
         protected int MapWidth => mapWidth;
         protected int MapHeight => mapHeight;
-
-        protected BaseMapGenerator(int mapWidth, int mapHeight, Random random)
-        {
-            this.mapWidth = mapWidth;
-            this.mapHeight = mapHeight;
-            this.random = random;
-        }
 
         public abstract Cell[,] Generate();
 

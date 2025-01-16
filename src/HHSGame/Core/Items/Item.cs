@@ -10,54 +10,31 @@ namespace HHSGame.Core.Items
         Legendary
     }
 
-    public abstract class Item
+    public abstract class Item(string name, ItemRarity rarity, int value, float weight)
     {
         public int X { get; set; }
         public int Y { get; set; }
-        public string Name { get; protected set; }
-        public ItemRarity Rarity { get; protected set; }
-        public int Value { get; protected set; }
-        public float Weight { get; protected set; }
-
-        public Item(string name, ItemRarity rarity, int value, float weight)
-        {
-            Name = name;
-            Rarity = rarity;
-            Value = value;
-            Weight = weight;
-        }
+        public string Name { get; } = name;
+        public ItemRarity Rarity { get; } = rarity;
+        public int Value { get; } = value;
+        public float Weight { get; } = weight;
 
         public abstract void Use(Player player);
     }
 
-    public class HealthPotion : Item
+    public class HealthPotion(int healAmount) : Item("Health Potion", ItemRarity.Common, 50, 0.5f)
     {
-        private int _healAmount;
-
-        public HealthPotion(int healAmount)
-            : base("Health Potion", ItemRarity.Common, 50, 0.5f)
-        {
-            _healAmount = healAmount;
-        }
-
         public override void Use(Player player)
         {
-            player.Heal(_healAmount);
+            player.Heal(healAmount);
         }
     }
 
-    public class Weapon : Item
+    public class Weapon(string name, ItemRarity rarity, int value, float weight,
+        int damage, float attackSpeed) : Item(name, rarity, value, weight)
     {
-        public int Damage { get; private set; }
-        public float AttackSpeed { get; private set; }
-
-        public Weapon(string name, ItemRarity rarity, int value, float weight,
-            int damage, float attackSpeed)
-            : base(name, rarity, value, weight)
-        {
-            Damage = damage;
-            AttackSpeed = attackSpeed;
-        }
+        public int Damage { get; } = damage;
+        public float AttackSpeed { get; } = attackSpeed;
 
         public override void Use(Player player)
         {
@@ -65,16 +42,10 @@ namespace HHSGame.Core.Items
         }
     }
 
-    public class Armor : Item
+    public class Armor(string name, ItemRarity rarity, int value, float weight,
+        int defense) : Item(name, rarity, value, weight)
     {
-        public int Defense { get; private set; }
-
-        public Armor(string name, ItemRarity rarity, int value, float weight,
-            int defense)
-            : base(name, rarity, value, weight)
-        {
-            Defense = defense;
-        }
+        public int Defense { get; } = defense;
 
         public override void Use(Player player)
         {

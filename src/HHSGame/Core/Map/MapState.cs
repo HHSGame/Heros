@@ -5,44 +5,44 @@ namespace HHSGame.Core.Map
 {
     public class MapState : IDrawable
     {
-        private Cell[,] _map;
+        private Cell[,] map;
         public int Width { get; private set; }
         public int Height { get; private set; }
 
-        private readonly bool[,] _visitedTiles;
-        private readonly HashSet<(int x, int y)> _currentVisibleTiles = [];
+        private readonly bool[,] visitedTiles;
+        private readonly HashSet<(int x, int y)> currentVisibleTiles = [];
 
-        public ImmutableHashSet<(int x, int y)> CurrentVisibleTiles => [.. _currentVisibleTiles];
+        public ImmutableHashSet<(int x, int y)> CurrentVisibleTiles => [.. currentVisibleTiles];
 
         public MapState(GameParameters parameters, MapGenerator generator)
         {
             Width = parameters.MapWidth;
             Height = parameters.MapWidth;
-            _map = new Cell[Height, Width];
-            _visitedTiles = new bool[Height, Width];
+            map = new Cell[Height, Width];
+            visitedTiles = new bool[Height, Width];
             Init(generator.GenerateDungeon());
         }
 
         public void Init(Cell[,] map)
         {
-            _map = map;
-            _visitedTiles.Initialize();
-            _currentVisibleTiles.Clear();
+            this.map = map;
+            visitedTiles.Initialize();
+            currentVisibleTiles.Clear();
         }
 
         public Cell GetCell(int x, int y)
         {
-            return _map[y, x];
+            return map[y, x];
         }
 
         public void SetCell(int x, int y, Cell cell)
         {
-            _map[y, x] = cell;
+            map[y, x] = cell;
         }
 
         public bool IsWalkable(int x, int y)
         {
-            return IsInBounds(x, y) && _map[y, x].IsWalkable;
+            return IsInBounds(x, y) && map[y, x].IsWalkable;
         }
 
         public bool IsInBounds(int x, int y)
@@ -52,31 +52,31 @@ namespace HHSGame.Core.Map
 
         public bool IsTransparent(int x, int y)
         {
-            return IsInBounds(x, y) && _map[y, x].IsWalkable;
+            return IsInBounds(x, y) && map[y, x].IsWalkable;
         }
 
         public void MarkVisibleTiles(HashSet<(int x, int y)> visibleTiles)
         {
-            _currentVisibleTiles.Clear();
+            currentVisibleTiles.Clear();
 
             foreach (var (x, y) in visibleTiles)
             {
                 if (IsInBounds(x, y))
                 {
-                    _visitedTiles[y, x] = true;
-                    _currentVisibleTiles.Add((x, y));
+                    visitedTiles[y, x] = true;
+                    currentVisibleTiles.Add((x, y));
                 }
             }
         }
 
         public bool IsVisible(int x, int y)
         {
-            return _currentVisibleTiles.Contains((x, y));
+            return currentVisibleTiles.Contains((x, y));
         }
 
         public bool WasVisited(int x, int y)
         {
-            return IsInBounds(x, y) && _visitedTiles[y, x];
+            return IsInBounds(x, y) && visitedTiles[y, x];
         }
 
         public void Draw(IDrawingContext ctx)
@@ -89,7 +89,7 @@ namespace HHSGame.Core.Map
                 {
                     if (x >= 0 && x < Width && y >= 0 && y < Height)
                     {
-                        ctx.DrawAt((x, y), _map[y, x]);
+                        ctx.DrawAt((x, y), map[y, x]);
                     }
                 }
             }

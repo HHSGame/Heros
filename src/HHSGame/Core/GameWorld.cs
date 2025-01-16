@@ -2,21 +2,15 @@ using HHSGame.UI;
 
 namespace HHSGame.Core
 {
-    public class GameWorld : IDrawable
+    using Classes;
+    public class GameWorld(GameContext context) : IDrawable
     {
         public static int MapWidth { get; } = 500;
         public static int MapHeight { get; } = 500;
 
-        GameContext _gameContext;
+        public GameContext Context => context;
 
-        public GameContext Context => _gameContext;
-
-        public GameWorld(GameContext context)
-        {
-            _gameContext = context;
-        }
-
-        public Player NewPlayer()
+        public Player NewPlayer(AbstractClass playerClass)
         {
             // create a player at the center of the map but avoid any obstacles
             int x = MapWidth / 2, y = MapHeight / 2;
@@ -28,6 +22,8 @@ namespace HHSGame.Core
                 round++;
             }
             var player = new Player(x, y, Context);
+            playerClass.ApplyClassBonuses(player);
+            playerClass.ApplyStartupEquipment(player);
             player.UpdateFOV();
             return player;
         }

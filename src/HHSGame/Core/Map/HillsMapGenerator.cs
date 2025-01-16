@@ -3,17 +3,12 @@ using HHSGame.UI;
 
 namespace HHSGame.Core.Map
 {
-    public class HillsMapGenerator : BaseMapGenerator
+    public class HillsMapGenerator(int MapWidth, int MapHeight, Random Random) : BaseMapGenerator(MapWidth, MapHeight, Random)
     {
         private const int HeightMapSmoothing = 5;
         private const float MountainThreshold = 0.7f;
         private const float HillThreshold = 0.5f;
         private const float ForestThreshold = 0.3f;
-
-        public HillsMapGenerator(int MapWidth, int MapHeight, Random Random)
-            : base(MapWidth, MapHeight, Random)
-        {
-        }
 
         public override Cell[,] Generate()
         {

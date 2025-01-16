@@ -1,5 +1,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
+using HHSGame.Core.Classes;
 
 namespace HHSGame.Core
 {
@@ -38,7 +39,7 @@ namespace HHSGame.Core
             serviceCollection.AddSingleton<GameWorld>();
 
             // Create Player
-            serviceCollection.AddSingleton((provider) => provider.GetRequiredService<GameWorld>().NewPlayer());
+            serviceCollection.AddSingleton((provider) => provider.GetRequiredService<GameWorld>().NewPlayer(Classes.Classes.Engineer.ToClass()));
 
             // Setup Game
             serviceCollection.AddSingleton<Game>();

@@ -9,23 +9,13 @@ namespace HHSGame.UI
     using Position = (int X, int Y);
 
 
-    public class Viewport
+    public class Viewport(int x, int y, int width, int height)
     {
 
-        public static int DefaultWidth => 150;
-        public static int DefaultHeight => 35;
-        public int X { get; private set; }
-        public int Y { get; private set; }
-        public int Width { get; private set; }
-        public int Height { get; private set; }
-
-        public Viewport(int x, int y, int width, int height)
-        {
-            X = x;
-            Y = y;
-            Width = width;
-            Height = height;
-        }
+        public int X { get; private set; } = x;
+        public int Y { get; private set; } = y;
+        public int Width { get; private set; } = width;
+        public int Height { get; private set; } = height;
 
         public bool Contains(Position pos)
         {
@@ -63,13 +53,11 @@ namespace HHSGame.UI
     {
 
         Viewport Viewport { get; }
-        View View { get; }
-        MapState? MapState { get; set; }
-
         void DrawAt(Position pos, char tile);
         void DrawAt(Position pos, Cell cell);
         void Clear();
         void Render();
+        void AttachTo(View parent);
     }
 
     public interface IDrawable
@@ -80,30 +68,17 @@ namespace HHSGame.UI
 
     public struct Cell
     {
-        public char Character {get; set;}
-        public Terminal.Gui.Attribute Attribute {get; set;}
+        public char Character { get; set; }
+        public Terminal.Gui.Attribute Attribute { get; set; }
 
         public bool IsWalkable => Character == '.' || Character == '▒';
     }
 
-    public class MapViewDrawingContext : IDrawingContext
+    public class MapViewDrawingContext(MapView mapView, MapState mapState) : IDrawingContext
     {
-        private readonly MapView _mapView;
-        private readonly Viewport _viewport;
-        public MapState? MapState { get; set; }
-        public View View => _mapView;
-
-        public Viewport Viewport => _viewport;
-        public int Width => View.Frame.Width;
-        public int Height => View.Frame.Height;
-
-
-        public MapViewDrawingContext(MapView mapView, MapState mapState)
-        {
-            _mapView = mapView;
-            _viewport = new Viewport(0, 0, Width, Height);
-            MapState = mapState;
-        }
+        private readonly MapView mapView = mapView;
+        private readonly Viewport viewport = new(0, 0, 0, 0);
+        public Viewport Viewport => viewport;
 
         // Explicit interface implementation for original method
         public void DrawAt((int X, int Y) pos, char tile)
@@ -113,48 +88,53 @@ namespace HHSGame.UI
 
         public void DrawAt((int X, int Y) pos, Cell cell)
         {
-            if (_viewport.Width != Width || _viewport.Height != Height)
+            if (viewport.Width != mapView.Frame.Width || viewport.Height != mapView.Frame.Height)
             {
-                _viewport.Resize(Width, Height);
+                viewport.Resize(mapView.Frame.Width, mapView.Frame.Height);
             }
-            if (!_viewport.Contains(pos))
+            if (!viewport.Contains(pos))
                 return;
 
             // Check visibility
-            if (MapState != null)
+            if (mapState != null)
             {
-                if (MapState.IsVisible(pos.X, pos.Y))
+                if (mapState.IsVisible(pos.X, pos.Y))
                 {
                     // Visible - use normal colors
-                    var (posX, posY) = _viewport.ToLocal(pos);
-                    _mapView.SetCell(posX, posY, cell.Character, cell.Attribute);
+                    var (posX, posY) = viewport.ToLocal(pos);
+                    mapView.SetCell(posX, posY, cell.Character, cell.Attribute);
                 }
-                else if (MapState.WasVisited(pos.X, pos.Y))
+                else if (mapState.WasVisited(pos.X, pos.Y))
                 {
                     // Visited but not visible - grey out
-                    var (posX, posY) = _viewport.ToLocal(pos);
-                    _mapView.SetCell(posX, posY, cell.Character, ColorPresets.GreyedOut);
+                    var (posX, posY) = viewport.ToLocal(pos);
+                    mapView.SetCell(posX, posY, cell.Character, ColorPresets.GreyedOut);
                 }
                 else
                 {
                     // Visited but not visible - grey out
-                    var (posX, posY) = _viewport.ToLocal(pos);
-                    _mapView.SetCell(posX, posY, ' ', ColorPresets.GreyedOut);
+                    var (posX, posY) = viewport.ToLocal(pos);
+                    mapView.SetCell(posX, posY, ' ', ColorPresets.GreyedOut);
                 }
                 // Else - don't draw at all
             }
             else
             {
                 // Fallback if no game world reference
-                var (posX, posY) = _viewport.ToLocal(pos);
-                _mapView.SetCell(posX, posY, cell.Character, cell.Attribute);
+                var (posX, posY) = viewport.ToLocal(pos);
+                mapView.SetCell(posX, posY, cell.Character, cell.Attribute);
             }
         }
 
         public void Render()
         {
-            _mapView.Redraw(new Rect(0, 0, Width, Height));
-            _mapView.SetNeedsDisplay();
+            mapView.Redraw(new Rect(0, 0, mapView.Frame.Width, mapView.Frame.Height));
+            mapView.SetNeedsDisplay();
+        }
+
+        public void AttachTo(View parent)
+        {
+            parent.Add(mapView);
         }
 
         public void Clear()

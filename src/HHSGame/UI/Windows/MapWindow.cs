@@ -13,7 +13,7 @@ namespace HHSGame.UI.Windows
             Width = Dim.Fill() - GUISettings.SidebarWidth;
             Height = Dim.Fill() - GUISettings.MessageWindowHeight;
 
-            Add(drawingContext.View);
+            drawingContext.AttachTo(this);
         }
     }
 }

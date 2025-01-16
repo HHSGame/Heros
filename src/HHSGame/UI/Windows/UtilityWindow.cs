@@ -6,22 +6,22 @@ namespace HHSGame.UI.Windows
 {
     public class UtilityWindow : Window
     {
-        private readonly InventoryManager _inventoryManager;
-        private readonly Lazy<Player> _playerHolder;
-        private readonly ListView _listView;
-        private readonly MapWindow _mapWindow;
+        private readonly InventoryManager inventoryManager;
+        private readonly Lazy<Player> playerHolder;
+        private readonly ListView listView;
+        private readonly MapWindow mapWindow;
 
         public UtilityWindow(GameContext context, MapWindow mapWindow) : base(GUISettings.UtilityWindowTitle)
         {
-            _inventoryManager = context.InventoryManager;
-            _playerHolder = new(() => context.Player);
+            inventoryManager = context.InventoryManager;
+            playerHolder = new(() => context.Player);
             X = Pos.Right(mapWindow);
             Y = 0;
             Height = Dim.Fill() - GUISettings.MessageWindowHeight;
             Visible = false;
-            _mapWindow = mapWindow;
+            this.mapWindow = mapWindow;
 
-            _listView = new ListView
+            listView = new ListView
             {
                 X = 0,
                 Y = 0,
@@ -31,11 +31,11 @@ namespace HHSGame.UI.Windows
                 AllowsMultipleSelection = false
             };
 
-            _listView.SetSource(_inventoryManager.Items);
+            listView.SetSource(inventoryManager.Items);
 
-            Add(_listView);
+            Add(listView);
 
-            _listView.OpenSelectedItem += HandleOpenSelectedItem;
+            listView.OpenSelectedItem += HandleOpenSelectedItem;
 
             EventSystem.OnInventoryChange += HandleInventoryChange;
         }
@@ -43,14 +43,14 @@ namespace HHSGame.UI.Windows
         private void HandleOpenSelectedItem(ListViewItemEventArgs args)
         {
             var index = args.Item;
-            var item = _inventoryManager.Items[index];
-            item.Use(_playerHolder.Value);
-            _inventoryManager.RemoveItem(item);
+            var item = inventoryManager.Items[index];
+            item.Use(playerHolder.Value);
+            inventoryManager.RemoveItem(item);
         }
 
         private void HandleInventoryChange(object? sender, InventoryChangeEventArgs e)
         {
-            _listView.SetSource(_inventoryManager.Items);
+            listView.SetSource(inventoryManager.Items);
         }
 
         public void ToggleUtilityWindow()
@@ -58,16 +58,16 @@ namespace HHSGame.UI.Windows
             if (!Visible)
             {
                 Visible = true;
-                _mapWindow.Width = Dim.Percent(75);
-                _mapWindow.SetNeedsDisplay();
+                mapWindow.Width = Dim.Percent(75);
+                mapWindow.SetNeedsDisplay();
                 Width = Dim.Percent(25);
                 this.SetNeedsDisplay();
             }
             else
             {
                 Visible = false;
-                _mapWindow.Width = Dim.Fill() - 20;
-                _mapWindow.SetNeedsDisplay();
+                mapWindow.Width = Dim.Fill() - 20;
+                mapWindow.SetNeedsDisplay();
                 this.SetNeedsDisplay();
             }
         }

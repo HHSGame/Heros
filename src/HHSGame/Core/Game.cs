@@ -8,14 +8,14 @@ namespace HHSGame.Core
     public class Game(GameContext context, GameWorld world, Player player)
     {
         public Player Player => player;
-        private bool _isRunning;
-        private DateTime _lastFrameTime;
+        private bool isRunning;
+        private DateTime lastFrameTime;
         private const double TargetFrameTime = 1000.0 / 60.0; // 60 FPS
 
         public void Start()
         {
             context.InitializeContext();
-            _isRunning = true;
+            isRunning = true;
 
             player.AddItem(new HealthPotion(10));
 
@@ -25,7 +25,7 @@ namespace HHSGame.Core
 
         private bool GameLoop(MainLoop arg)
         {
-            if (!_isRunning || world == null || player == null)
+            if (!isRunning || world == null || player == null)
                 return false;
             var drawingContext = context.DrawingContext;
 
@@ -43,26 +43,26 @@ namespace HHSGame.Core
             drawingContext.Render();
 
             // Maintain consistent frame rate
-            double frameTime = (DateTime.Now - _lastFrameTime).TotalMilliseconds;
+            double frameTime = (DateTime.Now - lastFrameTime).TotalMilliseconds;
             if (frameTime < TargetFrameTime)
             {
                 drawingContext.Clear();
                 Thread.Sleep((int)(TargetFrameTime - frameTime));
             }
 
-            return _isRunning;
+            return isRunning;
         }
 
         public void Stop()
         {
-            _isRunning = false;
+            isRunning = false;
         }
 
         private double CalculateDeltaTime()
         {
             var now = DateTime.Now;
-            var delta = (now - _lastFrameTime).TotalMilliseconds;
-            _lastFrameTime = now;
+            var delta = (now - lastFrameTime).TotalMilliseconds;
+            lastFrameTime = now;
             return delta;
         }
 

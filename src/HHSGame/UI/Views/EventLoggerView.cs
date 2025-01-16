@@ -6,14 +6,13 @@ namespace HHSGame.UI.Views
 {
     public class EventLoggerView : View
     {
-        private readonly List<string> _eventMessages;
+        private readonly List<string> eventMessages = [];
         private const int MaxEventMessages = 10;
 
         public EventLoggerView()
         {
             Width = Dim.Fill();
             Height = Dim.Fill();
-            _eventMessages = new List<string>();
             Height = MaxEventMessages + 2;
             EventSystem.OnGameMessageEvent += HandleGameEvent;
         }
@@ -25,21 +24,21 @@ namespace HHSGame.UI.Views
 
         public void LogEvent(string message)
         {
-            _eventMessages.Insert(0, message);
-            if (_eventMessages.Count > MaxEventMessages)
+            eventMessages.Insert(0, message);
+            if (eventMessages.Count > MaxEventMessages)
             {
-                _eventMessages.RemoveAt(MaxEventMessages);
+                eventMessages.RemoveAt(MaxEventMessages);
             }
             SetNeedsDisplay();
         }
 
         public override void Redraw(Rect bounds)
         {
-            for (int i = 0; i < _eventMessages.Count; i++)
+            for (int i = 0; i < eventMessages.Count; i++)
             {
                 Move(0, i);
                 Driver.SetAttribute(ColorScheme.Focus);
-                Driver.AddStr(_eventMessages[i]);
+                Driver.AddStr(eventMessages[i]);
             }
         }
     }

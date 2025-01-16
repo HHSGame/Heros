@@ -2,15 +2,10 @@ using HHSGame.UI;
 
 namespace HHSGame.Core.Map
 {
-    public class CaveMapGenerator : BaseMapGenerator
+    public class CaveMapGenerator(int MapWidth, int MapHeight, Random random) : BaseMapGenerator(MapWidth, MapHeight, random)
     {
         private const int InitialFillPercent = 45;
         private const int SmoothingIterations = 5;
-
-        public CaveMapGenerator(int MapWidth, int MapHeight, Random random)
-            : base(MapWidth, MapHeight, random)
-        {
-        }
 
         public override Cell[,] Generate()
         {

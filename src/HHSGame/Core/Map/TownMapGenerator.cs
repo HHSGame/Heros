@@ -3,18 +3,8 @@ using HHSGame.UI;
 
 namespace HHSGame.Core.Map
 {
-    public class TownMapGenerator : BaseMapGenerator
+    public class TownMapGenerator(int MapWidth, int MapHeight, Random Random) : BaseMapGenerator(MapWidth, MapHeight, Random)
     {
-        private const int MinBuildingSize = 3;
-        private const int MaxBuildingSize = 6;
-        private const int StreetWidth = 2;
-        private const int MinBuildings = 5;
-        private const int MaxBuildings = 10;
-
-        public TownMapGenerator(int MapWidth, int MapHeight, Random Random)
-            : base(MapWidth, MapHeight, Random)
-        {
-        }
 
         public override Cell[,] Generate()
         {

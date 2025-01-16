@@ -7,15 +7,16 @@ namespace HHSGame.Core
     using Map;
     using Enemies;
     using Items;
+    using HHSGame.Core.Classes;
 
     public class Player(int x, int y, GameContext context) : IGameActor
     {
         public int X { get; set; } = x;
         public int Y { get; set; } = y;
-        public int Health { get; private set; } = 100;
-        public int MaxHealth { get; private set; } = 100;
-        public int Strength { get; private set; } = 10;
-        public int Defense { get; private set; } = 5;
+        public int Health { get; internal set; } = 100;
+        public int MaxHealth { get; internal set; } = 100;
+        public int Strength { get; internal set; } = 10;
+        public int Defense { get; internal set; } = 5;
         public int Experience { get; private set; }
         public int Level { get; private set; } = 1;
 
@@ -30,8 +31,8 @@ namespace HHSGame.Core
         private readonly ItemManager itemManager = context.ItemManager;
         private readonly MapState mapState = context.MapState;
         private readonly TurnManager turnManager = context.TurnManager;
-        private Weapon? _equippedWeapon;
-        private Armor? _equippedArmor;
+        private Weapon? equippedWeapon;
+        private Armor? equippedArmor;
 
         private const int FOVRadius = 7;
         private readonly HashSet<(int x, int y)> visibleTiles = [];
@@ -167,7 +168,7 @@ namespace HHSGame.Core
             EventSystem.RaiseGameMessage(I18n.GetString("PlayerAttacks", enemy.Name));
 
             int baseDamage = Strength;
-            int weaponDamage = _equippedWeapon?.Damage ?? 0;
+            int weaponDamage = equippedWeapon?.Damage ?? 0;
             int totalDamage = baseDamage + weaponDamage;
             enemy.TakeDamage(totalDamage);
 
@@ -183,7 +184,7 @@ namespace HHSGame.Core
             EventSystem.RaiseGameMessage(I18n.GetString("PlayerTakesDamage", damage));
 
             int baseDefense = Defense;
-            int armorDefense = _equippedArmor?.Defense ?? 0;
+            int armorDefense = equippedArmor?.Defense ?? 0;
             int totalDefense = baseDefense + armorDefense;
 
             int actualDamage = damage - totalDefense;
@@ -231,21 +232,21 @@ namespace HHSGame.Core
 
         public void EquipWeapon(Weapon weapon)
         {
-            if (_equippedWeapon != null)
+            if (equippedWeapon != null)
             {
-                inventoryManager.AddItem(_equippedWeapon);
+                inventoryManager.AddItem(equippedWeapon);
             }
-            _equippedWeapon = weapon;
+            equippedWeapon = weapon;
             EventSystem.RaiseGameMessage(I18n.GetString("EquippedWeapon", weapon.Name));
         }
 
         public void EquipArmor(Armor armor)
         {
-            if (_equippedArmor != null)
+            if (equippedArmor != null)
             {
-                inventoryManager.AddItem(_equippedArmor);
+                inventoryManager.AddItem(equippedArmor);
             }
-            _equippedArmor = armor;
+            equippedArmor = armor;
             EventSystem.RaiseGameMessage(I18n.GetString("EquippedArmor", armor.Name));
         }
 

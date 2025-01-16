@@ -4,7 +4,7 @@ namespace HHSGame.Core.Enemies
 {
     using HHSGame.Utils;
     using Items;
-    
+
     public enum EnemyType
     {
         Gangster,

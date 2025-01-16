@@ -14,7 +14,7 @@ namespace HHSGame.Core.Map
 
     public class MapGenerator(GameParameters parameters, Random random, ItemManager itemManager, ItemFactory itemFactory)
     {
-        private static readonly Dictionary<char, Attribute> _terrainColors = new()
+        private static readonly Dictionary<char, Attribute> terrainColors = new()
         {
             { '#', ColorPresets.Terrain.Stone },    // Walls
             { '.', ColorPresets.Terrain.Grass },    // Floors
@@ -40,7 +40,7 @@ namespace HHSGame.Core.Map
 
         public static Attribute GetTerrainColor(char terrainChar)
         {
-            return _terrainColors.TryGetValue(terrainChar, out var color)
+            return terrainColors.TryGetValue(terrainChar, out var color)
                 ? color
                 : ColorPresets.Terrain.Grass;
         }

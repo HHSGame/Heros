@@ -2,14 +2,9 @@ using System.Collections.Generic;
 
 namespace HHSGame.Core.Map
 {
-    public class Pathfinder
+    public class Pathfinder(MapState mapState)
     {
-        private readonly MapState _mapState;
-
-        public Pathfinder(MapState mapState)
-        {
-            _mapState = mapState;
-        }
+        private readonly MapState mapState = mapState;
 
         public List<(int x, int y)> FindPath((int x, int y) start, (int x, int y) end)
         {
@@ -75,10 +70,10 @@ namespace HHSGame.Core.Map
             var neighbors = new List<(int x, int y)>();
 
             // Check four directions
-            if (_mapState.IsWalkable(pos.x - 1, pos.y)) neighbors.Add((pos.x - 1, pos.y));
-            if (_mapState.IsWalkable(pos.x + 1, pos.y)) neighbors.Add((pos.x + 1, pos.y));
-            if (_mapState.IsWalkable(pos.x, pos.y - 1)) neighbors.Add((pos.x, pos.y - 1));
-            if (_mapState.IsWalkable(pos.x, pos.y + 1)) neighbors.Add((pos.x, pos.y + 1));
+            if (mapState.IsWalkable(pos.x - 1, pos.y)) neighbors.Add((pos.x - 1, pos.y));
+            if (mapState.IsWalkable(pos.x + 1, pos.y)) neighbors.Add((pos.x + 1, pos.y));
+            if (mapState.IsWalkable(pos.x, pos.y - 1)) neighbors.Add((pos.x, pos.y - 1));
+            if (mapState.IsWalkable(pos.x, pos.y + 1)) neighbors.Add((pos.x, pos.y + 1));
 
             return neighbors;
         }

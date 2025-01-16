@@ -1,14 +1,9 @@
 namespace HHSGame.Core
 {
     using Items;
-    public class GameMessageEventArgs : EventArgs
+    public class GameMessageEventArgs(string message) : EventArgs
     {
-        public string Message { get; }
-
-        public GameMessageEventArgs(string message)
-        {
-            Message = message;
-        }
+        public string Message { get; } = message;
 
         public override string ToString()
         {
@@ -22,14 +17,9 @@ namespace HHSGame.Core
         EnemyTurn
     }
 
-    public class TurnEventArgs : EventArgs
+    public class TurnEventArgs(TurnState state) : EventArgs
     {
-        public TurnState State { get; }
-
-        public TurnEventArgs(TurnState state)
-        {
-            State = state;
-        }
+        public TurnState State { get; } = state;
     }
 
     public enum InventoryEventType
@@ -40,16 +30,10 @@ namespace HHSGame.Core
         Remove,
     }
 
-    public class InventoryChangeEventArgs : EventArgs
+    public class InventoryChangeEventArgs(InventoryEventType type, Item item) : EventArgs
     {
-        InventoryEventType EventType { get; }
-        public Item Item { get; }
-
-        public InventoryChangeEventArgs(InventoryEventType type, Item item)
-        {
-            EventType = type;
-            Item = item;
-        }
+        public InventoryEventType EventType { get; } = type;
+        public Item Item { get; } = item;
     }
 
     public enum SurroundingsChangeType
@@ -60,16 +44,11 @@ namespace HHSGame.Core
         DropItem,
     }
 
-    public class SurroundingsChangeEventArgs : EventArgs
+    public class SurroundingsChangeEventArgs((int X, int Y) position, int fovRadius, SurroundingsChangeType type) : EventArgs
     {
-        public (int X, int Y) Position { get; }
-        public int FOVRadius { get; }
-
-        public SurroundingsChangeEventArgs((int X, int Y) position, int fovRadius, SurroundingsChangeType type)
-        {
-            Position = position;
-            FOVRadius = fovRadius;
-        }
+        public (int X, int Y) Position { get; } = position;
+        public int FOVRadius { get; } = fovRadius;
+        public SurroundingsChangeType Type { get; } = type;
     }
 
     public static class EventSystem

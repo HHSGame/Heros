@@ -5,17 +5,8 @@ namespace HHSGame.Core.Map
     using Enemies;
     using HHSGame.Utils;
 
-    public class CollisionSystem
+    public class CollisionSystem(EnemyManager enemyManager, MapState mapState)
     {
-        private readonly EnemyManager _enemyManager;
-        private readonly MapState _mapState;
-
-        public CollisionSystem(EnemyManager enemyManager, MapState mapState)
-        {
-            _enemyManager = enemyManager;
-            _mapState = mapState;
-        }
-
         public bool CanMoveTo(int x, int y, IGameActor actor)
         {
             // Check map boundaries
@@ -23,13 +14,13 @@ namespace HHSGame.Core.Map
                 return false;
 
             // Check if tile is walkable
-            if (!_mapState.IsWalkable(x, y))
+            if (!mapState.IsWalkable(x, y))
                 return false;
 
             // Check for other enemies (except self)
             if (actor is Enemy)
             {
-                var enemyAtTarget = _enemyManager.GetEnemyAt(x, y);
+                var enemyAtTarget = enemyManager.GetEnemyAt(x, y);
                 if (enemyAtTarget != null && enemyAtTarget != actor)
                     return false;
             }
@@ -40,7 +31,7 @@ namespace HHSGame.Core.Map
         public IGameActor? GetCollisionAt(int x, int y)
         {
             // Check for enemies first
-            var enemy = _enemyManager.GetEnemyAt(x, y);
+            var enemy = enemyManager.GetEnemyAt(x, y);
             if (enemy != null)
                 return enemy;
 
@@ -50,7 +41,7 @@ namespace HHSGame.Core.Map
 
         public string GetCollisionMessage(int x, int y, IGameActor actor)
         {
-            if (!_mapState.IsWalkable(x, y))
+            if (!mapState.IsWalkable(x, y))
                 return I18n.GetString("HHS.Core.Map.CollisionSystem.BlockedByTerrain", actor.Name, x, y);
 
             var collision = GetCollisionAt(x, y);

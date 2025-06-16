@@ -37,10 +37,12 @@ namespace HHSGame.Core.Enemies
         public EnemyType Type { get; private set; }
         public EnemyState State { get; private set; }
         public char Glyph { get; }
-        public Terminal.Gui.Attribute Attribute { get; }
+        public Terminal.Gui.Drawing.Attribute Attribute { get; }
         private int attackCooldown;
         private int specialAbilityCooldown;
         private readonly Random random;
+
+        public Coordinate Position => new (X, Y);
 
         public Enemy(EnemyType type, int x, int y, CollisionSystem collisionSystem, Pathfinder pathfinder)
         {
@@ -108,13 +110,13 @@ namespace HHSGame.Core.Enemies
 
                 case EnemyState.Chasing:
                     // Get path to player
-                    var path = pathfinder.FindPath((X, Y), (player.X, player.Y));
+                    var path = pathfinder.FindPath(Position, player.Position);
 
                     if (path.Count > 1) // First element is current position
                     {
                         var nextStep = path[1];
-                        int moveX = nextStep.x - X;
-                        int moveY = nextStep.y - Y;
+                        int moveX = nextStep.X - X;
+                        int moveY = nextStep.Y - Y;
                         Move(moveX, moveY);
                     }
                     break;

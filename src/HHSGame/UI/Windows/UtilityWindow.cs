@@ -1,6 +1,9 @@
-using Terminal.Gui;
 using HHSGame.Core;
 using HHSGame.Core.Items;
+using Terminal.Gui.ViewBase;
+using Terminal.Gui.Views;
+using Terminal.Gui.Input;
+using Terminal.Gui.Drivers;
 
 namespace HHSGame.UI.Windows
 {
@@ -11,14 +14,15 @@ namespace HHSGame.UI.Windows
         private readonly ListView listView;
         private readonly MapWindow mapWindow;
 
-        public UtilityWindow(GameContext context, MapWindow mapWindow) : base(GUISettings.UtilityWindowTitle)
+        public UtilityWindow(InventoryManager inventoryManager, GameContext context, MapWindow mapWindow)
         {
-            inventoryManager = context.InventoryManager;
-            playerHolder = new(() => context.Player);
+            Title = GUISettings.UtilityWindowTitle;
             X = Pos.Right(mapWindow);
             Y = 0;
-            Height = Dim.Fill() - GUISettings.MessageWindowHeight;
+            Height = Dim.Fill()! - GUISettings.MessageWindowHeight;
             Visible = false;
+            playerHolder = new(() => context.Player);
+            this.inventoryManager = inventoryManager;
             this.mapWindow = mapWindow;
 
             listView = new ListView
@@ -31,7 +35,7 @@ namespace HHSGame.UI.Windows
                 AllowsMultipleSelection = false
             };
 
-            listView.SetSource(inventoryManager.Items);
+            listView.SetSource(inventoryManager.GetItems());
 
             Add(listView);
 
@@ -40,17 +44,17 @@ namespace HHSGame.UI.Windows
             EventSystem.OnInventoryChange += HandleInventoryChange;
         }
 
-        private void HandleOpenSelectedItem(ListViewItemEventArgs args)
+        private void HandleOpenSelectedItem(object? sender, ListViewItemEventArgs args)
         {
             var index = args.Item;
-            var item = inventoryManager.Items[index];
+            var item = inventoryManager.ObservableItems.ElementAt(index);
             item.Use(playerHolder.Value);
             inventoryManager.RemoveItem(item);
         }
 
         private void HandleInventoryChange(object? sender, InventoryChangeEventArgs e)
         {
-            listView.SetSource(inventoryManager.Items);
+            listView.SetSource(inventoryManager.GetItems());
         }
 
         public void ToggleUtilityWindow()
@@ -58,18 +62,39 @@ namespace HHSGame.UI.Windows
             if (!Visible)
             {
                 Visible = true;
-                mapWindow.Width = Dim.Percent(75);
-                mapWindow.SetNeedsDisplay();
-                Width = Dim.Percent(25);
-                this.SetNeedsDisplay();
+                mapWindow.Width = Dim.Percent(66);
+                mapWindow.SetNeedsDraw();
+                Width = Dim.Percent(34);
+                SetNeedsDraw();
             }
             else
             {
                 Visible = false;
-                mapWindow.Width = Dim.Fill() - 20;
-                mapWindow.SetNeedsDisplay();
-                this.SetNeedsDisplay();
+                mapWindow.Width = Dim.Fill()! - 20;
+                mapWindow.SetNeedsDraw();
+                SetNeedsDraw();
             }
+        }
+
+        public bool HandleKeyEvent(Key key)
+        {
+            switch (key.KeyCode)
+            {
+                case KeyCode.CursorUp:
+                    listView.MoveUp();
+                    return true;
+                case KeyCode.CursorDown:
+                    listView.MoveDown();
+                    return true;
+                case KeyCode.Esc:
+                    ToggleUtilityWindow();
+                    return true;
+                case KeyCode.Enter:
+                    return listView.OnOpenSelectedItem();
+                default:
+                    break;
+            }
+            return false;
         }
     }
 }

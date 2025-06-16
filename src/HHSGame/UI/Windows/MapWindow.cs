@@ -1,17 +1,19 @@
-using Terminal.Gui;
+using Terminal.Gui.Views;
+using Terminal.Gui.ViewBase;
 
 namespace HHSGame.UI.Windows
 {
     public class MapWindow : Window
     {
 
-        public MapWindow(IDrawingContext drawingContext) : base(GUISettings.MapWindowTitle)
+        public MapWindow(IDrawingContext drawingContext)
         {
-            ColorScheme = GUISettings.CommonWindowColorScheme;
+            Title = GUISettings.MapWindowTitle;
+            this.SetScheme(GUISettings.CommonWindowColorScheme);
             X = 0;
             Y = 0;
-            Width = Dim.Fill() - GUISettings.SidebarWidth;
-            Height = Dim.Fill() - GUISettings.MessageWindowHeight;
+            Width = Dim.Fill()! - GUISettings.SidebarWidth;
+            Height = Dim.Fill()! - GUISettings.MessageWindowHeight;
 
             drawingContext.AttachTo(this);
         }

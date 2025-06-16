@@ -1,16 +1,19 @@
 
 namespace HHSGame.Core.Map
 {
+    using System.Collections.ObjectModel;
     using Enemies;
     using Items;
 
     public class SurroundingsManager(ItemManager itemManager, EnemyManager enemyManager, MapState mapState)
     {
 
+        public ObservableCollection<string> VisibleEntities { get; set; } = [];
 
-        public List<(string Name, (int x, int y) Position)> GetVisibleItemsAndEnemies()
+
+        public void UpdateVisibleEntities()
         {
-            var visibleEntities = new List<(string Name, (int x, int y) Position)>();
+            VisibleEntities.Clear();
 
             foreach (var (tileX, tileY) in mapState.CurrentVisibleTiles)
             {
@@ -19,18 +22,14 @@ namespace HHSGame.Core.Map
 
                 foreach (var enemy in enemies)
                 {
-                    visibleEntities.Add((enemy.Name, (enemy.X, enemy.Y)));
+                    VisibleEntities.Add(enemy.Name);
                 }
 
                 foreach (var item in items)
                 {
-                    visibleEntities.Add((item.Name, (item.X, item.Y)));
+                    VisibleEntities.Add(item.Name);
                 }
             }
-
-            return visibleEntities;
         }
-
     }
-
 }

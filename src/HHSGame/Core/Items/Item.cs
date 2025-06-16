@@ -20,6 +20,12 @@ namespace HHSGame.Core.Items
         public float Weight { get; } = weight;
 
         public abstract void Use(Player player);
+
+
+        public override string ToString()
+        {
+            return $"{Name} - {Rarity} [{Value}] {Weight}";
+        }
     }
 
     public class HealthPotion(int healAmount) : Item("Health Potion", ItemRarity.Common, 50, 0.5f)

@@ -1,5 +1,6 @@
 
-using Terminal.Gui;
+using Terminal.Gui.Configuration;
+using Terminal.Gui.Drawing;
 
 namespace HHSGame.UI
 {
@@ -14,11 +15,7 @@ namespace HHSGame.UI
         public static string SurroundingsWindowTitle => "Surroundings";
         public static string UtilityWindowTitle => "Utilities";
 
-        public static ColorScheme CommonWindowColorScheme => new ColorScheme
-        {
-            Normal = Application.Driver.MakeAttribute(Color.White, Color.Black),
-            Focus = Application.Driver.MakeAttribute(Color.White, Color.Black)
-        };
+        public static Scheme CommonWindowColorScheme => SchemeManager.GetScheme(Schemes.Toplevel);
 
     }
 }

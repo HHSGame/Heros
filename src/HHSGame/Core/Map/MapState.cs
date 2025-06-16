@@ -10,9 +10,9 @@ namespace HHSGame.Core.Map
         public int Height { get; private set; }
 
         private readonly bool[,] visitedTiles;
-        private readonly HashSet<(int x, int y)> currentVisibleTiles = [];
+        private readonly HashSet<Coordinate> currentVisibleTiles = [];
 
-        public ImmutableHashSet<(int x, int y)> CurrentVisibleTiles => [.. currentVisibleTiles];
+        public ImmutableHashSet<Coordinate> CurrentVisibleTiles => [.. currentVisibleTiles];
 
         public MapState(GameParameters parameters, MapGenerator generator)
         {
@@ -45,6 +45,16 @@ namespace HHSGame.Core.Map
             return IsInBounds(x, y) && map[y, x].IsWalkable;
         }
 
+        public bool IsWalkable(Coordinate coordinate) 
+        {
+            return IsInBounds(coordinate) && map[coordinate.Y, coordinate.X].IsWalkable;
+        }
+
+        public bool IsInBounds(Coordinate coordinate) 
+        {
+            return IsInBounds(coordinate.X, coordinate.Y);
+        }
+
         public bool IsInBounds(int x, int y)
         {
             return x >= 0 && y >= 0 && x < Width && y < Height;
@@ -52,6 +62,7 @@ namespace HHSGame.Core.Map
 
         public bool IsTransparent(int x, int y)
         {
+            // todo: fix
             return IsInBounds(x, y) && map[y, x].IsWalkable;
         }
 
@@ -64,20 +75,41 @@ namespace HHSGame.Core.Map
                 if (IsInBounds(x, y))
                 {
                     visitedTiles[y, x] = true;
-                    currentVisibleTiles.Add((x, y));
+                    currentVisibleTiles.Add(new (x, y));
                 }
             }
         }
 
+
+        public void MarkVisibleTiles(HashSet<Coordinate> visibleTiles)
+        {
+            currentVisibleTiles.Clear();
+
+            foreach (var (x, y) in visibleTiles)
+            {
+                if (IsInBounds(x, y))
+                {
+                    visitedTiles[y, x] = true;
+                    currentVisibleTiles.Add(new (x, y));
+                }
+            }
+        }
+
+        public bool IsVisible(Coordinate coordinate) 
+        {
+            return currentVisibleTiles.Contains(coordinate);
+        }
+
         public bool IsVisible(int x, int y)
         {
-            return currentVisibleTiles.Contains((x, y));
+            return currentVisibleTiles.Contains(new (x, y));
         }
 
         public bool WasVisited(int x, int y)
         {
             return IsInBounds(x, y) && visitedTiles[y, x];
         }
+
 
         public void Draw(IDrawingContext ctx)
         {

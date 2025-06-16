@@ -6,46 +6,46 @@ namespace HHSGame.Core.Map
     {
         private readonly MapState mapState = mapState;
 
-        public List<(int x, int y)> FindPath((int x, int y) start, (int x, int y) end)
+        public List<Coordinate> FindPath(Coordinate start, Coordinate end)
         {
-            var openSet = new PriorityQueue<Node, float>();
-            var closedSet = new HashSet<(int x, int y)>();
-            var cameFrom = new Dictionary<(int x, int y), (int x, int y)>();
-            var gScore = new Dictionary<(int x, int y), float>();
-            var fScore = new Dictionary<(int x, int y), float>();
+            var openSet = new PriorityQueue<Coordinate, float>();
+            var closedSet = new HashSet<Coordinate>();
+            var cameFrom = new Dictionary<Coordinate, Coordinate>();
+            var gScore = new Dictionary<Coordinate, float>();
+            var fScore = new Dictionary<Coordinate, float>();
 
             gScore[start] = 0;
             fScore[start] = HeuristicCostEstimate(start, end);
-            openSet.Enqueue(new Node(start.x, start.y), fScore[start]);
+            openSet.Enqueue(start, fScore[start]);
 
             while (openSet.Count > 0)
             {
                 var current = openSet.Dequeue();
 
-                if (current.Position == end)
+                if (current == end)
                 {
-                    return ReconstructPath(cameFrom, current.Position);
+                    return ReconstructPath(cameFrom, current);
                 }
 
-                closedSet.Add(current.Position);
+                closedSet.Add(current);
 
-                foreach (var neighbor in GetNeighbors(current.Position))
+                foreach (var neighbor in GetNeighbors(current))
                 {
                     if (closedSet.Contains(neighbor))
                         continue;
 
-                    var tentativeGScore = gScore[current.Position] + 1;
+                    var tentativeGScore = gScore[current] + 1;
 
                     if (!gScore.TryGetValue(neighbor, out float value) || tentativeGScore < value)
                     {
-                        cameFrom[neighbor] = current.Position;
+                        cameFrom[neighbor] = current;
                         value = tentativeGScore;
                         gScore[neighbor] = value;
                         fScore[neighbor] = tentativeGScore + HeuristicCostEstimate(neighbor, end);
 
-                        if (!openSet.UnorderedItems.Any(n => n.Element.Position == neighbor))
+                        if (!openSet.UnorderedItems.Any(n => n.Element == neighbor))
                         {
-                            openSet.Enqueue(new Node(neighbor.x, neighbor.y), fScore[neighbor]);
+                            openSet.Enqueue(neighbor, fScore[neighbor]);
                         }
                     }
                 }
@@ -54,9 +54,9 @@ namespace HHSGame.Core.Map
             return []; // No path found
         }
 
-        private static List<(int x, int y)> ReconstructPath(Dictionary<(int x, int y), (int x, int y)> cameFrom, (int x, int y) current)
+        private static List<Coordinate> ReconstructPath(Dictionary<Coordinate, Coordinate> cameFrom, Coordinate current)
         {
-            var path = new List<(int x, int y)> { current };
+            var path = new List<Coordinate> { current };
             while (cameFrom.ContainsKey(current))
             {
                 current = cameFrom[current];
@@ -65,28 +65,23 @@ namespace HHSGame.Core.Map
             return path;
         }
 
-        private List<(int x, int y)> GetNeighbors((int x, int y) pos)
+        private List<Coordinate> GetNeighbors(Coordinate pos)
         {
-            var neighbors = new List<(int x, int y)>();
+            var neighbors = new List<Coordinate>();
 
             // Check four directions
-            if (mapState.IsWalkable(pos.x - 1, pos.y)) neighbors.Add((pos.x - 1, pos.y));
-            if (mapState.IsWalkable(pos.x + 1, pos.y)) neighbors.Add((pos.x + 1, pos.y));
-            if (mapState.IsWalkable(pos.x, pos.y - 1)) neighbors.Add((pos.x, pos.y - 1));
-            if (mapState.IsWalkable(pos.x, pos.y + 1)) neighbors.Add((pos.x, pos.y + 1));
+            if (mapState.IsWalkable(pos.X - 1, pos.Y)) neighbors.Add(new Coordinate(pos.X - 1, pos.Y));
+            if (mapState.IsWalkable(pos.X + 1, pos.Y)) neighbors.Add(new Coordinate(pos.X + 1, pos.Y));
+            if (mapState.IsWalkable(pos.X, pos.Y - 1)) neighbors.Add(new Coordinate(pos.X, pos.Y - 1));
+            if (mapState.IsWalkable(pos.X, pos.Y + 1)) neighbors.Add(new Coordinate(pos.X, pos.Y + 1));
 
             return neighbors;
         }
 
-        private static float HeuristicCostEstimate((int x, int y) a, (int x, int y) b)
+        private static float HeuristicCostEstimate(Coordinate a, Coordinate b)
         {
             // Manhattan distance
-            return Math.Abs(a.x - b.x) + Math.Abs(a.y - b.y);
-        }
-
-        private sealed record Node(int X, int Y)
-        {
-            public (int x, int y) Position => (X, Y);
+            return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
         }
     }
 }

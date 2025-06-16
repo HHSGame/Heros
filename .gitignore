@@ -11,3 +11,5 @@ obj/
 .fake
 
 .venv/
+
+*.log

@@ -1,8 +1,11 @@
-using Terminal.Gui;
 using HHSGame.Core;
 
 namespace HHSGame.UI
 {
+    using Terminal.Gui.App;
+    using Terminal.Gui.Drivers;
+    using Terminal.Gui.Input;
+    using Terminal.Gui.Views;
     using Windows;
 
     public class GameUI(MapWindow mapWindow,
@@ -27,44 +30,66 @@ namespace HHSGame.UI
 
             game.Start();
 
-            Application.RootKeyEvent += HandleKeyEvent;
+            Application.KeyDown += HandleKeyEvent;
             return top;
         }
 
-        private bool HandleKeyEvent(KeyEvent args)
+        private void HandleKeyEvent(object? sender, Key key)
         {
-            EventSystem.RaiseGameMessage($"Key pressed: {args.Key}");
-            // Process movement keys
-            switch (args.Key)
+            EventSystem.RaiseGameMessage($"Key pressed: {key}");
+
+            if (utilityWindow.Visible)
             {
-                case Key.CursorUp:
-                    game.Player.Move(0, -1);
+                if (utilityWindow.HandleKeyEvent(key))
+                {
+                    return;
+                }
+            }
+            // Process movement keys
+            switch (key.KeyCode)
+            {
+                case KeyCode.CursorUp:
+                case KeyCode.J:
+                    game.Player.Move(new Move.Forward(Direction.Up));
                     break;
-                case Key.CursorDown:
-                    game.Player.Move(0, 1);
+                case KeyCode.CursorDown:
+                case KeyCode.K:
+                    game.Player.Move(new Move.Forward(Direction.Down));
                     break;
-                case Key.CursorLeft:
-                    game.Player.Move(-1, 0);
+                case KeyCode.CursorLeft:
+                case KeyCode.H:
+                    game.Player.Move(new Move.Forward(Direction.Left));
                     break;
-                case Key.CursorRight:
-                    game.Player.Move(1, 0);
+                case KeyCode.CursorRight:
+                case KeyCode.L:
+                    game.Player.Move(new Move.Forward(Direction.Right));
                     break;
-                case Key.Q:
+                case KeyCode.Y:
+                    game.Player.Move(ExtendedDirection.UpLeft.ToDirections());
+                    break;
+                case KeyCode.U:
+                    game.Player.Move(ExtendedDirection.UpRight.ToDirections());
+                    break;
+                case KeyCode.B:
+                    game.Player.Move(ExtendedDirection.DownLeft.ToDirections());
+                    break;
+                case KeyCode.N:
+                    game.Player.Move(ExtendedDirection.DownRight.ToDirections());
+                    break;
+                case KeyCode.Q:
                     game.Stop();
                     Application.Shutdown();
-                    return true;
-                case Key.g:
+                    return;
+                case KeyCode.G:
                     game.Player.PickupItems();
-                    return true;
-                case Key.u:
+                    break;
+                case KeyCode.I:
                     utilityWindow.ToggleUtilityWindow();
                     break;
                 default:
-                    // Let other keys propagate
-                    return false;
+                    return;
             }
-            // Mark event as handled
-            return true;
+            return;
         }
 
         public void Dispose()

@@ -1,4 +1,4 @@
-using Terminal.Gui;
+using Terminal.Gui.Drawing;
 using HHSGame.Utils;
 
 namespace HHSGame.Core
@@ -7,7 +7,6 @@ namespace HHSGame.Core
     using Map;
     using Enemies;
     using Items;
-    using HHSGame.Core.Classes;
 
     public class Player(int x, int y, GameContext context) : IGameActor
     {
@@ -20,10 +19,12 @@ namespace HHSGame.Core
         public int Experience { get; private set; }
         public int Level { get; private set; } = 1;
 
+        public Coordinate Position => new (X, Y);
+
         public char Glyph => '☭';
         public string Name => I18n.GetString("HHS.Core.Player.Name");
 
-        public Terminal.Gui.Attribute Attribute => Terminal.Gui.Attribute.Make(Color.BrightYellow, Color.Red);
+        public Terminal.Gui.Drawing.Attribute Attribute => new Terminal.Gui.Drawing.Attribute(Color.BrightYellow, Color.Red);
 
         private readonly List<ActiveEffect> activeEffects = [];
         private readonly CollisionSystem collisionSystem = context.CollisionSystem;
@@ -35,17 +36,17 @@ namespace HHSGame.Core
         private Armor? equippedArmor;
 
         private const int FOVRadius = 7;
-        private readonly HashSet<(int x, int y)> visibleTiles = [];
+        private readonly HashSet<Coordinate> visibleTiles = [];
 
         public void UpdateFOV()
         {
             visibleTiles.Clear();
-            CalculateFOV(X, Y, FOVRadius);
+            CalculateFOV(Position, FOVRadius);
             mapState.MarkVisibleTiles(visibleTiles);
             EventSystem.RaiseSurroundingsChange((X, Y), FOVRadius, SurroundingsChangeType.Movement);
         }
 
-        private void CalculateFOV(int x, int y, int radius)
+        private void CalculateFOV(Coordinate position, int radius)
         {
             visibleTiles.Clear();
 
@@ -56,26 +57,27 @@ namespace HHSGame.Core
                 {
                     // Skip if outside radius
                     if (dx * dx + dy * dy > radius * radius) continue;
+                    
+                    Coordinate target = Position.Target(dx, dy);
 
-                    int targetX = x + dx;
-                    int targetY = y + dy;
-
-                    if (!mapState.IsInBounds(targetX, targetY)) continue;
+                    if (!mapState.IsInBounds(target)) continue;
 
                     // Check line of sight
-                    if (HasLineOfSight(x, y, targetX, targetY))
+                    if (HasLineOfSight(position, target))
                     {
-                        visibleTiles.Add((targetX, targetY));
+                        visibleTiles.Add(target);
                     }
                 }
             }
 
             // Always see current position
-            visibleTiles.Add((x, y));
+            visibleTiles.Add(position);
         }
 
-        private bool HasLineOfSight(int x0, int y0, int x1, int y1)
+        private bool HasLineOfSight(Coordinate position, Coordinate target)
         {
+            (int x0, int y0) = position;
+            (int x1, int y1) = target;
             int dx = Math.Abs(x1 - x0);
             int dy = Math.Abs(y1 - y0);
             int sx = x0 < x1 ? 1 : -1;
@@ -85,7 +87,7 @@ namespace HHSGame.Core
             while (true)
             {
                 // Add current tile to visible tiles
-                visibleTiles.Add((x0, y0));
+                visibleTiles.Add(new (x0, y0));
 
                 // If we hit an opaque tile, stop here but include it
                 if (!mapState.IsTransparent(x0, y0))
@@ -127,7 +129,7 @@ namespace HHSGame.Core
             }
         }
 
-        public void Move(int dx, int dy)
+        public void Move(Move move)
         {
             if (!turnManager.IsPlayerTurn())
             {
@@ -136,8 +138,7 @@ namespace HHSGame.Core
 
             Update();
 
-            int newX = X + dx;
-            int newY = Y + dy;
+            (int newX, int newY) = Position.Move(move.ToVec());
 
             if (collisionSystem.CanMoveTo(newX, newY, this))
             {

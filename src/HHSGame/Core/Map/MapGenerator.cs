@@ -4,7 +4,7 @@ namespace HHSGame.Core.Map
 {
     using System.Globalization;
     using Items;
-    using Attribute = Terminal.Gui.Attribute;
+    using Attribute = Terminal.Gui.Drawing.Attribute;
     public enum MapStyle
     {
         Cave,

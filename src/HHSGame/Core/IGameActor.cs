@@ -13,7 +13,7 @@ namespace HHSGame.Core
 
         public abstract char Glyph { get; }
 
-        public abstract Terminal.Gui.Attribute Attribute { get; }
+        public abstract Terminal.Gui.Drawing.Attribute Attribute { get; }
 
         void IDrawable.Draw(IDrawingContext ctx)
         {

@@ -1,7 +1,6 @@
-
-using Terminal.Gui;
-using HHSGame.Core;
 using HHSGame.UI.Views;
+using Terminal.Gui.Views;
+using Terminal.Gui.ViewBase;
 
 namespace HHSGame.UI.Windows
 {
@@ -13,15 +12,15 @@ namespace HHSGame.UI.Windows
             MapWindow mapWindow,
             InventoryWindow inventoryWindow,
             SurroundingsListView surroundingsListView)
-            : base(GUISettings.SurroundingsWindowTitle)
         {
-            ColorScheme = GUISettings.CommonWindowColorScheme;
+            Title = GUISettings.SurroundingsWindowTitle;
             X = Pos.Right(mapWindow);
             Y = Pos.Bottom(inventoryWindow);
             Width = GUISettings.SidebarWidth;
             Height = Dim.Percent(50);
 
             Add(surroundingsListView);
+            SetScheme(GUISettings.CommonWindowColorScheme);
         }
     }
 }

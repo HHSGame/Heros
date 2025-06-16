@@ -1,6 +1,7 @@
 using HHSGame.Core;
 using HHSGame.Core.Map;
-using Terminal.Gui;
+using Terminal.Gui.ViewBase;
+using Terminal.Gui.Views;
 
 namespace HHSGame.UI.Views
 {
@@ -16,13 +17,14 @@ namespace HHSGame.UI.Views
             Height = Dim.Fill();
             this.surroundingsManager = surroundingsManager;
 
+            this.SetSource(surroundingsManager.VisibleEntities);
+
             EventSystem.OnSurroundingsChange += HandleVisibleTilesChange;
         }
 
         private void HandleVisibleTilesChange(object? sender, SurroundingsChangeEventArgs e)
         {
-            this.SetSource(surroundingsManager.GetVisibleItemsAndEnemies()
-                    .Select(s => s.Name).ToList());
+            surroundingsManager.UpdateVisibleEntities();
         }
     }
 }

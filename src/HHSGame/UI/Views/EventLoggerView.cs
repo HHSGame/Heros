@@ -1,6 +1,9 @@
 
-using Terminal.Gui;
+
 using HHSGame.Core;
+using Terminal.Gui.Drawing;
+using Terminal.Gui.Configuration;
+using Terminal.Gui.ViewBase;
 
 namespace HHSGame.UI.Views
 {
@@ -29,17 +32,18 @@ namespace HHSGame.UI.Views
             {
                 eventMessages.RemoveAt(MaxEventMessages);
             }
-            SetNeedsDisplay();
+            SetNeedsDraw();
         }
 
-        public override void Redraw(Rect bounds)
+        protected override bool OnDrawingContent()
         {
             for (int i = 0; i < eventMessages.Count; i++)
             {
                 Move(0, i);
-                Driver.SetAttribute(ColorScheme.Focus);
-                Driver.AddStr(eventMessages[i]);
+                SetAttribute(SchemeManager.GetScheme(Schemes.Base).GetAttributeForRole(VisualRole.Focus));
+                AddStr(eventMessages[i]);
             }
+            return false;
         }
     }
 }

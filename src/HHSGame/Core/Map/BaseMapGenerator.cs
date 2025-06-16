@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
 using HHSGame.UI;
-using Attribute = Terminal.Gui.Attribute;
+using Attribute = Terminal.Gui.Drawing.Attribute;
 
 namespace HHSGame.Core.Map
 {

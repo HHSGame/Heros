@@ -1,7 +1,8 @@
 
 using HHSGame.Core;
 using HHSGame.Core.Items;
-using Terminal.Gui;
+using Terminal.Gui.Views;
+using Terminal.Gui.ViewBase;
 
 namespace HHSGame.UI.Views
 {
@@ -23,7 +24,7 @@ namespace HHSGame.UI.Views
 
         private void HandleInventoryChange(object? sender, InventoryChangeEventArgs e)
         {
-            this.SetSource(inventoryManager.Items.Select(i => i.Name).ToList());
+            this.SetSource(inventoryManager.GetItems());
         }
 
 

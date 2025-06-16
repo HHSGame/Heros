@@ -1,6 +1,5 @@
 using HHSGame.Core.Map;
-using Terminal.Gui;
-
+using Terminal.Gui.ViewBase;
 
 namespace HHSGame.UI
 {
@@ -69,7 +68,7 @@ namespace HHSGame.UI
     public struct Cell
     {
         public char Character { get; set; }
-        public Terminal.Gui.Attribute Attribute { get; set; }
+        public Terminal.Gui.Drawing.Attribute Attribute { get; set; }
 
         public bool IsWalkable => Character == '.' || Character == '▒';
     }
@@ -128,8 +127,7 @@ namespace HHSGame.UI
 
         public void Render()
         {
-            mapView.Redraw(new Rect(0, 0, mapView.Frame.Width, mapView.Frame.Height));
-            mapView.SetNeedsDisplay();
+            mapView.SetNeedsDraw();
         }
 
         public void AttachTo(View parent)
@@ -142,3 +140,4 @@ namespace HHSGame.UI
         }
     }
 }
+

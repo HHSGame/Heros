@@ -1,9 +1,10 @@
-using Terminal.Gui;
+using Terminal.Gui.ViewBase;
+using System.Drawing;
 
 namespace HHSGame.UI.Views
 {
 
-    using Attribute = Terminal.Gui.Attribute;
+    using Attribute = Terminal.Gui.Drawing.Attribute;
     public class MapView : View
     {
         private Cell[,] buffer;
@@ -24,7 +25,7 @@ namespace HHSGame.UI.Views
             }
         }
 
-        public void SetCell(int x, int y, Rune character, Attribute attribute)
+        public void SetCell(int x, int y, char character, Attribute attribute)
         {
             ResizeBackBuffer();
             if (x >= 0 && x < Frame.Width && y >= 0 && y < Frame.Height)
@@ -34,23 +35,25 @@ namespace HHSGame.UI.Views
                     Character = (char)character,
                     Attribute = attribute
                 };
+               SetNeedsDraw(new Rectangle(x, y, 1, 1));
             }
         }
 
-        public override void Redraw(Rect bounds)
+        protected override bool OnDrawingContent()
         {
             ResizeBackBuffer();
-            base.Redraw(bounds);
             for (int y = 0; y < Frame.Height; y++)
             {
                 for (int x = 0; x < Frame.Width; x++)
                 {
                     var cell = buffer[y, x];
                     Move(x, y);
-                    Driver.SetAttribute(cell.Attribute);
-                    Driver.AddRune(cell.Character);
+                    SetAttribute(cell.Attribute);
+                    AddRune(cell.Character);
                 }
             }
+            return true;
         }
+
     }
 }

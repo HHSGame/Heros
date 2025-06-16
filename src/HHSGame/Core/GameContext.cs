@@ -48,13 +48,9 @@ namespace HHSGame.Core
         public IDrawingContext DrawingContext => drawingContext;
         public Player Player => player!;
 
-        public void InitializeContext()
+        public void InitializeContext(Player player)
         {
             enemyManager.SetEnemies(enemyFactory.SpawnEnemies());
-        }
-
-        public void SetPlayer(Player player)
-        {
             this.player = player;
         }
     }

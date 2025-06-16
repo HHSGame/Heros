@@ -1,3 +1,5 @@
+using HHSGame.Core.Stats;
+
 namespace HHSGame.Core.Items
 {
 
@@ -18,6 +20,12 @@ namespace HHSGame.Core.Items
         public ItemRarity Rarity { get; } = rarity;
         public int Value { get; } = value;
         public float Weight { get; } = weight;
+        public bool Consumable { get; set; }
+
+        public List<CoreAttributeModifier> AttributeModifiers { get; set; } = [];
+
+        public List<SkillModifier> SkillModifiers { get; set; } = [];
+
 
         public abstract void Use(Player player);
 
@@ -28,8 +36,15 @@ namespace HHSGame.Core.Items
         }
     }
 
-    public class HealthPotion(int healAmount) : Item("Health Potion", ItemRarity.Common, 50, 0.5f)
+    public class HealthPotion : Item
     {
+        private int healAmount;
+
+        public HealthPotion(int healAmount) : base("Health Potion", ItemRarity.Common, 50, 0.5f)
+        {
+            Consumable = true;
+            this.healAmount = healAmount;
+        }
         public override void Use(Player player)
         {
             player.Heal(healAmount);

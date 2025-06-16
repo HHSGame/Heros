@@ -22,12 +22,12 @@ namespace HHSGame.Core.Map
 
                 foreach (var enemy in enemies)
                 {
-                    VisibleEntities.Add(enemy.Name);
+                    VisibleEntities.Add(enemy.ToString());
                 }
 
                 foreach (var item in items)
                 {
-                    VisibleEntities.Add(item.Name);
+                    VisibleEntities.Add(item.ToString());
                 }
             }
         }

@@ -28,6 +28,18 @@ namespace HHSGame.Core.Enemies
             {
                 EnemyType.BanditLeader,
                 new EnemyConfig("Bandit Leader", 100, 12, 8, 200, 'L', ColorPresets.Enemies.BanditLeader)
+            },
+            {
+                EnemyType.Thug,
+                new EnemyConfig("Thug", 30, 5, 2, 30, 't', ColorPresets.Enemies.Thug)
+            },
+            {
+                EnemyType.Soldier,
+                new EnemyConfig("Soldier", 60, 10, 5, 60, 's', ColorPresets.Enemies.Soldier)
+            },
+            {
+                EnemyType.Officer,
+                new EnemyConfig("Officer", 100, 15, 8, 100, 'o', ColorPresets.Enemies.Officer)
             }
         };
 

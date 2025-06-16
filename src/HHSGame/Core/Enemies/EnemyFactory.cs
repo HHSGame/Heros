@@ -12,11 +12,14 @@ namespace HHSGame.Core.Enemies
             var enemies = new List<Enemy>();
 
             // Spawn different enemy types
-            SpawnEnemyType(enemies, EnemyType.Gangster, 100);
+            SpawnEnemyType(enemies, EnemyType.Gangster, 50);
             SpawnEnemyType(enemies, EnemyType.Bandit, 30);
-            SpawnEnemyType(enemies, EnemyType.BanditLeader, 1);
+            SpawnEnemyType(enemies, EnemyType.BanditLeader, 5);
+            SpawnEnemyType(enemies, EnemyType.Thug, 100);
+            SpawnEnemyType(enemies, EnemyType.Soldier, 60);
+            SpawnEnemyType(enemies, EnemyType.Officer, 10);
 
-            EventSystem.RaiseGameMessage("Enemies spawned: 3 Gangsters, 2 Bandits, 1 Bandit Leader");
+            EventSystem.RaiseGameMessage("Enemies spawned: 50 Gangsters, 30 Bandits, 5 Bandit Leaders, 100 Thugs, 60 Soldiers, 10 Officer");
             return enemies;
         }
 

@@ -9,7 +9,10 @@ namespace HHSGame.Core.Enemies
     {
         Gangster,
         Bandit,
-        BanditLeader
+        BanditLeader,
+        Thug,
+        Soldier,
+        Officer,
     }
 
     public enum EnemyState
@@ -181,5 +184,10 @@ namespace HHSGame.Core.Enemies
         }
 
         public List<Item> GenerateLoot() => lootSystem.GenerateLoot();
+
+        public override string ToString()
+        {
+            return $"[0]{Name} - {Health}/{MaxHealth}";
+        }
     }
 }

@@ -28,7 +28,7 @@ namespace HHSGame.UI
             public static readonly Attribute BanditLeader = new(Color.DarkGray, Color.BrightGreen);
             public static readonly Attribute Thug = new(Color.Cyan, Color.DarkGray);
             public static readonly Attribute Soldier = new(Color.Gray, Color.DarkGray);
-            public static readonly Attribute Officer = new(Color.Red, Color.White);
+            public static readonly Attribute Sniper = new(Color.DarkGray, Color.Black);
             // public static Attribute Dragon = new(Color.Red, Color.White);
             // public static Attribute Skeleton = new(Color.White, Color.Black);
             // public static Attribute Slime = new(Color.BrightCyan, Color.Black);

@@ -1,101 +1,115 @@
-# TODO
+开发任务列表
+为了实现上述游戏，我们将开发任务分解为几个核心阶段和模块。
 
-## Gameplay Enhancements
+# 阶段一：核心系统搭建 (Foundation Systems)
 
-### Implement more enemy types and behaviors
+## 终端显示与用户输入模块 (Terminal Display & Input Module)
 
--   [ ] Design new enemy types with unique stats, abilities, and attack patterns.
-    -   [ ] Brainstorm at least 3 new enemy types (e.g., Goblin, Orc, Mage).
-    -   [ ] Define stats for each new enemy type (Health, Strength, Defense, Speed).
-    -   [ ] Design unique abilities and attack patterns for each enemy type.
-        -   [ ] Goblin: Weak melee attacker, can move quickly.
-        -   [ ] Orc: Strong melee attacker, slow movement.
-        -   [ ] Mage: Ranged attacker, casts spells with various effects.
-    -   [ ] Implement configuration for each enemy type in `EnemyRegistry.cs`.
--   [ ] Implement AI for new enemy types.
-    -   [ ] Implement basic AI for each enemy type (e.g., chase player, attack player).
-    -   [ ] Implement more advanced AI (e.g., patrol, flee, use abilities strategically).
+- [X] 实现基于 ASCII 或 Unicode 的地图和角色渲染。
+- [ ] 处理键盘输入（方向键、交互键、菜单键）。
+- [ ] 实现消息日志显示区域（用于战斗信息、事件通知）。
+- [ ] 状态栏显示（生命值、魔法值、经验值、当前位置、时间）。
 
-### Implement more item types and effects
+## 游戏循环与状态管理 (Game Loop & State Management)
 
--   [ ] Design new item types with various effects (e.g., stat boosts, healing, temporary abilities).
-    -   [ ] Brainstorm at least 3 new item types (e.g., Mana Potion, Strength Elixir, Scroll of Teleportation).
-    -   [ ] Define effects for each new item type.
-        -   [ ] Mana Potion: Restores mana points.
-        -   [ ] Strength Elixir: Temporarily increases strength.
-        -   [ ] Scroll of Teleportation: Teleports the player to a random location on the map.
-    -   [ ] Implement configuration for each item type in `ItemFactory.cs`.
--   [ ] Implement item usage logic.
-    -   [ ] Implement the `Use` method for each new item type.
-    -   [ ] Update the `UtilityWindow` to allow the player to use the new items.
+- [ ] 实现回合制游戏循环（玩家回合 -> 怪物回合 -> NPC 回合 -> 环境更新）。
+- [ ] 管理游戏状态（探索、战斗、对话、菜单、库存）。
+- [ ] 保存/加载游戏进度系统。
 
-### Implement a combat system
+## 地图生成与管理 (Map Generation & Management)
 
--   [ ] Implement different attack types (e.g., melee, ranged, magic).
-    -   [ ] Define different attack types with varying damage, range, and accuracy.
-    -   [ ] Implement attack type selection in the UI.
--   [ ] Implement defense mechanics (e.g., blocking, dodging, armor).
-    -   [ ] Implement blocking and dodging mechanics.
-    -   [ ] Implement armor that reduces damage taken.
--   [ ] Implement special abilities and skills for players and enemies.
-    -   [ ] Design special abilities and skills for players and enemies.
-    -   [ ] Implement ability/skill activation logic.
-    -   [ ] Implement cooldowns for abilities/skills.
+- [ ] 实现程序化生成地图算法（例如：洞穴生成、房间连接、地形生成）。
+- [ ] 支持预定义地图区域（用于重要地点如村庄、高塔）。
+- [ ] 地图元素定义（墙壁、地面、门、水、特殊地形）。
+- [ ] 视野（Fog of War）系统，只显示玩家视野范围内的区域。
 
-### Implement a leveling system
+## 基本角色系统 (Basic Character System)
 
--   [ ] Implement experience point (XP) gain from defeating enemies and completing quests.
-    -   [ ] Calculate XP based on enemy difficulty.
-    -   [ ] Store player's XP.
--   [ ] Implement level-up logic with stat increases and new abilities.
-    -   [ ] Define level requirements.
-    -   [ ] Implement stat increase logic on level up.
-    -   [ ] Implement ability/skill unlocking on level up.
+- [ ] 玩家角色定义（属性：力量、敏捷、体质、智力、感知；生命值、魔法值）。
+- [ ] 基础移动（上下左右）和碰撞检测。
+- [ ] 物品栏（Inventory）系统（拾取、丢弃、使用物品）。
 
-### Add a story and quests
+# 阶段二：核心玩法实现 (Core Gameplay)
 
--   [ ] Develop a compelling storyline.
-    -   [ ] Brainstorm a basic storyline.
-    -   [ ] Write dialogue for key characters.
--   [ ] Design and implement quests with objectives, rewards, and dialogue.
-    -   [ ] Design at least 3 quests with varying objectives (e.g., kill a certain number of enemies, retrieve an item, explore a location).
-    -   [ ] Implement quest tracking and completion logic.
-    -   [ ] Implement quest rewards (e.g., XP, items, gold).
+## 战斗系统 (Combat System)
 
-## UI Improvements
+- [ ] 回合制战斗逻辑（攻击、防御、技能）。
+- [ ] 伤害计算、命中率、暴击系统。
+- [ ] 怪物 AI（基础攻击、寻路、追逐）。
+- [ ] 经验值获取与升级系统（属性提升、技能点）。
+- [ ] 战利品（Loot）生成系统（怪物掉落、宝箱）。
 
-### Improve the UI
+## 物品与装备系统 (Items & Equipment System)
 
--   [ ] Add more information to the UI, such as the player's health, mana, and experience.
-    -   [ ] Display player's health in the UI.
-    -   [ ] Display player's mana in the UI (if mana is implemented).
-    -   [ ] Display player's experience in the UI.
--   [ ] Make the UI more visually appealing.
-    -   [ ] Experiment with different color schemes and layouts.
-    -   [ ] Add visual effects (e.g., animations, transitions).
--   [ ] Implement a better inventory management system.
-    -   [ ] Allow the player to sort and filter their inventory.
-    -   [ ] Implement item tooltips with detailed information.
+- [ ] 定义物品类型（武器、防具、消耗品、任务物品、杂物）。
+- [ ] 装备槽位管理（武器、头部、身体、腿部、饰品等）。
+- [ ] 物品属性（攻击力、防御力、魔法加成、特殊效果）。
+- [ ] 物品稀有度与鉴定系统。
 
-## Code Improvements
+## 技能与魔法系统 (Skills & Magic System)
 
-### Refactor the code
+- [ ] 定义不同职业或派系的技能树。
+- [ ] 实现主动技能和被动技能。
+- [ ] 魔法消耗与冷却机制。
 
--   [ ] Identify areas of the code that are unclear or that could be improved.
-    -   [ ] Review the code for potential areas of improvement.
-    -   [ ] Make a list of specific code sections to refactor.
--   [ ] Refactor the code to make it more readable, maintainable, and efficient.
-    -   [ ] Apply design patterns where appropriate.
-    -   [ ] Reduce code duplication.
-    -   [ ] Improve code performance.
--   [ ] Add comments and documentation to the code.
-    -   [ ] Add comments to explain complex logic.
-    -   [ ] Generate API documentation.
+# 阶段三：世界交互与叙事 (World Interaction & Narrative)
 
-## Other
+## 怪物与 NPC 系统 (Enemy & NPC System)
 
--   [ ] Experiment with the game
-    -   [ ] Try different things in the game to see how they work.
-    -   [ ] Identify any bugs or issues.
--   [ ] Ask questions
-    -   [ ] If you have any questions about the code, ask the developer for clarification.
+- [ ] 定义怪物类型（名称、外观、属性、行为模式、掉落物）。
+- [ ] 定义 NPC 类型（名称、外观、立场、对话树）。
+- [ ] NPC 寻路和日常行为（可选）。
+
+## 对话与任务系统 (Dialogue & Quest System)
+
+- [ ] 实现对话树（多分支对话、选项影响）。
+- [ ] 任务日志（记录主线和支线任务）。
+- [ ] 任务目标跟踪与完成条件检测。
+- [ ] 任务奖励发放。
+
+## 世界交互与背景故事 (World Interaction & Lore)
+
+- [ ] 可互动对象（门、开关、宝箱、书籍、碑文、雕像）。
+- [ ] “检查”功能：玩家可以检查地图上的任何对象，获取其背景信息和传说。
+- [ ] 物品描述系统：每个物品都有详细的背景和故事。
+- [ ] 解谜系统：通过环境交互、物品使用、对话来推进。
+
+# 阶段四：高级功能与完善 (Advanced Features & Refinement)
+
+## 音效与音乐集成 (Sound Effects & Music Integration) (可选，但推荐)
+
+- [ ] 播放背景音乐和环境音效。
+- [ ] 播放战斗音效、交互音效。
+
+## UI/UX 优化 (User Interface/Experience Optimization)
+
+- [ ] 菜单系统（主菜单、设置、帮助）。
+- [ ] 快捷键设置与提示。
+- [ ] 错误处理与用户友好提示。
+
+## 故事脚本与内容填充 (Story Scripting & Content Population)
+
+- [ ] 根据“阿卡迪亚的挽歌”故事，编写所有对话、任务文本。
+- [ ] 设计所有地图区域的布局和细节。
+- [ ] 创建所有怪物、NPC 和物品的具体数值和描述。
+
+## 教程与新手引导 (Tutorial & Onboarding)
+
+- [ ] 引导玩家熟悉游戏机制和界面。
+- [ ] 逐步介绍核心玩法。
+
+# 阶段五：测试与迭代 (Testing & Iteration)
+
+## Bug 修复与性能优化 (Bug Fixing & Performance Optimization)
+
+- [ ] 识别并修复游戏中的错误。
+- [ ] 优化游戏性能，确保流畅运行。
+
+## 平衡性调整 (Balance Adjustments)
+
+- [ ] 调整战斗难度、经验值获取、物品掉落率。
+- [ ] 确保角色成长曲线合理。
+
+## 玩家反馈与迭代 (Player Feedback & Iteration)
+
+- [ ] 收集玩家反馈，进行后续改进。

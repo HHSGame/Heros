@@ -12,7 +12,7 @@ namespace HHSGame.Core.Enemies
         BanditLeader,
         Thug,
         Soldier,
-        Officer,
+        Sniper,
     }
 
     public enum EnemyState

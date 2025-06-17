@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII Tilemap Editor</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        /* Custom styles for canvas to ensure it fits and looks good */
+        canvas {
+            background-color: #000; /* Black background for visibility */
+            border: 1px solid #ccc; /* Light border */
+            display: block;
+            margin: 0 auto; /* Center the canvas */
+            /* Responsive width, max height handled by JS and container */
+            cursor: crosshair; /* Indicate drawing mode */
+        }
+        /* Style for radio buttons to make them look like toggles */
+        input[type="radio"]:checked + label {
+            background-color: #3b82f6; /* Blue for selected tool */
+            color: white;
+            border-color: #2563eb;
+        }
+
+        /* Container for canvas and rulers/indicators */
+        .canvas-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Rulers above/below or left/right */
+            max-width: 100%; /* Ensure responsiveness */
+            margin: 0 auto;
+        }
+
+        .canvas-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+        }
+
+        .ruler-x, .ruler-y {
+            position: absolute;
+            font-family: monospace;
+            font-size: 10px;
+            color: #9ca3af;
+            z-index: 10;
+        }
+
+        .ruler-x {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            display: flex;
+            overflow: hidden;
+            background-color: #333;
+        }
+
+        .ruler-y {
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #333;
+        }
+
+        .ruler-x span, .ruler-y span {
+            position: absolute;
+            text-align: center;
+            line-height: 20px;
+            white-space: nowrap;
+        }
+        .ruler-y span {
+            text-align: right;
+            padding-right: 2px;
+        }
+
+        #coordinatesDisplay {
+            min-height: 24px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        /* Side Indicators Styling */
+        .indicator {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+            z-index: 20;
+        }
+        .indicator.visible {
+            opacity: 1;
+        }
+        .indicator-top, .indicator-bottom {
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 20px;
+        }
+        .indicator-top { top: 0; border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
+        .indicator-bottom { bottom: 0; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; }
+        .indicator-left, .indicator-right {
+            top: 50%;
+            transform: translateY(-50%);
+            height: 80%;
+            width: 20px;
+        }
+        .indicator-left { left: 0; border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
+        .indicator-right { right: 0; border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; }
+    </style>
+</head>
+<body class="p-4 bg-gray-100 min-h-screen flex flex-col items-center justify-center">
+
+    <div class="max-w-4xl w-full bg-white rounded-lg shadow-xl p-6 space-y-6">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">ASCII Tilemap Editor</h1>
+
+        <!-- Map Configuration -->
+        <div class="bg-gray-50 p-4 rounded-lg shadow-inner flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <div class="flex items-center space-x-2">
+                <label for="mapWidth" class="text-gray-700 font-medium">Width:</label>
+                <input type="number" id="mapWidth" value="40" min="10" max="65536"
+                       class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+            </div>
+            <div class="flex items-center space-x-2">
+                <label for="mapHeight" class="text-gray-700 font-medium">Height:</label>
+                <input type="number" id="mapHeight" value="25" min="10" max="65536"
+                       class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+            </div>
+            <div class="flex items-center space-x-2">
+                <label for="roomCount" class="text-gray-700 font-medium">Rooms:</label>
+                <input type="number" id="roomCount" value="5" min="1" max="65536"
+                       class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+            </div>
+            <button id="createMapBtn"
+                    class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                Create Map
+            </button>
+            <div class="flex items-center space-x-2">
+                <button id="randomMapBtn"
+                        class="px-5 py-2 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus->ring-purple-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    Random Map
+                </button>
+            </div>
+        </div>
+
+        <!-- Tool Selection and Character Input -->
+        <div class="bg-gray-50 p-4 rounded-lg shadow-inner flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0">
+            <div class="flex flex-wrap gap-2 justify-center lg:justify-start">
+                <input type="radio" id="toolPaint" name="tool" value="paint" checked class="hidden">
+                <label for="toolPaint" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
+                    Paint
+                </label>
+
+                <input type="radio" id="toolBox" name="tool" value="box" class="hidden">
+                <label for="toolBox" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
+                    Box
+                </label>
+
+                <input type="radio" id="toolFill" name="tool" value="fill" class="hidden">
+                <label for="toolFill" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
+                    Fill
+                </label>
+
+                <input type="radio" id="toolDoor" name="tool" value="door" class="hidden">
+                <label for="toolDoor" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
+                    Door
+                </label>
+
+                <input type="radio" id="toolStairs" name="tool" value="stairs" class="hidden">
+                <label for="toolStairs" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
+                    Stairs
+                </label>
+
+                <input type="radio" id="toolMove" name="tool" value="move" class="hidden">
+                <label for="toolMove" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
+                    Move
+                </label>
+            </div>
+
+            <div class="flex items-center space-x-2 mt-4 lg:mt-0">
+                <label for="drawCharInput" class="text-gray-700 font-medium">Custom Char:</label>
+                <input type="text" id="drawCharInput" value="#" maxlength="1"
+                       class="w-16 px-3 py-2 text-center border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+            </div>
+        </div>
+
+        <!-- Quick Characters Dropdowns -->
+        <div class="bg-gray-50 p-4 rounded-lg shadow-inner flex flex-wrap gap-4 justify-center">
+            <div class="flex items-center space-x-2">
+                <label for="charGroupBasic" class="text-gray-700 font-medium">Basic:</label>
+                <select id="charGroupBasic" name="quickCharGroup"
+                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                    <option value="#"># Wall</option>
+                    <option value=".">. Floor</option>
+                    <option value=" ">_ Empty</option>
+                </select>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <label for="charGroupEntryExit" class="text-gray-700 font-medium">Entry/Exit:</label>
+                <select id="charGroupEntryExit" name="quickCharGroup"
+                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                    <option value="+">+ Door</option>
+                    <option value=">">> Stairs Down</option>
+                    <option value="<">< Stairs Up</option>
+                </select>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <label for="charGroupCreatures" class="text-gray-700 font-medium">Creatures:</label>
+                <select id="charGroupCreatures" name="quickCharGroup"
+                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                    <option value="@">@ Player</option>
+                    <option value="X">X Monster</option>
+                    <option value="D">D Dragon</option>
+                    <option value="S">S Snake</option>
+                    <option value="G">G Goblin</option>
+                    <option value="E">E Eye</option>
+                    <option value="C">C Cyclops</option>
+                </select>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <label for="charGroupItems" class="text-gray-700 font-medium">Items/Objects:</label>
+                <select id="charGroupItems" name="quickCharGroup"
+                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                    <option value="~">~ Liquid</option>
+                    <option value="$">$ Gold</option>
+                    <option value="P">P Potion</option>
+                    <option value="K">K Key</option>
+                    <option value="F">F Food</option>
+                    <option value="!">! Exclamation</option>
+                    <option value="?">? Question</option>
+                </select>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <label for="charGroupNumbers" class="text-gray-700 font-medium">Numbers:</label>
+                <select id="charGroupNumbers" name="quickCharGroup"
+                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+            </div>
+        </div>
+
+
+        <!-- Canvas for drawing with Rulers and Indicators -->
+        <div class="canvas-wrapper flex flex-col items-center">
+            <div id="rulerX" class="ruler-x relative w-full h-[20px] rounded-t-lg bg-gray-700 overflow-hidden"></div>
+            <div class="flex w-full">
+                <div id="rulerY" class="ruler-y relative w-[20px] h-full rounded-l-lg bg-gray-700 overflow-hidden"></div>
+                <div class="canvas-container relative flex-grow">
+                    <canvas id="tilemapCanvas"></canvas>
+                    <!-- Side Indicators -->
+                    <div id="indicatorTop" class="indicator indicator-top rounded-b-lg">▲</div>
+                    <div id="indicatorBottom" class="indicator indicator-bottom rounded-t-lg">▼</div>
+                    <div id="indicatorLeft" class="indicator indicator-left rounded-r-lg">◀</div>
+                    <div id="indicatorRight" class="indicator indicator-right rounded-l-lg">▶</div>
+                </div>
+            </div>
+            <div id="coordinatesDisplay" class="mt-2">Mouse: (X: -, Y: -)</div>
+        </div>
+
+        <!-- Zoom Controls -->
+        <div class="flex justify-center space-x-2 mt-4">
+            <button id="zoomInBtn" class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-150 ease-in-out">
+                Zoom In (+)
+            </button>
+            <button id="zoomOutBtn" class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-150 ease-in-out">
+                Zoom Out (-)
+            </button>
+        </div>
+
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
+            <button id="clearMapBtn"
+                    class="px-5 py-2 bg-red-600 text-white font-semibold rounded-md shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                Clear Map
+            </button>
+            <button id="exportMapBtn"
+                    class="px-5 py-2 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                Export Map
+            </button>
+            <input type="file" id="loadFileInput" accept=".txt" class="hidden">
+            <button id="loadMapBtn"
+                    class="px-5 py-2 bg-yellow-600 text-white font-semibold rounded-md shadow-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                Load Map
+            </button>
+        </div>
+
+        <!-- Message Box for user feedback -->
+        <div id="messageBox" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
+                <p id="messageText" class="text-gray-800 text-lg font-medium mb-4"></p>
+                <button id="closeMessageBoxBtn" class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    OK
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Get DOM elements
+        const canvas = document.getElementById('tilemapCanvas');
+        const ctx = canvas.getContext('2d');
+        const mapWidthInput = document.getElementById('mapWidth');
+        const mapHeightInput = document.getElementById('mapHeight');
+        const roomCountInput = document.getElementById('roomCount');
+        const createMapBtn = document.getElementById('createMapBtn');
+        const randomMapBtn = document.getElementById('randomMapBtn');
+        const toolRadios = document.querySelectorAll('input[name="tool"]');
+        const drawCharInput = document.getElementById('drawCharInput');
+        const quickCharGroupSelects = document.querySelectorAll('select[name="quickCharGroup"]');
+        const clearMapBtn = document.getElementById('clearMapBtn');
+        const exportMapBtn = document.getElementById('exportMapBtn');
+        const loadFileInput = document.getElementById('loadFileInput'); // New
+        const loadMapBtn = document.getElementById('loadMapBtn'); // New
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const closeMessageBoxBtn = document.getElementById('closeMessageBoxBtn');
+        const coordinatesDisplay = document.getElementById('coordinatesDisplay');
+        const rulerX = document.getElementById('rulerX');
+        const rulerY = document.getElementById('rulerY');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+
+        const indicatorTop = document.getElementById('indicatorTop');
+        const indicatorBottom = document.getElementById('indicatorBottom');
+        const indicatorLeft = document.getElementById('indicatorLeft');
+        const indicatorRight = document.getElementById('indicatorRight');
+
+        // --- Global Variables ---
+        let mapData = []; // 2D array to store ASCII characters
+        let mapWidth = parseInt(mapWidthInput.value);
+        let mapHeight = parseInt(mapHeightInput.value);
+        let charSize = 16; // Current drawing size of each character in pixels
+        let baseCharSize = 16; // The calculated base character size to fit the map in initial view
+        let currentZoom = 1.0; // Current zoom level
+        const MIN_ZOOM = 0.1;
+        const MAX_ZOOM = 5.0;
+        const ZOOM_STEP = 0.1;
+        const ZOOM_WHEEL_STEP = 0.05; // Smaller step for mouse wheel
+
+        let currentCol = '#f0f0f0'; // Default text color for characters
+
+        let currentTool = 'paint'; // Default tool
+        let drawChar = drawCharInput.value; // Default drawing character
+
+        let isDrawing = false; // Flag for drawing state (for paint, box)
+        let isPanning = false; // Flag for panning state (for move tool)
+        let startGridX = -1, startGridY = -1; // For box tool starting coordinates
+        let lastPanMouseX = 0, lastPanMouseY = 0; // For move tool mouse tracking
+
+        // Viewport offset for panning (in pixels relative to the full map)
+        let viewOffsetX = 0;
+        let viewOffsetY = 0;
+
+        // Stores generated room objects for pathfinding
+        let generatedRooms = [];
+
+        // --- Helper Functions ---
+
+        /**
+         * Displays a message box to the user.
+         * @param {string} message The message to display.
+         */
+        function showMessageBox(message) {
+            messageText.textContent = message;
+            messageBox.classList.remove('hidden');
+        }
+
+        /**
+         * Hides the message box.
+         */
+        function hideMessageBox() {
+            messageBox.classList.add('hidden');
+        }
+
+        /**
+         * Initializes the map data and resets view.
+         * Fills the map with spaces (' ').
+         */
+        function initializeMap() {
+            mapWidth = parseInt(mapWidthInput.value);
+            mapHeight = parseInt(mapHeightInput.value);
+
+            if (mapWidth < 10 || mapWidth > 65536 || mapHeight < 10 || mapHeight > 65536) {
+                showMessageBox("Map dimensions must be between 10 and 65536.");
+                // Reset to default if invalid
+                mapWidth = 40;
+                mapHeight = 25;
+                mapWidthInput.value = 40;
+                mapHeightInput.value = 25;
+            }
+
+            if (mapWidth * mapHeight > 5000 * 5000) { // Warning for extremely large maps
+                 showMessageBox("Warning: Extremely large maps may cause performance issues or browser crashes due to memory limitations.");
+            }
+
+
+            mapData = Array(mapHeight).fill(null).map(() => Array(mapWidth).fill(' ')); // Fill with spaces
+            generatedRooms = []; // Clear rooms on new map creation
+            currentZoom = 1.0; // Reset zoom
+            viewOffsetX = 0; // Reset pan
+            viewOffsetY = 0; // Reset pan
+            updateCanvasAndDraw();
+        }
+
+        /**
+         * Updates canvas dimensions, calculates charSize, and redraws everything.
+         * Call this after map size changes, window resize, or zoom changes.
+         */
+        function updateCanvasAndDraw() {
+            const canvasContainer = canvas.parentElement;
+            const containerWidth = canvasContainer.clientWidth;
+            const containerHeight = window.innerHeight * 0.6; // Max height for canvas area
+
+            // Determine the base character size so the whole map fits at zoom 1.0
+            // This is the largest charSize at which the *entire* map would fit within the container
+            const maxCharSizeX = containerWidth / mapWidth;
+            const maxCharSizeY = containerHeight / mapHeight;
+            // Ensure charSize has a reasonable minimum, and max initial at 24 for readability
+            baseCharSize = Math.max(8, Math.min(maxCharSizeX, maxCharSizeY, 24));
+
+            charSize = baseCharSize * currentZoom;
+
+            // Canvas dimensions are now the maximum visible area, not necessarily the full map size
+            canvas.width = containerWidth; // The actual pixel width of the canvas viewport
+            canvas.height = containerHeight; // The actual pixel height of the canvas viewport
+
+            // Ensure view offsets are within valid range after zoom/resize
+            clampViewOffsets();
+
+            // Set font properties based on updated charSize. Using 'monospace' for consistent ASCII alignment.
+            ctx.font = `${charSize}px 'monospace'`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = currentCol;
+
+            drawMap();
+            updateRulers();
+        }
+
+        /**
+         * Clamps view offsets to prevent panning beyond map boundaries.
+         */
+        function clampViewOffsets() {
+            const maxOffsetX = (mapWidth * charSize) - canvas.width;
+            const maxOffsetY = (mapHeight * charSize) - canvas.height;
+
+            viewOffsetX = Math.max(0, Math.min(viewOffsetX, maxOffsetX > 0 ? maxOffsetX : 0));
+            viewOffsetY = Math.max(0, Math.min(viewOffsetY, maxOffsetY > 0 ? maxOffsetY : 0));
+        }
+
+        /**
+         * Draws the entire map data onto the canvas, respecting current pan offset and zoom.
+         */
+        function drawMap() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Calculate visible grid range
+            const startCol = Math.floor(viewOffsetX / charSize);
+            const endCol = Math.min(mapWidth, Math.ceil((viewOffsetX + canvas.width) / charSize) + 1); // +1 for partial visibility
+            const startRow = Math.floor(viewOffsetY / charSize);
+            const endRow = Math.min(mapHeight, Math.ceil((viewOffsetY + canvas.height) / charSize) + 1); // +1 for partial visibility
+
+
+            for (let y = startRow; y < endRow; y++) {
+                for (let x = startCol; x < endCol; x++) {
+                    // Calculate position on the canvas relative to the current viewport offset
+                    const charX = (x * charSize + charSize / 2) - viewOffsetX;
+                    const charY = (y * charSize + charSize / 2) - viewOffsetY;
+                    // Only draw if within canvas bounds for performance
+                    if (charX >= -charSize && charX < canvas.width + charSize && charY >= -charSize && charY < canvas.height + charSize) {
+                         ctx.fillText(mapData[y][x], charX, charY);
+                    }
+                }
+            }
+            updateIndicators();
+        }
+
+        /**
+         * Updates the rulers based on current view offset and character size.
+         */
+        function updateRulers() {
+            rulerX.innerHTML = ''; // Clear existing rulers
+            rulerY.innerHTML = '';
+
+            const rulerFontSize = Math.max(8, Math.min(10, charSize / 2)); // Adjust ruler font size based on charSize
+
+            // Horizontal ruler
+            const startXIndex = Math.floor(viewOffsetX / charSize);
+            const endXIndex = Math.ceil((viewOffsetX + canvas.width) / charSize);
+            for (let i = startXIndex; i < endXIndex; i++) {
+                if (i >= 0 && i < mapWidth) {
+                    const span = document.createElement('span');
+                    span.textContent = i % 10;
+                    span.style.left = `${(i * charSize - viewOffsetX)}px`;
+                    span.style.width = `${charSize}px`;
+                    span.style.fontSize = `${rulerFontSize}px`;
+                    rulerX.appendChild(span);
+                }
+            }
+            rulerX.style.width = `${canvas.width}px`;
+
+            // Vertical ruler
+            const startYIndex = Math.floor(viewOffsetY / charSize);
+            const endYIndex = Math.ceil((viewOffsetY + canvas.height) / charSize);
+            for (let i = startYIndex; i < endYIndex; i++) {
+                if (i >= 0 && i < mapHeight) {
+                    const span = document.createElement('span');
+                    span.textContent = i % 10;
+                    span.style.top = `${(i * charSize - viewOffsetY)}px`;
+                    span.style.height = `${charSize}px`;
+                    span.style.fontSize = `${rulerFontSize}px`;
+                    rulerY.appendChild(span);
+                }
+            }
+            rulerY.style.height = `${canvas.height}px`;
+        }
+
+        /**
+         * Updates visibility of side indicators based on pan position.
+         */
+        function updateIndicators() {
+            indicatorTop.classList.toggle('visible', viewOffsetY > 0);
+            indicatorBottom.classList.toggle('visible', viewOffsetY + canvas.height < mapHeight * charSize);
+            indicatorLeft.classList.toggle('visible', viewOffsetX > 0);
+            indicatorRight.classList.toggle('visible', viewOffsetX + canvas.width < mapWidth * charSize);
+        }
+
+        /**
+         * Gets the grid coordinates (column, row) from mouse event coordinates,
+         * accounting for current pan offset.
+         * @param {MouseEvent|TouchEvent} event The mouse/touch event.
+         * @returns {{gridX: number, gridY: number}} The grid coordinates.
+         */
+        function getGridCoordinates(event) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const clientX = event.clientX || (event.touches && event.touches[0] ? event.touches[0].clientX : 0);
+            const clientY = event.clientY || (event.touches && event.touches[0] ? event.touches[0].clientY : 0);
+
+            const x = (clientX - rect.left) * scaleX;
+            const y = (clientY - rect.top) * scaleY;
+
+            // Adjust for pan offset to get actual map coordinates
+            const gridX = Math.floor((x + viewOffsetX) / charSize);
+            const gridY = Math.floor((y + viewOffsetY) / charSize);
+
+            return { gridX, gridY };
+        }
+
+        /**
+         * Implements the flood fill algorithm.
+         * @param {number} startX Starting X coordinate.
+         * @param {number} startY Starting Y coordinate.
+         * @param {string} newChar The character to fill with.
+         * @param {string} targetChar The original character to replace.
+         */
+        function floodFill(startX, startY, newChar, targetChar) {
+            // Check boundaries and if the current cell is the target character
+            if (startX < 0 || startX >= mapWidth || startY < 0 || startY >= mapHeight || mapData[startY][startX] !== targetChar) {
+                return;
+            }
+            // Avoid filling with the same character
+            if (newChar === targetChar) return;
+
+            const queue = [{ x: startX, y: startY }];
+            while (queue.length > 0) {
+                const { x, y } = queue.shift();
+
+                if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight || mapData[y][x] !== targetChar) {
+                    continue; // Skip if out of bounds or not target character
+                }
+
+                mapData[y][x] = newChar; // Fill the cell
+
+                // Add neighbors to the queue
+                queue.push({ x: x, y: y + 1 });
+                queue.push({ x: x, y: y - 1 });
+                queue.push({ x: x + 1, y: y });
+                queue.push({ x: x - 1, y: y });
+            }
+        }
+
+        /**
+         * Draws the box outline using box drawing characters onto a target map.
+         * @param {Array<Array<string>>} targetMap The map array to draw on (either mapData or tempMapData).
+         * @param {number} minX Top-left X coordinate of the box.
+         * @param {number} minY Top-left Y coordinate of the box.
+         * @param {number} maxX Bottom-right X coordinate of the box.
+         * @param {number} maxY Bottom-right Y coordinate of the box.
+         */
+        function drawBoxOutline(targetMap, minX, minY, maxX, maxY) {
+            const topLeft = '┌';
+            const topRight = '┐';
+            const bottomLeft = '└';
+            const bottomRight = '┘';
+            const horizontal = '─';
+            const vertical = '│';
+
+            for (let y = minY; y <= maxY; y++) {
+                for (let x = minX; x <= maxX; x++) {
+                    // Check boundaries first to avoid errors
+                    if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) continue;
+
+                    if (x === minX && y === minY) { // Top-left corner
+                        targetMap[y][x] = topLeft;
+                    } else if (x === maxX && y === minY) { // Top-right corner
+                        targetMap[y][x] = topRight;
+                    } else if (x === minX && y === maxY) { // Bottom-left corner
+                        targetMap[y][x] = bottomLeft;
+                    } else if (x === maxX && y === maxY) { // Bottom-right corner
+                        targetMap[y][x] = bottomRight;
+                    } else if (y === minY || y === maxY) { // Horizontal walls (top/bottom)
+                        targetMap[y][x] = horizontal;
+                    } else if (x === minX || x === maxX) { // Vertical walls (left/right)
+                        targetMap[y][x] = vertical;
+                    }
+                    // If a cell is inside the box but not part of the border, it remains unchanged.
+                }
+            }
+        }
+
+        /**
+         * Generates a random dungeon map (always 'town' style now).
+         */
+        function generateRandomMap() {
+            mapWidth = parseInt(mapWidthInput.value);
+            mapHeight = parseInt(mapHeightInput.value);
+            const numRooms = parseInt(roomCountInput.value);
+
+            if (mapWidth < 10 || mapWidth > 65536 || mapHeight < 10 || mapHeight > 65536 || numRooms < 1 || numRooms > 65536) {
+                 showMessageBox("Map dimensions must be between 10-65536, and rooms between 1-65536.");
+                 return;
+            }
+
+            // Initialize map with spaces for a clean slate
+            mapData = Array(mapHeight).fill(null).map(() => Array(mapWidth).fill(' '));
+            generatedRooms = []; // Clear rooms on new map creation
+            currentZoom = 1.0; // Reset zoom
+            viewOffsetX = 0; // Reset pan
+            viewOffsetY = 0; // Reset pan
+
+            generateTownMap(numRooms); // Always generate town style now
+
+            updateCanvasAndDraw(); // Redraw the new random map
+            showMessageBox(`Generated random map.`);
+        }
+
+        /**
+         * Generates a town-like map with rooms and corridors.
+         * @param {number} numRooms The number of rooms to attempt to generate.
+         */
+        function generateTownMap(numRooms) {
+            const MIN_ROOM_SIZE = 5;
+            const MAX_ROOM_SIZE = 15;
+            const ROOM_ATTEMPTS = numRooms * 5;
+
+            // Step 1: Create rooms
+            for (let i = 0; i < ROOM_ATTEMPTS && generatedRooms.length < numRooms; i++) {
+                const rw = Math.floor(Math.random() * ((MAX_ROOM_SIZE - MIN_ROOM_SIZE) / 2 + 1)) * 2 + MIN_ROOM_SIZE;
+                const rh = Math.floor(Math.random() * ((MAX_ROOM_SIZE - MIN_ROOM_SIZE) / 2 + 1)) * 2 + MIN_ROOM_SIZE;
+
+                const rx = Math.floor(Math.random() * (mapWidth - rw - 1)) + 1;
+                const ry = Math.floor(Math.random() * (mapHeight - rh - 1)) + 1;
+
+                const newRoom = { x: rx, y: ry, width: rw, height: rh };
+
+                let overlaps = false;
+                for (const existingRoom of generatedRooms) {
+                    // Check for overlap with a buffer of 1 cell
+                    if (newRoom.x < existingRoom.x + existingRoom.width + 1 &&
+                        newRoom.x + newRoom.width + 1 > existingRoom.x &&
+                        newRoom.y < existingRoom.y + existingRoom.height + 1 &&
+                        newRoom.y + newRoom.height + 1 > existingRoom.y) {
+                        overlaps = true;
+                        break;
+                    }
+                }
+
+                if (!overlaps) {
+                    // Carve out floor
+                    for (let y = newRoom.y + 1; y < newRoom.y + newRoom.height - 1; y++) {
+                        for (let x = newRoom.x + 1; x < newRoom.x + newRoom.width - 1; x++) {
+                            mapData[y][x] = '.'; // Floor
+                        }
+                    }
+                    // Draw box outline for walls
+                    drawBoxOutline(mapData, newRoom.x, newRoom.y, newRoom.x + newRoom.width - 1, newRoom.y + newRoom.height - 1);
+                    generatedRooms.push(newRoom);
+                }
+            }
+
+            // Step 2: Connect rooms with corridors
+            generatedRooms.sort((a, b) => a.x - b.x);
+            for (let i = 0; i < generatedRooms.length - 1; i++) {
+                const room1 = generatedRooms[i];
+                const room2 = generatedRooms[i + 1];
+
+                const center1X = Math.floor(room1.x + room1.width / 2);
+                const center1Y = Math.floor(room1.y + room1.height / 2);
+                const center2X = Math.floor(room2.x + room2.width / 2);
+                const center2Y = Math.floor(room2.y + room2.height / 2);
+
+                // Draw horizontal corridor
+                for (let x = Math.min(center1X, center2X); x <= Math.max(center1X, center2X); x++) {
+                    if (center1Y >= 0 && center1Y < mapHeight && x >= 0 && x < mapWidth) {
+                        mapData[center1Y][x] = '.'; // Path
+                    }
+                }
+                // Draw vertical corridor
+                for (let y = Math.min(center1Y, center2Y); y <= Math.max(center1Y, center2Y); y++) {
+                    if (y >= 0 && y < mapHeight && center2X >= 0 && center2X < mapWidth) {
+                        mapData[y][center2X] = '.'; // Path
+                    }
+                    // Ensure that the cell connecting a corridor to a room is part of the corridor
+                    // and doesn't get overwritten by a wall character if it's already a floor.
+                    const charAtCoord = mapData[y][center2X];
+                    if (charAtCoord !== '┌' && charAtCoord !== '┐' &&
+                        charAtCoord !== '└' && charAtCoord !== '┘' &&
+                        charAtCoord !== '─' && charAtCoord !== '│' &&
+                        charAtCoord !== '.') { // Also ensure it's not already a floor
+                            mapData[y][center2X] = '.';
+                    }
+                }
+            }
+
+            // Step 3: Add doors randomly (no stairs)
+            addSpecialItemsRandomly();
+        }
+
+        /**
+         * Adds doors randomly to the map.
+         * Places doors on walls adjacent to floor. No stairs added.
+         */
+        function addSpecialItemsRandomly() {
+            const MAX_DOORS = Math.min(Math.floor(mapWidth * mapHeight / 200), 5); // Max 5 doors or 0.5% of map
+            let doorsPlaced = 0;
+
+            for (let i = 0; i < MAX_DOORS * 5; i++) { // Attempt more times to place
+                const rx = Math.floor(Math.random() * mapWidth);
+                const ry = Math.floor(Math.random() * mapHeight);
+
+                // Place doors
+                if (doorsPlaced < MAX_DOORS && rx >=0 && rx < mapWidth && ry >=0 && ry < mapHeight) {
+                    // Check if it's a wall character and has floor on two opposite sides (horizontal or vertical)
+                    const currentCell = mapData[ry][rx];
+                    if (['─', '│'].includes(currentCell)) { // Only place doors on horizontal or vertical walls
+                        const isHorizontalDoorSpot = (rx > 0 && mapData[ry][rx-1] === '.') && (rx < mapWidth - 1 && mapData[ry][rx+1] === '.');
+                        const isVerticalDoorSpot = (ry > 0 && mapData[ry-1][rx] === '.') && (ry < mapHeight - 1 && mapData[ry+1][rx] === '.');
+                        
+                        if (isHorizontalDoorSpot || isVerticalDoorSpot) {
+                            mapData[ry][rx] = '+';
+                            doorsPlaced++;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        // --- Event Handlers ---
+
+        /**
+         * Handles mouse/touch down event on canvas.
+         * @param {MouseEvent|TouchEvent} event
+         */
+        function handleCanvasMouseDown(event) {
+            event.preventDefault(); // Prevent default touch behavior (scrolling, zooming)
+            isDrawing = true; // For drawing tools
+            isPanning = false; // Assume not panning initially
+
+            const clientX = event.clientX || (event.touches && event.touches[0] ? event.touches[0].clientX : 0);
+            const clientY = event.clientY || (event.touches && event.touches[0] ? event.touches[0].clientY : 0);
+
+            lastPanMouseX = clientX;
+            lastPanMouseY = clientY;
+
+            if (currentTool === 'move') {
+                isPanning = true;
+                canvas.style.cursor = 'grab'; // Change cursor for move tool
+            } else {
+                canvas.style.cursor = 'crosshair'; // Default cursor for drawing tools
+                const { gridX, gridY } = getGridCoordinates(event);
+                startGridX = gridX;
+                startGridY = gridY;
+
+                if (currentTool === 'paint') {
+                    if (gridX >= 0 && gridX < mapWidth && gridY >= 0 && gridY < mapHeight) {
+                        mapData[gridY][gridX] = drawChar;
+                        drawMap();
+                    }
+                } else if (currentTool === 'door') {
+                    if (gridX >= 0 && gridX < mapWidth && gridY >= 0 && gridY < mapHeight) {
+                        mapData[gridY][gridX] = '+'; // Door character
+                        drawMap();
+                    }
+                } else if (currentTool === 'stairs') { // Stairs tool still available for manual drawing
+                    if (gridX >= 0 && gridX < mapWidth && gridY >= 0 && gridY < mapHeight) {
+                        mapData[gridY][gridX] = '>'; // Stairs character
+                        drawMap();
+                    }
+                } else if (currentTool === 'fill') {
+                    if (gridX >= 0 && gridX < mapWidth && gridY >= 0 && gridY < mapHeight) {
+                        const targetChar = mapData[gridY][gridX];
+                        if (targetChar !== drawChar) { // Only fill if target is different
+                            floodFill(gridX, gridY, drawChar, targetChar);
+                            drawMap();
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * Handles mouse/touch move event on canvas.
+         * @param {MouseEvent|TouchEvent} event
+         */
+        function handleCanvasMouseMove(event) {
+            event.preventDefault(); // Prevent default touch behavior
+            const clientX = event.clientX || (event.touches && event.touches[0] ? event.touches[0].clientX : 0);
+            const clientY = event.clientY || (event.touches && event.touches[0] ? event.touches[0].clientY : 0);
+
+            const { gridX, gridY } = getGridCoordinates(event);
+            coordinatesDisplay.textContent = `Mouse: (X: ${gridX}, Y: ${gridY})`;
+
+            if (isPanning && currentTool === 'move') {
+                const dx = clientX - lastPanMouseX;
+                const dy = clientY - lastPanMouseY;
+
+                viewOffsetX -= dx;
+                viewOffsetY -= dy;
+
+                clampViewOffsets(); // Ensure offsets are valid after panning
+
+                lastPanMouseX = clientX;
+                lastPanMouseY = clientY;
+
+                drawMap();
+                updateRulers();
+            } else if (isDrawing && currentTool === 'paint') {
+                // Draw if within bounds and different character
+                if (gridX >= 0 && gridX < mapWidth && gridY >= 0 && gridY < mapHeight && mapData[gridY][gridX] !== drawChar) {
+                    mapData[gridY][gridX] = drawChar;
+                    drawMap();
+                }
+            } else if (isDrawing && currentTool === 'box') {
+                // Live preview for box tool
+                const tempMapData = JSON.parse(JSON.stringify(mapData)); // Create a deep copy
+                const minX = Math.min(startGridX, gridX);
+                const maxX = Math.max(startGridX, gridX);
+                const minY = Math.min(startGridY, gridY);
+                const maxY = Math.max(startGridY, gridY);
+
+                // Draw a simple box outline for preview
+                drawBoxOutline(tempMapData, minX, minY, maxX, maxY);
+
+
+                // Re-draw with temporary data
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const startCol = Math.floor(viewOffsetX / charSize);
+                const endCol = Math.min(mapWidth, Math.ceil((viewOffsetX + canvas.width) / charSize) + 1);
+                const startRow = Math.floor(viewOffsetY / charSize);
+                const endRow = Math.min(mapHeight, Math.ceil((viewOffsetY + canvas.height) / charSize) + 1);
+
+                for (let y = startRow; y < endRow; y++) {
+                    for (let x = startCol; x < endCol; x++) {
+                        const charX = (x * charSize + charSize / 2) - viewOffsetX;
+                        const charY = (y * charSize + charSize / 2) - viewOffsetY;
+                        if (charX >= -charSize && charX < canvas.width + charSize && charY >= -charSize && charY < canvas.height + charSize) {
+                            ctx.fillText(tempMapData[y][x], charX, charY);
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * Handles mouse/touch up event on canvas.
+         * @param {MouseEvent|TouchEvent} event
+         */
+        function handleCanvasMouseUp(event) {
+            event.preventDefault(); // Prevent default touch behavior
+            if (!isDrawing) return; // Only process if drawing started
+            isDrawing = false;
+            isPanning = false;
+            canvas.style.cursor = (currentTool === 'move') ? 'grab' : 'crosshair'; // Reset cursor
+
+            const { gridX, gridY } = getGridCoordinates(event);
+
+            const minX = Math.min(startGridX, gridX);
+            const maxX = Math.max(startGridX, gridX);
+            const minY = Math.min(startGridY, gridY);
+            const maxY = Math.max(startGridY, gridY);
+
+            // Ensure coordinates are within map bounds
+            const finalMinX = Math.max(0, minX);
+            const finalMaxX = Math.min(mapWidth - 1, maxX);
+            const finalMinY = Math.max(0, minY);
+            const finalMaxY = Math.min(mapHeight - 1, maxY);
+
+            if (currentTool === 'box') {
+                drawBoxOutline(mapData, finalMinX, finalMinY, finalMaxX, finalMaxY);
+            }
+            drawMap(); // Redraw the final map state
+        }
+
+        /**
+         * Handles mouse leave event on canvas to stop drawing/panning.
+         * @param {MouseEvent} event
+         */
+        function handleCanvasMouseLeave(event) {
+            if (isDrawing || isPanning) {
+                // If the mouse leaves while drawing/panning, simulate mouse up
+                handleCanvasMouseUp(event);
+            }
+            coordinatesDisplay.textContent = `Mouse: (X: -, Y: -)`; // Clear coordinates
+        }
+
+        // --- Event Listeners ---
+
+        // Initialize map when the window loads
+        window.onload = function() {
+            initializeMap();
+            // Add a resize listener to handle responsiveness
+            window.addEventListener('resize', () => {
+                updateCanvasAndDraw();
+            });
+        };
+
+        // Create Map button click
+        createMapBtn.addEventListener('click', initializeMap);
+
+        // Random Map button click
+        randomMapBtn.addEventListener('click', generateRandomMap);
+
+        // Tool selection
+        toolRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                currentTool = event.target.value;
+                // Update default char based on tool or reset if not a special tool
+                if (currentTool === 'door') {
+                    drawCharInput.value = '+';
+                } else if (currentTool === 'stairs') {
+                    drawCharInput.value = '>';
+                } else if (currentTool === 'move') {
+                    canvas.style.cursor = 'grab'; // Set cursor for move tool
+                } else if (currentTool === 'box') {
+                     canvas.style.cursor = 'crosshair';
+                }
+                else { // paint, fill
+                    canvas.style.cursor = 'crosshair'; // Reset cursor for drawing tools
+                    // When switching to paint/fill, set drawChar to the currently selected quick char, or '#'
+                    const selectedQuickChar = document.querySelector('select[name="quickCharGroup"] option:checked')?.value;
+                    drawCharInput.value = selectedQuickChar || '#';
+                }
+                drawChar = drawCharInput.value; // Update drawChar from input field
+            });
+        });
+
+        // Drawing character input change (for custom char)
+        drawCharInput.addEventListener('input', (event) => {
+            drawChar = event.target.value.substring(0, 1) || ' '; // Default to space if empty
+            drawCharInput.value = drawChar; // Force single char in input
+        });
+
+        // Quick character group select change
+        quickCharGroupSelects.forEach(select => {
+            select.addEventListener('change', (event) => {
+                drawChar = event.target.value;
+                drawCharInput.value = drawChar === ' ' ? '' : drawChar; // Set input, clear for space
+                // Auto-select paint tool when a char is selected from a dropdown, if not move/fill/door/stairs/box
+                if (currentTool === 'move' || currentTool === 'fill' || currentTool === 'door' || currentTool === 'stairs' || currentTool === 'box') {
+                    // Do nothing, let the current specialized tool remain active
+                } else {
+                    document.getElementById('toolPaint').checked = true;
+                    currentTool = 'paint';
+                    canvas.style.cursor = 'crosshair';
+                }
+            });
+        });
+
+
+        // Canvas mouse/touch events
+        canvas.addEventListener('mousedown', handleCanvasMouseDown);
+        canvas.addEventListener('mousemove', handleCanvasMouseMove);
+        canvas.addEventListener('mouseup', handleCanvasMouseUp);
+        canvas.addEventListener('mouseleave', handleCanvasMouseLeave);
+
+        // Touch events for mobile responsiveness
+        canvas.addEventListener('touchstart', handleCanvasMouseDown);
+        canvas.addEventListener('touchmove', handleCanvasMouseMove);
+        canvas.addEventListener('touchend', handleCanvasMouseUp);
+        canvas.addEventListener('touchcancel', handleCanvasMouseUp); // Consider touchcancel as mouseup
+
+        // Clear Map button click
+        clearMapBtn.addEventListener('click', () => {
+            initializeMap(); // Re-initialize the map to clear it
+            showMessageBox("Map cleared!");
+        });
+
+        // Export Map button click
+        exportMapBtn.addEventListener('click', () => {
+            const mapText = mapData.map(row => row.join('')).join('\n');
+            const blob = new Blob([mapText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tilemap.txt';
+            document.body.appendChild(a); // Append to body to make it clickable
+            a.click(); // Programmatically click the link
+            document.body.removeChild(a); // Clean up
+            URL.revokeObjectURL(url); // Release the object URL
+            showMessageBox("Map exported successfully as tilemap.txt!");
+        });
+
+        // Close message box button
+        closeMessageBoxBtn.addEventListener('click', hideMessageBox);
+
+        // Zoom button event listeners
+        zoomInBtn.addEventListener('click', () => {
+            currentZoom = Math.min(MAX_ZOOM, currentZoom + ZOOM_STEP);
+            updateCanvasAndDraw();
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+            currentZoom = Math.max(MIN_ZOOM, currentZoom - ZOOM_STEP);
+            updateCanvasAndDraw();
+        });
+
+        // Mouse Wheel Zoom
+        canvas.addEventListener('wheel', (event) => {
+            event.preventDefault(); // Prevent page scrolling
+
+            const oldZoom = currentZoom;
+            if (event.deltaY < 0) { // Zoom in
+                currentZoom = Math.min(MAX_ZOOM, currentZoom + ZOOM_WHEEL_STEP);
+            } else { // Zoom out
+                currentZoom = Math.max(MIN_ZOOM, currentZoom - ZOOM_WHEEL_STEP);
+            }
+
+            // Adjust view offset to zoom towards the mouse pointer
+            const mouseX_canvas = event.clientX - canvas.getBoundingClientRect().left;
+            const mouseY_canvas = event.clientY - canvas.getBoundingClientRect().top;
+
+            const oldMapX_pixel = viewOffsetX + mouseX_canvas;
+            const oldMapY_pixel_corrected = viewOffsetY + mouseY_canvas;
+
+
+            viewOffsetX = (oldMapX_pixel * (currentZoom / oldZoom)) - mouseX_canvas;
+            viewOffsetY = (oldMapY_pixel_corrected * (currentZoom / oldZoom)) - mouseY_canvas; // Corrected line
+
+            updateCanvasAndDraw();
+        }, { passive: false }); // Use passive: false to allow preventDefault
+
+        // --- Load Map Button and File Input Logic ---
+        loadMapBtn.addEventListener('click', () => {
+            loadFileInput.click(); // Programmatically click the hidden file input
+        });
+
+        loadFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                const lines = content.split(/\r?\n/); // Split by newline, handle both Windows/Unix
+
+                let loadedHeight = lines.length;
+                let loadedWidth = 0;
+                // Determine the maximum width
+                for (const line of lines) {
+                    if (line.length > loadedWidth) {
+                        loadedWidth = line.length;
+                    }
+                }
+
+                // Warn about large maps before loading
+                if (loadedWidth * loadedHeight > 5000 * 5000) {
+                    showMessageBox("Warning: This map is extremely large and may cause performance issues or browser crashes. Proceeding with load...");
+                }
+
+                // Update input fields and global variables
+                mapWidthInput.value = loadedWidth;
+                mapHeightInput.value = loadedHeight;
+                mapWidth = loadedWidth;
+                mapHeight = loadedHeight;
+
+                // Reinitialize mapData with loaded content, padding or truncating lines as needed
+                mapData = [];
+                for (let i = 0; i < loadedHeight; i++) {
+                    let line = lines[i] || ''; // Handle potentially empty lines
+                    if (line.length < mapWidth) {
+                        line = line.padEnd(mapWidth, ' '); // Pad with spaces
+                    } else if (line.length > mapWidth) {
+                        line = line.substring(0, mapWidth); // Truncate
+                    }
+                    mapData.push(line.split(''));
+                }
+                
+                generatedRooms = []; // Clear generated rooms as this is a loaded map
+                currentZoom = 1.0; // Reset zoom for loaded map
+                viewOffsetX = 0; // Reset pan
+                viewOffsetY = 0; // Reset pan
+
+                updateCanvasAndDraw();
+                showMessageBox(`Map "${file.name}" loaded successfully! Dimensions: ${loadedWidth}x${loadedHeight}`);
+            };
+
+            reader.onerror = (e) => {
+                showMessageBox(`Error reading file: ${e.target.error.name}`);
+            };
+
+            reader.readAsText(file);
+        });
+
+    </script>
+</body>
+</html>

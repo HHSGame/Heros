@@ -6,6 +6,8 @@ This document provides a high-level overview of the HHSGame project structure an
 
 HHSGame is a C# based nethack clone with random generated terrain map and enemies. The game runs on the terminal, and tiles are made by unicode characters.
 
+This game is setting in WWII Northen China during Second Sino-Japan War.
+
 ## 2. Directory Structure
 
 The project is organized into the following directories:

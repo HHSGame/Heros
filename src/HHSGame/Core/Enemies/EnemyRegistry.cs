@@ -38,8 +38,8 @@ namespace HHSGame.Core.Enemies
                 new EnemyConfig("Soldier", 60, 10, 5, 60, 's', ColorPresets.Enemies.Soldier)
             },
             {
-                EnemyType.Officer,
-                new EnemyConfig("Officer", 100, 15, 8, 100, 'o', ColorPresets.Enemies.Officer)
+                EnemyType.Sniper,
+                new EnemyConfig("Sniper", 50, 20, 3, 150, 's', ColorPresets.Enemies.Sniper)
             }
         };
 

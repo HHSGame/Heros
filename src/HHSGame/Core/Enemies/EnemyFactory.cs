@@ -17,9 +17,9 @@ namespace HHSGame.Core.Enemies
             SpawnEnemyType(enemies, EnemyType.BanditLeader, 5);
             SpawnEnemyType(enemies, EnemyType.Thug, 100);
             SpawnEnemyType(enemies, EnemyType.Soldier, 60);
-            SpawnEnemyType(enemies, EnemyType.Officer, 10);
+            SpawnEnemyType(enemies, EnemyType.Sniper, 5);
 
-            EventSystem.RaiseGameMessage("Enemies spawned: 50 Gangsters, 30 Bandits, 5 Bandit Leaders, 100 Thugs, 60 Soldiers, 10 Officer");
+            EventSystem.RaiseGameMessage("Enemies spawned: 50 Gangsters, 30 Bandits, 5 Bandit Leaders, 100 Thugs, 60 Soldiers, 5 Snipers");
             return enemies;
         }
 

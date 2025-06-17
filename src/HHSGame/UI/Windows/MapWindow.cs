@@ -17,5 +17,7 @@ namespace HHSGame.UI.Windows
 
             drawingContext.AttachTo(this);
         }
+
+        
     }
 }

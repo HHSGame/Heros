@@ -144,18 +144,26 @@
         <div class="bg-gray-50 p-4 rounded-lg shadow-inner flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <div class="flex items-center space-x-2">
                 <label for="mapWidth" class="text-gray-700 font-medium">Width:</label>
-                <input type="number" id="mapWidth" value="40" min="10" max="65536"
+                <input type="number" id="mapWidth" value="40" min="20" max="65536"
                        class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
             </div>
             <div class="flex items-center space-x-2">
                 <label for="mapHeight" class="text-gray-700 font-medium">Height:</label>
-                <input type="number" id="mapHeight" value="25" min="10" max="65536"
+                <input type="number" id="mapHeight" value="25" min="20" max="65536"
                        class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
             </div>
             <div class="flex items-center space-x-2">
-                <label for="roomCount" class="text-gray-700 font-medium">Rooms:</label>
-                <input type="number" id="roomCount" value="5" min="1" max="65536"
+                <label for="roomCount" id="roomCountLabel" class="text-gray-700 font-medium">Rooms:</label>
+                <input type="number" id="roomCount" value="5" min="2" max="65536"
                        class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+            </div>
+            <div class="flex items-center space-x-2">
+                <label for="mapStyle" class="text-gray-700 font-medium">Style:</label>
+                <select id="mapStyle" class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                    <option value="town">Town</option>
+                    <option value="cave">Cave</option>
+                    <option value="forest">Forest</option>
+                </select>
             </div>
             <button id="createMapBtn"
                     class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
@@ -163,7 +171,7 @@
             </button>
             <div class="flex items-center space-x-2">
                 <button id="randomMapBtn"
-                        class="px-5 py-2 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus->ring-purple-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                        class="px-5 py-2 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-150 ease-in-out">
                     Random Map
                 </button>
             </div>
@@ -337,6 +345,8 @@
         const mapWidthInput = document.getElementById('mapWidth');
         const mapHeightInput = document.getElementById('mapHeight');
         const roomCountInput = document.getElementById('roomCount');
+        const roomCountLabel = document.getElementById('roomCountLabel'); // New: Get the label element
+        const mapStyleSelect = document.getElementById('mapStyle'); // New
         const createMapBtn = document.getElementById('createMapBtn');
         const randomMapBtn = document.getElementById('randomMapBtn');
         const toolRadios = document.querySelectorAll('input[name="tool"]');
@@ -344,8 +354,8 @@
         const quickCharGroupSelects = document.querySelectorAll('select[name="quickCharGroup"]');
         const clearMapBtn = document.getElementById('clearMapBtn');
         const exportMapBtn = document.getElementById('exportMapBtn');
-        const loadFileInput = document.getElementById('loadFileInput'); // New
-        const loadMapBtn = document.getElementById('loadMapBtn'); // New
+        const loadFileInput = document.getElementById('loadFileInput');
+        const loadMapBtn = document.getElementById('loadMapBtn');
         const messageBox = document.getElementById('messageBox');
         const messageText = document.getElementById('messageText');
         const closeMessageBoxBtn = document.getElementById('closeMessageBoxBtn');
@@ -386,8 +396,16 @@
         let viewOffsetX = 0;
         let viewOffsetY = 0;
 
-        // Stores generated room objects for pathfinding
+        // Stores generated room objects for pathfinding (primarily for town)
         let generatedRooms = [];
+
+        // Global visited matrix for region carving to ensure distinct regions
+        let globalVisitedRegions = [];
+
+        // Constants for region sizes (as percentage of total map area)
+        const MIN_REGION_SIZE_FACTOR = 0.005; // 0.5% of total map area
+        const MAX_REGION_SIZE_FACTOR = 0.05;  // 5% of total map area
+        const MAX_CARVE_ATTEMPTS = 50; // Max attempts to place a region for each desired region
 
         // --- Helper Functions ---
 
@@ -408,26 +426,44 @@
         }
 
         /**
+         * Validates map dimensions and room count against requirements.
+         * @returns {boolean} True if dimensions are valid, false otherwise.
+         */
+        function validateMapParameters(width, height, rooms) {
+            if (width < 20 || width > 65536 || height < 20 || height > 65536) {
+                showMessageBox("Map dimensions (width/height) must be between 20 and 65536.");
+                return false;
+            }
+            if (rooms < 2 || rooms > 65536) {
+                showMessageBox("Number of rooms/caves/clearings must be between 2 and 65536.");
+                return false;
+            }
+            // Add warning for extremely large maps, but don't prevent
+            if (width * height > 25000000) { // 5000x5000 = 25,000,000 cells
+                 showMessageBox("Warning: Extremely large maps may cause performance issues or browser crashes due to memory limitations. Proceed with caution.");
+            }
+            return true;
+        }
+
+        /**
          * Initializes the map data and resets view.
          * Fills the map with spaces (' ').
          */
         function initializeMap() {
-            mapWidth = parseInt(mapWidthInput.value);
-            mapHeight = parseInt(mapHeightInput.value);
+            const newMapWidth = parseInt(mapWidthInput.value);
+            const newMapHeight = parseInt(mapHeightInput.value);
+            const newRoomCount = parseInt(roomCountInput.value); // Even if not used directly, validate
 
-            if (mapWidth < 10 || mapWidth > 65536 || mapHeight < 10 || mapHeight > 65536) {
-                showMessageBox("Map dimensions must be between 10 and 65536.");
-                // Reset to default if invalid
-                mapWidth = 40;
-                mapHeight = 25;
-                mapWidthInput.value = 40;
-                mapHeightInput.value = 25;
+            if (!validateMapParameters(newMapWidth, newMapHeight, newRoomCount)) {
+                // Revert inputs to current map size if validation fails
+                mapWidthInput.value = mapWidth;
+                mapHeightInput.value = mapHeight;
+                roomCountInput.value = newRoomCount; // Keep last entered room count
+                return;
             }
 
-            if (mapWidth * mapHeight > 5000 * 5000) { // Warning for extremely large maps
-                 showMessageBox("Warning: Extremely large maps may cause performance issues or browser crashes due to memory limitations.");
-            }
-
+            mapWidth = newMapWidth;
+            mapHeight = newMapHeight;
 
             mapData = Array(mapHeight).fill(null).map(() => Array(mapWidth).fill(' ')); // Fill with spaces
             generatedRooms = []; // Clear rooms on new map creation
@@ -657,30 +693,132 @@
         }
 
         /**
-         * Generates a random dungeon map (always 'town' style now).
+         * Generates a random dungeon map based on selected style.
          */
         function generateRandomMap() {
-            mapWidth = parseInt(mapWidthInput.value);
-            mapHeight = parseInt(mapHeightInput.value);
-            const numRooms = parseInt(roomCountInput.value);
+            const newMapWidth = parseInt(mapWidthInput.value);
+            const newMapHeight = parseInt(mapHeightInput.value);
+            const numFeatures = parseInt(roomCountInput.value); // Renamed to numFeatures for clarity across styles
+            const mapStyle = mapStyleSelect.value;
 
-            if (mapWidth < 10 || mapWidth > 65536 || mapHeight < 10 || mapHeight > 65536 || numRooms < 1 || numRooms > 65536) {
-                 showMessageBox("Map dimensions must be between 10-65536, and rooms between 1-65536.");
-                 return;
+            if (!validateMapParameters(newMapWidth, newMapHeight, numFeatures)) {
+                return;
             }
 
-            // Initialize map with spaces for a clean slate
-            mapData = Array(mapHeight).fill(null).map(() => Array(mapWidth).fill(' '));
+            mapWidth = newMapWidth;
+            mapHeight = newMapHeight;
+
+            // Reset map and global state
+            mapData = Array(mapHeight).fill(null).map(() => Array(mapWidth).fill(' ')); // Default to void space
             generatedRooms = []; // Clear rooms on new map creation
             currentZoom = 1.0; // Reset zoom
             viewOffsetX = 0; // Reset pan
             viewOffsetY = 0; // Reset pan
 
-            generateTownMap(numRooms); // Always generate town style now
+            // Initialize global visited regions at the start of map generation for unique regions
+            globalVisitedRegions = Array(mapHeight).fill(null).map(() => Array(mapWidth).fill(false));
+
+            switch (mapStyle) {
+                case 'town':
+                    generateTownMap(numFeatures);
+                    break;
+                case 'cave':
+                    generateCaveMap(numFeatures);
+                    break;
+                case 'forest':
+                    generateForestMap(numFeatures);
+                    break;
+                default:
+                    generateTownMap(numFeatures);
+            }
 
             updateCanvasAndDraw(); // Redraw the new random map
-            showMessageBox(`Generated random map.`);
+            showMessageBox(`Generated random map (Style: ${mapStyle.charAt(0).toUpperCase() + mapStyle.slice(1)})`);
         }
+
+        /**
+         * Carves a connected region of a specific fill character into the map using a drunkard's walk.
+         * Ensures distinct regions by preventing starting points near already carved areas.
+         * @param {number} startX Start X for the region.
+         * @param {number} startY Start Y for the region.
+         * @param {string} targetChar The character to replace (e.g., ' ' for cave, '#' for forest).
+         * @param {string} fillChar The character to fill with (e.g., '.').
+         * @param {Array<Array<boolean>>} globalVisitedMatrix Global visited matrix to track cells from all successfully carved regions.
+         * @param {number} minSize Minimum size of the region (in cells).
+         * @param {number} maxSize Maximum size of the region (in cells).
+         * @returns {boolean} True if a region of sufficient size was carved.
+         */
+        function carveRegion(startX, startY, targetChar, fillChar, globalVisitedMatrix, minSize, maxSize) {
+            // Check if the starting point is valid: it must be targetChar and not adjacent to an already filled region
+            const checkNeighborsForOverlap = (x, y) => {
+                const directNeighbors = [{dx:0,dy:1}, {dx:0,dy:-1}, {dx:1,dy:0}, {dx:-1,dy:0}, {dx:-1,dy:-1}, {dx:-1,dy:1}, {dx:1,dy:-1}, {dx:1,dy:1}]; // Include diagonals for stronger separation
+                for (const n of directNeighbors) {
+                    const nx = x + n.dx;
+                    const ny = y + n.dy;
+                    if (nx >= 0 && nx < mapWidth && ny >= 0 && ny < mapHeight &&
+                        globalVisitedMatrix[ny][nx]) { // Check if neighbor is part of an already completed region
+                        return true; // Overlaps with an existing filled region
+                    }
+                }
+                return false;
+            };
+
+            // Ensure startX, startY are not on the immediate border and are valid
+            if (startX < 1 || startX >= mapWidth - 1 || startY < 1 || startY >= mapHeight - 1 ||
+                mapData[startY][startX] !== targetChar || globalVisitedMatrix[startY][startX] ||
+                checkNeighborsForOverlap(startX, startY)) {
+                return false; // Cannot start carving here due to boundary, already visited, or overlap
+            }
+
+            let currentRegionCells = [];
+            let currX = startX;
+            let currY = startY;
+            // Randomize desired size within the min/max range
+            const cellsToCarve = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
+
+            // Immediately mark the starting cell
+            mapData[currY][currX] = fillChar;
+            currentRegionCells.push({ x: currX, y: currY });
+
+            const directions = [{dx:0,dy:1}, {dx:0,dy:-1}, {dx:1,dy:0}, {dx:-1,dy:0}]; // Cardinal directions for walk
+
+            // Drunkard's walk: attempt to carve 'cellsToCarve' cells with some randomness
+            for (let i = 0; i < cellsToCarve * 5 && currentRegionCells.length < cellsToCarve; i++) { // More attempts than cells for better chance of reaching size
+                const { dx, dy } = directions[Math.floor(Math.random() * directions.length)];
+                let nextX = currX + dx;
+                let nextY = currY + dy;
+
+                // Ensure potential next cell is within bounds and not part of an already carved *distinct* region
+                if (nextX > 0 && nextX < mapWidth - 1 && nextY > 0 && nextY < mapHeight - 1 &&
+                    !globalVisitedMatrix[nextY][nextX]) {
+
+                    // Only change if it's the target char (an uncarved area) or already part of this current region
+                    if (mapData[nextY][nextX] === targetChar || mapData[nextY][nextX] === fillChar) {
+                        if (mapData[nextY][nextX] === targetChar) {
+                            mapData[nextY][nextX] = fillChar;
+                            currentRegionCells.push({ x: nextX, y: nextY });
+                        }
+                        currX = nextX;
+                        currY = nextY;
+                    }
+                }
+            }
+
+            if (currentRegionCells.length >= minSize) {
+                // Mark all cells of this successfully carved region in the global visited matrix
+                for (const cell of currentRegionCells) {
+                    globalVisitedMatrix[cell.y][cell.x] = true;
+                }
+                return true;
+            } else {
+                // Region was too small or failed to expand, revert changes
+                for (const cell of currentRegionCells) {
+                    mapData[cell.y][cell.x] = targetChar; // Revert to original character
+                }
+                return false;
+            }
+        }
+
 
         /**
          * Generates a town-like map with rooms and corridors.
@@ -727,6 +865,7 @@
             }
 
             // Step 2: Connect rooms with corridors
+            // Sort rooms by X coordinate to connect them in a sensible order
             generatedRooms.sort((a, b) => a.x - b.x);
             for (let i = 0; i < generatedRooms.length - 1; i++) {
                 const room1 = generatedRooms[i];
@@ -740,53 +879,164 @@
                 // Draw horizontal corridor
                 for (let x = Math.min(center1X, center2X); x <= Math.max(center1X, center2X); x++) {
                     if (center1Y >= 0 && center1Y < mapHeight && x >= 0 && x < mapWidth) {
-                        mapData[center1Y][x] = '.'; // Path
+                        if (!['┌', '┐', '└', '┘', '─', '│'].includes(mapData[center1Y][x])) { // Avoid overwriting room corners/walls
+                            mapData[center1Y][x] = '.'; // Path
+                        }
                     }
                 }
                 // Draw vertical corridor
                 for (let y = Math.min(center1Y, center2Y); y <= Math.max(center1Y, center2Y); y++) {
                     if (y >= 0 && y < mapHeight && center2X >= 0 && center2X < mapWidth) {
-                        mapData[y][center2X] = '.'; // Path
-                    }
-                    // Ensure that the cell connecting a corridor to a room is part of the corridor
-                    // and doesn't get overwritten by a wall character if it's already a floor.
-                    const charAtCoord = mapData[y][center2X];
-                    if (charAtCoord !== '┌' && charAtCoord !== '┐' &&
-                        charAtCoord !== '└' && charAtCoord !== '┘' &&
-                        charAtCoord !== '─' && charAtCoord !== '│' &&
-                        charAtCoord !== '.') { // Also ensure it's not already a floor
-                            mapData[y][center2X] = '.';
+                        if (!['┌', '┐', '└', '┘', '─', '│'].includes(mapData[y][center2X])) { // Avoid overwriting room corners/walls
+                             mapData[y][center2X] = '.'; // Path
+                        }
                     }
                 }
             }
 
             // Step 3: Add doors randomly (no stairs)
-            addSpecialItemsRandomly();
+            addSpecialItemsRandomly('town');
         }
 
         /**
-         * Adds doors randomly to the map.
+         * Generates a cave-like map with multiple disconnected cave systems.
+         * @param {number} numCaves The number of distinct cave systems to generate.
+         */
+        function generateCaveMap(numCaves) {
+            // Fill map with ' ' (void/wall) initially
+            mapData = Array(mapHeight).fill(null).map(() => Array(mapWidth).fill(' '));
+            // Re-initialize global visited regions at the start of map generation
+            globalVisitedRegions = Array(mapHeight).fill(null).map(() => Array(mapWidth).fill(false));
+
+            const minCaveSize = Math.floor(mapWidth * mapHeight * MIN_REGION_SIZE_FACTOR);
+            const maxCaveSize = Math.floor(mapWidth * mapHeight * MAX_REGION_SIZE_FACTOR);
+
+            let cavesPlaced = 0;
+            let attempts = 0;
+
+            while (cavesPlaced < numCaves && attempts < MAX_CARVE_ATTEMPTS * numCaves) {
+                const startX = Math.floor(Math.random() * (mapWidth - 2)) + 1; // Avoid immediate borders
+                const startY = Math.floor(Math.random() * (mapHeight - 2)) + 1; // Avoid immediate borders
+
+                // Try to carve a region
+                if (carveRegion(startX, startY, ' ', '.', globalVisitedRegions, minCaveSize, maxCaveSize)) {
+                    cavesPlaced++;
+                }
+                attempts++;
+            }
+
+            // Ensure the outer border is completely solid ' ' (void)
+            for (let y = 0; y < mapHeight; y++) {
+                mapData[y][0] = ' ';
+                mapData[y][mapWidth - 1] = ' ';
+            }
+            for (let x = 0; x < mapWidth; x++) {
+                mapData[0][x] = ' ';
+                mapData[mapHeight - 1][x] = ' ';
+            }
+
+            addSpecialItemsRandomly('cave');
+            // Do NOT call connectMapRegions here, as caves are meant to be separated
+        }
+
+        /**
+         * Generates a forest-like map with multiple disconnected clearings.
+         * @param {number} numClearings The number of distinct clearings to generate.
+         */
+        function generateForestMap(numClearings) {
+            // Fill map with '#' (trees) initially
+            mapData = Array(mapHeight).fill(null).map(() => Array(mapWidth).fill('#'));
+            // Re-initialize global visited regions at the start of map generation
+            globalVisitedRegions = Array(mapHeight).fill(null).map(() => Array(mapWidth).fill(false));
+
+            const minClearingSize = Math.floor(mapWidth * mapHeight * MIN_REGION_SIZE_FACTOR);
+            const maxClearingSize = Math.floor(mapWidth * mapHeight * MAX_REGION_SIZE_FACTOR);
+
+            let clearingsPlaced = 0;
+            let attempts = 0;
+
+            while (clearingsPlaced < numClearings && attempts < MAX_CARVE_ATTEMPTS * numClearings) {
+                const startX = Math.floor(Math.random() * (mapWidth - 2)) + 1; // Avoid immediate borders
+                const startY = Math.floor(Math.random() * (mapHeight - 2)) + 1; // Avoid immediate borders
+
+                // Try to carve a region
+                if (carveRegion(startX, startY, '#', '.', globalVisitedRegions, minClearingSize, maxClearingSize)) {
+                    clearingsPlaced++;
+                }
+                attempts++;
+            }
+
+            // Ensure the outer border is completely solid '#' (trees)
+            for (let y = 0; y < mapHeight; y++) {
+                mapData[y][0] = '#';
+                mapData[y][mapWidth - 1] = '#';
+            }
+            for (let x = 0; x < mapWidth; x++) {
+                mapData[0][x] = '#';
+                mapData[mapHeight - 1][x] = '#';
+            }
+
+            addSpecialItemsRandomly('forest');
+            // Do NOT call connectMapRegions here, as clearings are meant to be separated
+        }
+
+        /**
+         * Adds doors randomly to the map based on map style.
          * Places doors on walls adjacent to floor. No stairs added.
          */
-        function addSpecialItemsRandomly() {
+        function addSpecialItemsRandomly(style) {
             const MAX_DOORS = Math.min(Math.floor(mapWidth * mapHeight / 200), 5); // Max 5 doors or 0.5% of map
             let doorsPlaced = 0;
+            let stairsPlaced = 0;
+            const MAX_STAIRS = Math.min(Math.floor(mapWidth * mapHeight / 300), 3); // Max 3 stairs or 0.33% of map
 
-            for (let i = 0; i < MAX_DOORS * 5; i++) { // Attempt more times to place
+            for (let i = 0; i < MAX_DOORS * 5; i++) { // Attempt more times to place doors
                 const rx = Math.floor(Math.random() * mapWidth);
                 const ry = Math.floor(Math.random() * mapHeight);
 
                 // Place doors
                 if (doorsPlaced < MAX_DOORS && rx >=0 && rx < mapWidth && ry >=0 && ry < mapHeight) {
-                    // Check if it's a wall character and has floor on two opposite sides (horizontal or vertical)
                     const currentCell = mapData[ry][rx];
-                    if (['─', '│'].includes(currentCell)) { // Only place doors on horizontal or vertical walls
+                    if (style === 'town' && ['─', '│'].includes(currentCell)) {
                         const isHorizontalDoorSpot = (rx > 0 && mapData[ry][rx-1] === '.') && (rx < mapWidth - 1 && mapData[ry][rx+1] === '.');
                         const isVerticalDoorSpot = (ry > 0 && mapData[ry-1][rx] === '.') && (ry < mapHeight - 1 && mapData[ry+1][rx] === '.');
-                        
+
                         if (isHorizontalDoorSpot || isVerticalDoorSpot) {
                             mapData[ry][rx] = '+';
                             doorsPlaced++;
+                        }
+                    } else if (style === 'cave' || style === 'forest') {
+                        // For caves/forests, doors might just appear on walls next to floor.
+                        // Simplified: find an isolated ' ' (wall/void) cell surrounded by '.' (floor)
+                        const neighbors = [
+                            {x: rx - 1, y: ry}, {x: rx + 1, y: ry},
+                            {x: rx, y: ry - 1}, {x: rx, y: ry + 1}
+                        ];
+                        let floorNeighbors = 0;
+                        for (const n of neighbors) {
+                            if (n.x >= 0 && n.x < mapWidth && n.y >= 0 && n.y < mapHeight && mapData[n.y][n.x] === '.') {
+                                floorNeighbors++;
+                            }
+                        }
+                        if (currentCell === ' ' && floorNeighbors >= 2) { // At least two floor neighbors to be a door candidate
+                            mapData[ry][rx] = '+';
+                            doorsPlaced++;
+                        }
+                    }
+                }
+            }
+
+            // Add stairs for cave/forest maps
+            if (style === 'cave' || style === 'forest') {
+                for (let i = 0; i < MAX_STAIRS * 5; i++) { // Attempt more times to place stairs
+                    const rx = Math.floor(Math.random() * mapWidth);
+                    const ry = Math.floor(Math.random() * mapHeight);
+
+                    if (stairsPlaced < MAX_STAIRS && rx >=0 && rx < mapWidth && ry >=0 && ry < mapHeight) {
+                        const currentCell = mapData[ry][rx];
+                        if (currentCell === '.') { // Only place stairs on floor
+                            mapData[ry][rx] = (Math.random() < 0.5) ? '>' : '<'; // Randomly '>' or '<'
+                            stairsPlaced++;
                         }
                     }
                 }
@@ -832,7 +1082,8 @@
                     }
                 } else if (currentTool === 'stairs') { // Stairs tool still available for manual drawing
                     if (gridX >= 0 && gridX < mapWidth && gridY >= 0 && gridY < mapHeight) {
-                        mapData[gridY][gridX] = '>'; // Stairs character
+                        // Use current drawChar, default to '>' if not specified for stairs
+                        mapData[gridY][gridX] = (drawChar === '>' || drawChar === '<') ? drawChar : '>';
                         drawMap();
                     }
                 } else if (currentTool === 'fill') {
@@ -961,6 +1212,8 @@
             window.addEventListener('resize', () => {
                 updateCanvasAndDraw();
             });
+            // Initial update of the room count label based on default style
+            updateRoomCountLabel();
         };
 
         // Create Map button click
@@ -968,6 +1221,30 @@
 
         // Random Map button click
         randomMapBtn.addEventListener('click', generateRandomMap);
+
+        // Update room count label when map style changes
+        mapStyleSelect.addEventListener('change', updateRoomCountLabel);
+
+        /**
+         * Updates the text content of the roomCountLabel based on the selected map style.
+         */
+        function updateRoomCountLabel() {
+            const selectedStyle = mapStyleSelect.value;
+            switch (selectedStyle) {
+                case 'town':
+                    roomCountLabel.textContent = 'Rooms:';
+                    break;
+                case 'cave':
+                    roomCountLabel.textContent = 'Caves:';
+                    break;
+                case 'forest':
+                    roomCountLabel.textContent = 'Clearings:';
+                    break;
+                default:
+                    roomCountLabel.textContent = 'Rooms:';
+            }
+        }
+
 
         // Tool selection
         toolRadios.forEach(radio => {
@@ -977,15 +1254,15 @@
                 if (currentTool === 'door') {
                     drawCharInput.value = '+';
                 } else if (currentTool === 'stairs') {
-                    drawCharInput.value = '>';
+                    // When stairs tool is selected, if custom char is not '>' or '<', default to '>'
+                    if (drawCharInput.value !== '>' && drawCharInput.value !== '<') {
+                        drawCharInput.value = '>';
+                    }
                 } else if (currentTool === 'move') {
                     canvas.style.cursor = 'grab'; // Set cursor for move tool
-                } else if (currentTool === 'box') {
-                     canvas.style.cursor = 'crosshair';
-                }
-                else { // paint, fill
+                } else { // paint, fill, box
                     canvas.style.cursor = 'crosshair'; // Reset cursor for drawing tools
-                    // When switching to paint/fill, set drawChar to the currently selected quick char, or '#'
+                    // When switching to paint/fill/box, set drawChar to the currently selected quick char, or '#'
                     const selectedQuickChar = document.querySelector('select[name="quickCharGroup"] option:checked')?.value;
                     drawCharInput.value = selectedQuickChar || '#';
                 }
@@ -1079,11 +1356,11 @@
             const mouseY_canvas = event.clientY - canvas.getBoundingClientRect().top;
 
             const oldMapX_pixel = viewOffsetX + mouseX_canvas;
-            const oldMapY_pixel_corrected = viewOffsetY + mouseY_canvas;
+            const oldMapY_pixel = viewOffsetY + mouseY_canvas;
 
 
             viewOffsetX = (oldMapX_pixel * (currentZoom / oldZoom)) - mouseX_canvas;
-            viewOffsetY = (oldMapY_pixel_corrected * (currentZoom / oldZoom)) - mouseY_canvas; // Corrected line
+            viewOffsetY = (oldMapY_pixel * (currentZoom / oldZoom)) - mouseY_canvas;
 
             updateCanvasAndDraw();
         }, { passive: false }); // Use passive: false to allow preventDefault
@@ -1113,9 +1390,10 @@
                     }
                 }
 
-                // Warn about large maps before loading
-                if (loadedWidth * loadedHeight > 5000 * 5000) {
-                    showMessageBox("Warning: This map is extremely large and may cause performance issues or browser crashes. Proceeding with load...");
+                // Validate loaded map dimensions against requirements
+                if (!validateMapParameters(loadedWidth, loadedHeight, 2)) { // Rooms count is arbitrary for loaded map
+                    showMessageBox(`Loaded map dimensions (${loadedWidth}x${loadedHeight}) are outside the allowed range (20-65536). Map not loaded.`);
+                    return;
                 }
 
                 // Update input fields and global variables

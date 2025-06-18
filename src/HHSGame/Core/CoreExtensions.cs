@@ -1,13 +1,12 @@
 
 using Microsoft.Extensions.DependencyInjection;
+using HHSGame.Core.Combat;
+using HHSGame.Core.Map;
+using HHSGame.Core.Enemies;
+using HHSGame.Core.Items;
 
 namespace HHSGame.Core
 {
-    using Combat;
-    using Map;
-    using Enemies;
-    using Items;
-
     public static class CoreExtensions
     {
 

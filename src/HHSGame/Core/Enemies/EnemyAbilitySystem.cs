@@ -20,7 +20,7 @@ namespace HHSGame.Core.Enemies
 
         public void TryApplySpecialEffect(Player player)
         {
-            if (attackEffects.TryGetValue(enemy.Type, out var effectData) &&
+            if (attackEffects.TryGetValue(enemy.Type, out (int Chance, Action<Player, Enemy> Effect) effectData) &&
                 random.Next(100) < effectData.Chance)
             {
                 effectData.Effect(player, enemy);

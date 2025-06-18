@@ -1,8 +1,8 @@
+using HHSGame.Core.Enemies;
+using HHSGame.Core.Items;
+
 namespace HHSGame.Core.Classes
 {
-    using Enemies;
-    using Items;
-
     public abstract class AbstractClass
     {
         public string Name { get; set; } = "Unknown";

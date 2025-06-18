@@ -1,10 +1,9 @@
 using HHSGame.Core.Map;
+using HHSGame.Utils;
+using HHSGame.Core.Items;
 
 namespace HHSGame.Core.Enemies
 {
-    using HHSGame.Utils;
-    using Items;
-
     public enum EnemyType
     {
         Gangster,
@@ -57,7 +56,7 @@ namespace HHSGame.Core.Enemies
             this.pathfinder = pathfinder;
             State = EnemyState.Chasing;
 
-            var config = EnemyRegistry.GetConfig(type);
+            EnemyRegistry.EnemyConfig config = EnemyRegistry.GetConfig(type);
             Name = config.Name;
             MaxHealth = config.MaxHealth;
             Strength = config.Strength;
@@ -76,10 +75,20 @@ namespace HHSGame.Core.Enemies
 
         public void Update(Player player, bool isEnemyTurn)
         {
-            if (!isEnemyTurn) return;
+            if (!isEnemyTurn)
+            {
+                return;
+            }
 
-            if (attackCooldown > 0) attackCooldown--;
-            if (specialAbilityCooldown > 0) specialAbilityCooldown--;
+            if (attackCooldown > 0)
+            {
+                attackCooldown--;
+            }
+
+            if (specialAbilityCooldown > 0)
+            {
+                specialAbilityCooldown--;
+            }
 
             // Calculate squared distance to player (avoid expensive sqrt)
             int dx = player.X - X;
@@ -113,11 +122,11 @@ namespace HHSGame.Core.Enemies
 
                 case EnemyState.Chasing:
                     // Get path to player
-                    var path = pathfinder.FindPath(Position, player.Position);
+                    List<Coordinate> path = pathfinder.FindPath(Position, player.Position);
 
                     if (path.Count > 1) // First element is current position
                     {
-                        var nextStep = path[1];
+                        Coordinate nextStep = path[1];
                         int moveX = nextStep.X - X;
                         int moveY = nextStep.Y - Y;
                         Move(moveX, moveY);
@@ -138,7 +147,11 @@ namespace HHSGame.Core.Enemies
         public void TakeDamage(int damage)
         {
             int actualDamage = damage - Defense;
-            if (actualDamage < 0) actualDamage = 0;
+            if (actualDamage < 0)
+            {
+                actualDamage = 0;
+            }
+
             Health -= actualDamage;
 
             if (Health <= 0)
@@ -156,7 +169,10 @@ namespace HHSGame.Core.Enemies
         public void Heal(int amount)
         {
             Health += amount;
-            if (Health > MaxHealth) Health = MaxHealth;
+            if (Health > MaxHealth)
+            {
+                Health = MaxHealth;
+            }
         }
 
         public void Move(int dx, int dy)
@@ -179,11 +195,14 @@ namespace HHSGame.Core.Enemies
         private void Die()
         {
             // Drop loot
-            var loot = GenerateLoot();
+            _ = GenerateLoot();
             // TODO: Add loot to game world
         }
 
-        public List<Item> GenerateLoot() => lootSystem.GenerateLoot();
+        public List<Item> GenerateLoot()
+        {
+            return lootSystem.GenerateLoot();
+        }
 
         public override string ToString()
         {

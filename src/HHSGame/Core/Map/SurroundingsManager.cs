@@ -1,10 +1,9 @@
+using System.Collections.ObjectModel;
+using HHSGame.Core.Enemies;
+using HHSGame.Core.Items;
 
 namespace HHSGame.Core.Map
 {
-    using System.Collections.ObjectModel;
-    using Enemies;
-    using Items;
-
     public class SurroundingsManager(ItemManager itemManager, EnemyManager enemyManager, MapState mapState)
     {
 
@@ -15,17 +14,17 @@ namespace HHSGame.Core.Map
         {
             VisibleEntities.Clear();
 
-            foreach (var (tileX, tileY) in mapState.CurrentVisibleTiles)
+            foreach ((int tileX, int tileY) in mapState.CurrentVisibleTiles)
             {
-                var enemies = enemyManager.Enemies.Where(e => e.X == tileX && e.Y == tileY).ToList();
-                var items = itemManager.Loot.Where(item => item.X == tileX && item.Y == tileY).ToList();
+                List<Enemy> enemies = [.. enemyManager.Enemies.Where(e => e.X == tileX && e.Y == tileY)];
+                List<Item> items = [.. itemManager.Loot.Where(item => item.X == tileX && item.Y == tileY)];
 
-                foreach (var enemy in enemies)
+                foreach (Enemy? enemy in enemies)
                 {
                     VisibleEntities.Add(enemy.ToString());
                 }
 
-                foreach (var item in items)
+                foreach (Item? item in items)
                 {
                     VisibleEntities.Add(item.ToString());
                 }

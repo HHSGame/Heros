@@ -1,8 +1,8 @@
 using HHSGame.UI;
+using HHSGame.Core.Classes;
 
 namespace HHSGame.Core
 {
-    using Classes;
     public class GameWorld(GameContext context) : IDrawable
     {
         public static int MapWidth { get; } = 500;
@@ -21,7 +21,7 @@ namespace HHSGame.Core
                 y = Context.Random.Next(y - round, y + round);
                 round++;
             }
-            var player = new Player(x, y, Context);
+            Player player = new(x, y, Context);
             playerClass.ApplyClassBonuses(player);
             playerClass.ApplyStartupEquipment(player);
             player.UpdateFOV();

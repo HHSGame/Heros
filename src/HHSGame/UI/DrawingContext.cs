@@ -1,13 +1,11 @@
 using HHSGame.Core.Map;
 using Terminal.Gui.ViewBase;
+using HHSGame.UI.Views;
+
+using Position = (int X, int Y);
 
 namespace HHSGame.UI
 {
-    using Views;
-
-    using Position = (int X, int Y);
-
-
     public class Viewport(int x, int y, int width, int height)
     {
 
@@ -31,14 +29,22 @@ namespace HHSGame.UI
             int margin = 5;
 
             if (x - X < margin)
+            {
                 X = Math.Max(0, x - margin);
+            }
             else if (x - X > Width - margin)
+            {
                 X = Math.Min(mapWidth - Width, x - Width + margin);
+            }
 
             if (y - Y < margin)
+            {
                 Y = Math.Max(0, y - margin);
+            }
             else if (y - Y > Height - margin)
+            {
                 Y = Math.Min(mapHeight - Height, y - Height + margin);
+            }
         }
 
         public void Resize(int width, int height)
@@ -70,14 +76,14 @@ namespace HHSGame.UI
         public char Character { get; set; }
         public Terminal.Gui.Drawing.Attribute Attribute { get; set; }
 
-        public bool IsWalkable => Character == '.' || Character == '▒';
+        public readonly bool IsWalkable => Character is '.' or '▒';
     }
 
     public class MapViewDrawingContext(MapView mapView, MapState mapState) : IDrawingContext
     {
         private readonly MapView mapView = mapView;
-        private readonly Viewport viewport = new(0, 0, 0, 0);
-        public Viewport Viewport => viewport;
+
+        public Viewport Viewport { get; } = new(0, 0, 0, 0);
 
         // Explicit interface implementation for original method
         public void DrawAt((int X, int Y) pos, char tile)
@@ -87,12 +93,14 @@ namespace HHSGame.UI
 
         public void DrawAt((int X, int Y) pos, Cell cell)
         {
-            if (viewport.Width != mapView.Frame.Width || viewport.Height != mapView.Frame.Height)
+            if (Viewport.Width != mapView.Frame.Width || Viewport.Height != mapView.Frame.Height)
             {
-                viewport.Resize(mapView.Frame.Width, mapView.Frame.Height);
+                Viewport.Resize(mapView.Frame.Width, mapView.Frame.Height);
             }
-            if (!viewport.Contains(pos))
+            if (!Viewport.Contains(pos))
+            {
                 return;
+            }
 
             // Check visibility
             if (mapState != null)
@@ -100,19 +108,19 @@ namespace HHSGame.UI
                 if (mapState.IsVisible(pos.X, pos.Y))
                 {
                     // Visible - use normal colors
-                    var (posX, posY) = viewport.ToLocal(pos);
+                    (int posX, int posY) = Viewport.ToLocal(pos);
                     mapView.SetCell(posX, posY, cell.Character, cell.Attribute);
                 }
                 else if (mapState.WasVisited(pos.X, pos.Y))
                 {
                     // Visited but not visible - grey out
-                    var (posX, posY) = viewport.ToLocal(pos);
+                    (int posX, int posY) = Viewport.ToLocal(pos);
                     mapView.SetCell(posX, posY, cell.Character, ColorPresets.GreyedOut);
                 }
                 else
                 {
                     // Visited but not visible - grey out
-                    var (posX, posY) = viewport.ToLocal(pos);
+                    (int posX, int posY) = Viewport.ToLocal(pos);
                     mapView.SetCell(posX, posY, ' ', ColorPresets.GreyedOut);
                 }
                 // Else - don't draw at all
@@ -120,7 +128,7 @@ namespace HHSGame.UI
             else
             {
                 // Fallback if no game world reference
-                var (posX, posY) = viewport.ToLocal(pos);
+                (int posX, int posY) = Viewport.ToLocal(pos);
                 mapView.SetCell(posX, posY, cell.Character, cell.Attribute);
             }
         }

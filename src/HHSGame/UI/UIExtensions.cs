@@ -1,11 +1,10 @@
 
 using Microsoft.Extensions.DependencyInjection;
+using HHSGame.UI.Views;
+using HHSGame.UI.Windows;
 
 namespace HHSGame.UI
 {
-    using Views;
-    using Windows;
-
     public static class UIExtensions
     {
         public static IServiceCollection AddHHSGameUI(this IServiceCollection serviceCollection)

@@ -2,11 +2,10 @@
 using System.Collections.Immutable;
 using HHSGame.Core.Combat;
 using HHSGame.UI;
+using HHSGame.Core.Items;
 
 namespace HHSGame.Core.Enemies
 {
-    using Items;
-
     public class EnemyManager(ItemManager itemManager, TurnManager turnManager) : IDrawable
     {
         private readonly List<Enemy> enemies = [];
@@ -15,8 +14,8 @@ namespace HHSGame.Core.Enemies
 
         private void DropLoot(Enemy enemy)
         {
-            var loot = enemy.GenerateLoot();
-            foreach (var item in loot)
+            List<Item> loot = enemy.GenerateLoot();
+            foreach (Item item in loot)
             {
                 item.X = enemy.X;
                 item.Y = enemy.Y;
@@ -28,7 +27,7 @@ namespace HHSGame.Core.Enemies
 
         public void UpdateEnemies(Player player)
         {
-            foreach (var enemy in enemies.ToArray())
+            foreach (Enemy enemy in enemies.ToArray())
             {
                 if (enemy.Health <= 0)
                 {
@@ -45,9 +44,9 @@ namespace HHSGame.Core.Enemies
 
         public void Draw(IDrawingContext ctx)
         {
-            var viewport = ctx.Viewport;
+            Viewport viewport = ctx.Viewport;
 
-            foreach (var enemy in enemies)
+            foreach (Enemy enemy in enemies)
             {
                 if (viewport.Contains((enemy.X, enemy.Y)))
                 {

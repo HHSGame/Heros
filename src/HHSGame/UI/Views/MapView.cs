@@ -1,10 +1,10 @@
 using Terminal.Gui.ViewBase;
 using System.Drawing;
 
+using Attribute = Terminal.Gui.Drawing.Attribute;
+
 namespace HHSGame.UI.Views
 {
-
-    using Attribute = Terminal.Gui.Drawing.Attribute;
     public class MapView : View
     {
         private Cell[,] buffer;
@@ -46,7 +46,7 @@ namespace HHSGame.UI.Views
             {
                 for (int x = 0; x < Frame.Width; x++)
                 {
-                    var cell = buffer[y, x];
+                    Cell cell = buffer[y, x];
                     Move(x, y);
                     SetAttribute(cell.Attribute);
                     AddRune(cell.Character);

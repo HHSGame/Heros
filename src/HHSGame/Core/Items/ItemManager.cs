@@ -30,9 +30,9 @@ namespace HHSGame.Core.Items
 
         public void Draw(IDrawingContext ctx)
         {
-            var viewport = ctx.Viewport;
+            Viewport viewport = ctx.Viewport;
 
-            foreach (var item in Loot)
+            foreach (Item item in Loot)
             {
                 if (viewport.Contains((item.X, item.Y)))
                 {

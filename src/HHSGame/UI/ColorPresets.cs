@@ -1,8 +1,8 @@
 using Terminal.Gui.Drawing;
+using Attribute = Terminal.Gui.Drawing.Attribute;
 
 namespace HHSGame.UI
 {
-    using Attribute = Terminal.Gui.Drawing.Attribute;
     public static class ColorPresets
     {
         public static readonly Attribute GreyedOut = new(Color.DarkGray, Color.Black);

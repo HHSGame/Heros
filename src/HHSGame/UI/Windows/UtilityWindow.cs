@@ -46,8 +46,8 @@ namespace HHSGame.UI.Windows
 
         private void HandleOpenSelectedItem(object? sender, ListViewItemEventArgs args)
         {
-            var index = args.Item;
-            var item = inventoryManager.ObservableItems.ElementAt(index);
+            int index = args.Item;
+            Item item = inventoryManager.ObservableItems.ElementAt(index);
             item.Use(playerHolder.Value);
             inventoryManager.RemoveItem(item);
         }

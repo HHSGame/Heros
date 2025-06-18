@@ -45,11 +45,9 @@ namespace HHSGame.Core.Enemies
 
         public static EnemyConfig GetConfig(EnemyType type)
         {
-            if (enemyConfigs.TryGetValue(type, out var config))
-            {
-                return config;
-            }
-            throw new ArgumentException($"No config found for enemy type {type}");
+            return enemyConfigs.TryGetValue(type, out EnemyConfig? config)
+                ? config
+                : throw new ArgumentException($"No config found for enemy type {type}");
         }
     }
 }

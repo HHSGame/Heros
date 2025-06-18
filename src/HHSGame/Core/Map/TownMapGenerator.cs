@@ -1,4 +1,3 @@
-using System;
 using HHSGame.UI;
 
 namespace HHSGame.Core.Map
@@ -19,7 +18,7 @@ namespace HHSGame.Core.Map
 
         private Cell[,] GenerateTown()
         {
-            var map = new Cell[MapHeight, MapWidth];
+            Cell[,] map = new Cell[MapHeight, MapWidth];
 
             // Initialize with grass
             for (int y = 0; y < MapHeight; y++)
@@ -93,7 +92,7 @@ namespace HHSGame.Core.Map
             }
 
             // Generate houses
-            int houseCount = (MapWidth / streetSpacing) * (MapHeight / streetSpacing) / 2;
+            int houseCount = MapWidth / streetSpacing * (MapHeight / streetSpacing) / 2;
             for (int i = 0; i < houseCount; i++)
             {
                 int blockX = Random.Next(1, (MapWidth - 2) / streetSpacing) * streetSpacing;

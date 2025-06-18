@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace HHSGame.Core.Map
 {
     public class Pathfinder(MapState mapState)
@@ -8,11 +6,11 @@ namespace HHSGame.Core.Map
 
         public List<Coordinate> FindPath(Coordinate start, Coordinate end)
         {
-            var openSet = new PriorityQueue<Coordinate, float>();
-            var closedSet = new HashSet<Coordinate>();
-            var cameFrom = new Dictionary<Coordinate, Coordinate>();
-            var gScore = new Dictionary<Coordinate, float>();
-            var fScore = new Dictionary<Coordinate, float>();
+            PriorityQueue<Coordinate, float> openSet = new();
+            HashSet<Coordinate> closedSet = [];
+            Dictionary<Coordinate, Coordinate> cameFrom = [];
+            Dictionary<Coordinate, float> gScore = [];
+            Dictionary<Coordinate, float> fScore = [];
 
             gScore[start] = 0;
             fScore[start] = HeuristicCostEstimate(start, end);
@@ -20,7 +18,7 @@ namespace HHSGame.Core.Map
 
             while (openSet.Count > 0)
             {
-                var current = openSet.Dequeue();
+                Coordinate current = openSet.Dequeue();
 
                 if (current == end)
                 {
@@ -29,12 +27,14 @@ namespace HHSGame.Core.Map
 
                 closedSet.Add(current);
 
-                foreach (var neighbor in GetNeighbors(current))
+                foreach (Coordinate neighbor in GetNeighbors(current))
                 {
                     if (closedSet.Contains(neighbor))
+                    {
                         continue;
+                    }
 
-                    var tentativeGScore = gScore[current] + 1;
+                    float tentativeGScore = gScore[current] + 1;
 
                     if (!gScore.TryGetValue(neighbor, out float value) || tentativeGScore < value)
                     {
@@ -56,7 +56,7 @@ namespace HHSGame.Core.Map
 
         private static List<Coordinate> ReconstructPath(Dictionary<Coordinate, Coordinate> cameFrom, Coordinate current)
         {
-            var path = new List<Coordinate> { current };
+            List<Coordinate> path = [current];
             while (cameFrom.ContainsKey(current))
             {
                 current = cameFrom[current];
@@ -67,13 +67,28 @@ namespace HHSGame.Core.Map
 
         private List<Coordinate> GetNeighbors(Coordinate pos)
         {
-            var neighbors = new List<Coordinate>();
+            List<Coordinate> neighbors = [];
 
             // Check four directions
-            if (mapState.IsWalkable(pos.X - 1, pos.Y)) neighbors.Add(new Coordinate(pos.X - 1, pos.Y));
-            if (mapState.IsWalkable(pos.X + 1, pos.Y)) neighbors.Add(new Coordinate(pos.X + 1, pos.Y));
-            if (mapState.IsWalkable(pos.X, pos.Y - 1)) neighbors.Add(new Coordinate(pos.X, pos.Y - 1));
-            if (mapState.IsWalkable(pos.X, pos.Y + 1)) neighbors.Add(new Coordinate(pos.X, pos.Y + 1));
+            if (mapState.IsWalkable(pos.X - 1, pos.Y))
+            {
+                neighbors.Add(new Coordinate(pos.X - 1, pos.Y));
+            }
+
+            if (mapState.IsWalkable(pos.X + 1, pos.Y))
+            {
+                neighbors.Add(new Coordinate(pos.X + 1, pos.Y));
+            }
+
+            if (mapState.IsWalkable(pos.X, pos.Y - 1))
+            {
+                neighbors.Add(new Coordinate(pos.X, pos.Y - 1));
+            }
+
+            if (mapState.IsWalkable(pos.X, pos.Y + 1))
+            {
+                neighbors.Add(new Coordinate(pos.X, pos.Y + 1));
+            }
 
             return neighbors;
         }

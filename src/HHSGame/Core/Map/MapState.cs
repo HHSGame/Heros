@@ -70,7 +70,7 @@ namespace HHSGame.Core.Map
         {
             currentVisibleTiles.Clear();
 
-            foreach (var (x, y) in visibleTiles)
+            foreach ((int x, int y) in visibleTiles)
             {
                 if (IsInBounds(x, y))
                 {
@@ -85,7 +85,7 @@ namespace HHSGame.Core.Map
         {
             currentVisibleTiles.Clear();
 
-            foreach (var (x, y) in visibleTiles)
+            foreach ((int x, int y) in visibleTiles)
             {
                 if (IsInBounds(x, y))
                 {
@@ -113,7 +113,7 @@ namespace HHSGame.Core.Map
 
         public void Draw(IDrawingContext ctx)
         {
-            var viewport = ctx.Viewport;
+            Viewport viewport = ctx.Viewport;
 
             for (int y = viewport.Y; y < viewport.Y + viewport.Height; y++)
             {

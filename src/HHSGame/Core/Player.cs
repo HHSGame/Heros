@@ -1,13 +1,12 @@
 using Terminal.Gui.Drawing;
 using HHSGame.Utils;
+using HHSGame.Core.Combat;
+using HHSGame.Core.Map;
+using HHSGame.Core.Enemies;
+using HHSGame.Core.Items;
 
 namespace HHSGame.Core
 {
-    using Combat;
-    using Map;
-    using Enemies;
-    using Items;
-
     public class Player(int x, int y, GameContext context) : IGameActor
     {
         public int X { get; set; } = x;
@@ -24,7 +23,7 @@ namespace HHSGame.Core
         public char Glyph => '☭';
         public string Name => I18n.GetString("HHS.Core.Player.Name");
 
-        public Terminal.Gui.Drawing.Attribute Attribute => new Terminal.Gui.Drawing.Attribute(Color.BrightYellow, Color.Red);
+        public Terminal.Gui.Drawing.Attribute Attribute => new(Color.BrightYellow, Color.Red);
 
         private readonly List<ActiveEffect> activeEffects = [];
         private readonly CollisionSystem collisionSystem = context.CollisionSystem;
@@ -56,11 +55,17 @@ namespace HHSGame.Core
                 for (int dy = -radius; dy <= radius; dy++)
                 {
                     // Skip if outside radius
-                    if (dx * dx + dy * dy > radius * radius) continue;
-                    
+                    if (dx * dx + dy * dy > radius * radius)
+                    {
+                        continue;
+                    }
+
                     Coordinate target = Position.Target(dx, dy);
 
-                    if (!mapState.IsInBounds(target)) continue;
+                    if (!mapState.IsInBounds(target))
+                    {
+                        continue;
+                    }
 
                     // Check line of sight
                     if (HasLineOfSight(position, target))
@@ -87,15 +92,19 @@ namespace HHSGame.Core
             while (true)
             {
                 // Add current tile to visible tiles
-                visibleTiles.Add(new (x0, y0));
+                visibleTiles.Add(new(x0, y0));
 
                 // If we hit an opaque tile, stop here but include it
                 if (!mapState.IsTransparent(x0, y0))
+                {
                     return true;
+                }
 
                 // If we reached the target, we have line of sight
                 if (x0 == x1 && y0 == y1)
+                {
                     return true;
+                }
 
                 int e2 = 2 * err;
                 if (e2 > -dy)
@@ -115,7 +124,7 @@ namespace HHSGame.Core
         {
             UpdateFOV();
 
-            foreach (var effect in activeEffects.ToArray())
+            foreach (ActiveEffect effect in activeEffects.ToArray())
             {
                 effect.Duration--;
                 if (effect.Duration <= 0)
@@ -142,7 +151,7 @@ namespace HHSGame.Core
 
             if (collisionSystem.CanMoveTo(newX, newY, this))
             {
-                var collision = collisionSystem.GetCollisionAt(newX, newY);
+                IGameActor? collision = collisionSystem.GetCollisionAt(newX, newY);
                 if (collision is Enemy enemy)
                 {
                     Attack(enemy);
@@ -164,7 +173,10 @@ namespace HHSGame.Core
 
         public void Attack(Enemy enemy)
         {
-            if (IsStunned()) return;
+            if (IsStunned())
+            {
+                return;
+            }
 
             EventSystem.RaiseGameMessage(I18n.GetString("PlayerAttacks", enemy.Name));
 
@@ -181,7 +193,11 @@ namespace HHSGame.Core
 
         public void TakeDamage(int damage)
         {
-            if (IsStunned()) return;
+            if (IsStunned())
+            {
+                return;
+            }
+
             EventSystem.RaiseGameMessage(I18n.GetString("PlayerTakesDamage", damage));
 
             int baseDefense = Defense;
@@ -189,7 +205,11 @@ namespace HHSGame.Core
             int totalDefense = baseDefense + armorDefense;
 
             int actualDamage = damage - totalDefense;
-            if (actualDamage < 0) actualDamage = 0;
+            if (actualDamage < 0)
+            {
+                actualDamage = 0;
+            }
+
             Health -= actualDamage;
 
             if (Health <= 0)
@@ -203,7 +223,10 @@ namespace HHSGame.Core
         public void Heal(int amount)
         {
             Health += amount;
-            if (Health > MaxHealth) Health = MaxHealth;
+            if (Health > MaxHealth)
+            {
+                Health = MaxHealth;
+            }
         }
 
         public void AddExperience(int amount)
@@ -253,7 +276,7 @@ namespace HHSGame.Core
 
         public void PickupItems()
         {
-            var items = itemManager.GetItemsAt(X, Y);
+            List<Item> items = itemManager.GetItemsAt(X, Y);
             if (items.Count == 0)
             {
                 EventSystem.RaiseGameMessage(I18n.GetString("NoItemsToPickUp"));
@@ -261,7 +284,7 @@ namespace HHSGame.Core
             }
 
             itemManager.RemoveItemsAt(X, Y);
-            foreach (var item in items)
+            foreach (Item item in items)
             {
                 AddItem(item);
             }

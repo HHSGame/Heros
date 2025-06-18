@@ -1,10 +1,10 @@
 using HHSGame.UI;
+using System.Globalization;
+using HHSGame.Core.Items;
+using Attribute = Terminal.Gui.Drawing.Attribute;
 
 namespace HHSGame.Core.Map
 {
-    using System.Globalization;
-    using Items;
-    using Attribute = Terminal.Gui.Drawing.Attribute;
     public enum MapStyle
     {
         Cave,
@@ -40,7 +40,7 @@ namespace HHSGame.Core.Map
 
         public static Attribute GetTerrainColor(char terrainChar)
         {
-            return terrainColors.TryGetValue(terrainChar, out var color)
+            return terrainColors.TryGetValue(terrainChar, out Attribute color)
                 ? color
                 : ColorPresets.Terrain.Grass;
         }
@@ -60,7 +60,7 @@ namespace HHSGame.Core.Map
                 _ => new CaveMapGenerator(mapWidth, mapHeight, random)
             };
 
-            var map = generator.Generate();
+            Cell[,] map = generator.Generate();
 
             // Place random items in the dungeon
             PlaceRandomItems(map);
@@ -74,7 +74,7 @@ namespace HHSGame.Core.Map
             int itemCount = random.Next(700, 1000); // Place some items
             for (int i = 0; i < itemCount; i++)
             {
-                var item = itemFactory.CreateRandomItem();
+                Item item = itemFactory.CreateRandomItem();
                 int x = random.Next(1, mapWidth - 1);
                 int y = random.Next(1, mapHeight - 1);
                 while (!map[y, x].IsWalkable)

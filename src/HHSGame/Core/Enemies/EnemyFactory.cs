@@ -9,7 +9,7 @@ namespace HHSGame.Core.Enemies
         {
             EventSystem.RaiseGameMessage("Spawning enemies...");
 
-            var enemies = new List<Enemy>();
+            List<Enemy> enemies = [];
 
             // Spawn different enemy types
             SpawnEnemyType(enemies, EnemyType.Gangster, 50);

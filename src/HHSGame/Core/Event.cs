@@ -1,6 +1,7 @@
+using HHSGame.Core.Items;
+
 namespace HHSGame.Core
 {
-    using Items;
     public class GameMessageEventArgs(string message) : EventArgs
     {
         public string Message { get; } = message;

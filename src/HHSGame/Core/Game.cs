@@ -1,9 +1,9 @@
+using HHSGame.Core.Items;
+using Microsoft.Extensions.Logging;
+using Terminal.Gui.App;
+
 namespace HHSGame.Core
 {
-    using Items;
-    using Microsoft.Extensions.Logging;
-    using Terminal.Gui.App;
-
     public partial class Game(ILogger<Game> logger, GameContext context, GameWorld world, Player player)
     {
         public Player Player => player;
@@ -30,8 +30,11 @@ namespace HHSGame.Core
         private bool GameLoop()
         {
             if (!isRunning || world == null || player == null)
+            {
                 return false;
-            var drawingContext = context.DrawingContext;
+            }
+
+            UI.IDrawingContext drawingContext = context.DrawingContext;
 
             // Calculate frame timing
             double deltaTime = CalculateDeltaTime();
@@ -64,16 +67,18 @@ namespace HHSGame.Core
 
         private double CalculateDeltaTime()
         {
-            var now = DateTime.Now;
-            var delta = (now - lastFrameTime).TotalMilliseconds;
+            DateTime now = DateTime.Now;
+            double delta = (now - lastFrameTime).TotalMilliseconds;
             lastFrameTime = now;
             return delta;
         }
 
-        private void UpdateGame(double deltaTime)
+        private void UpdateGame(double _)
         {
             if (world == null || player == null)
+            {
                 return;
+            }
 
             world.Update(player);
         }

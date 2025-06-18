@@ -23,9 +23,6 @@ namespace HHSGame.Core.Map
             { '▒', ColorPresets.Terrain.Grass },    // Town streets
         };
 
-        private readonly Random random = random;
-        private readonly int mapWidth = mapWidth;
-        private readonly int mapHeight = mapHeight;
 
         protected Random Random => random;
         protected int MapWidth => mapWidth;
@@ -35,7 +32,7 @@ namespace HHSGame.Core.Map
 
         public static Attribute GetTerrainColor(char terrainChar)
         {
-            return terrainColors.TryGetValue(terrainChar, out var color)
+            return terrainColors.TryGetValue(terrainChar, out Attribute color)
                 ? color
                 : ColorPresets.Terrain.Grass;
         }
@@ -51,11 +48,17 @@ namespace HHSGame.Core.Map
                     int neighborCount = GetSurroundingCount(map, x, y, wallChar);
 
                     if (neighborCount > 4)
+                    {
                         newMap[y, x] = new Cell { Character = wallChar, Attribute = GetTerrainColor(wallChar) };
+                    }
                     else if (neighborCount < 4)
+                    {
                         newMap[y, x] = new Cell { Character = '.', Attribute = ColorPresets.Terrain.Grass };
+                    }
                     else
+                    {
                         newMap[y, x] = map[y, x];
+                    }
                 }
             }
 
@@ -109,7 +112,7 @@ namespace HHSGame.Core.Map
 
             while (queue.Count > 0 && filled < maxSize)
             {
-                var (currentX, currentY) = queue.Dequeue();
+                (int currentX, int currentY) = queue.Dequeue();
 
                 if (map[currentY, currentX].Character == '.')
                 {
@@ -117,10 +120,25 @@ namespace HHSGame.Core.Map
                     filled++;
 
                     // Add neighbors
-                    if (currentX > 1) queue.Enqueue((currentX - 1, currentY));
-                    if (currentX < mapWidth - 2) queue.Enqueue((currentX + 1, currentY));
-                    if (currentY > 1) queue.Enqueue((currentX, currentY - 1));
-                    if (currentY < mapHeight - 2) queue.Enqueue((currentX, currentY + 1));
+                    if (currentX > 1)
+                    {
+                        queue.Enqueue((currentX - 1, currentY));
+                    }
+
+                    if (currentX < mapWidth - 2)
+                    {
+                        queue.Enqueue((currentX + 1, currentY));
+                    }
+
+                    if (currentY > 1)
+                    {
+                        queue.Enqueue((currentX, currentY - 1));
+                    }
+
+                    if (currentY < mapHeight - 2)
+                    {
+                        queue.Enqueue((currentX, currentY + 1));
+                    }
                 }
             }
             return map;

@@ -1,13 +1,12 @@
 using HHSGame.Core;
+using Terminal.Gui.App;
+using Terminal.Gui.Drivers;
+using Terminal.Gui.Input;
+using Terminal.Gui.Views;
+using HHSGame.UI.Windows;
 
 namespace HHSGame.UI
 {
-    using Terminal.Gui.App;
-    using Terminal.Gui.Drivers;
-    using Terminal.Gui.Input;
-    using Terminal.Gui.Views;
-    using Windows;
-
     public class GameUI(MapWindow mapWindow,
             MessageWindow messageWindow,
             InventoryWindow inventoryWindow,
@@ -25,7 +24,7 @@ namespace HHSGame.UI
         public Toplevel Start()
         {
             // Create main window
-            var top = new Toplevel();
+            Toplevel top = new();
             top.Add(mapWindow, inventoryWindow, surroundingsWindow, messageWindow, utilityWindow);
 
             game.Start();

@@ -1,10 +1,9 @@
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
+using HHSGame.UI.Views;
 
 namespace HHSGame.UI.Windows
 {
-    using Views;
-
     public class MessageWindow : Window
     {
 

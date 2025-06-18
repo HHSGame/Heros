@@ -13,6 +13,9 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             background-color: #f3f4f6; /* Light gray background */
+            display: flex; /* Use flexbox for body */
+            height: 100vh; /* Full viewport height */
+            overflow: hidden; /* Prevent body scroll */
         }
         /* Custom styles for canvas to ensure it fits and looks good */
         canvas {
@@ -20,8 +23,9 @@
             border: 1px solid #ccc; /* Light border */
             display: block;
             margin: 0 auto; /* Center the canvas */
-            /* Responsive width, max height handled by JS and container */
             cursor: crosshair; /* Indicate drawing mode */
+            width: 100%; /* Canvas takes full width of its container */
+            height: 100%; /* Canvas takes full height of its container */
         }
         /* Style for radio buttons to make them look like toggles */
         input[type="radio"]:checked + label {
@@ -30,26 +34,92 @@
             border-color: #2563eb;
         }
 
+        /* Sidebar specific styles */
+        #sidebar {
+            width: 320px; /* Default width for sidebar */
+            min-width: 320px; /* Prevent shrinking too much */
+            max-width: 320px; /* Prevent growing too much */
+            background-color: #ffffff;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out, max-width 0.3s ease-in-out, transform 0.3s ease-in-out;
+            overflow-y: auto; /* Allow scrolling within the sidebar if content overflows */
+            flex-shrink: 0; /* Prevent sidebar from shrinking when main content needs space */
+        }
+
+        #sidebar.collapsed {
+            width: 0;
+            min-width: 0;
+            max-width: 0;
+            padding: 0;
+            transform: translateX(-100%); /* Visually hide it */
+            overflow: hidden; /* Hide content */
+        }
+
+        #sidebar-content {
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+            flex-grow: 1; /* Allow content to grow */
+        }
+
+        #sidebar.collapsed #sidebar-content {
+            opacity: 0;
+            pointer-events: none; /* Disable interactions when collapsed */
+        }
+
+        #toggleSidebarBtn {
+            position: absolute; /* Position relative to the main layout, outside sidebar */
+            top: 1rem;
+            left: calc(320px + 1rem); /* Position right of the sidebar + some margin */
+            z-index: 50; /* Above canvas */
+            transition: left 0.3s ease-in-out;
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 9999px; /* Circle shape */
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #toggleSidebarBtn.collapsed {
+            left: 1rem; /* Move to the left when sidebar is collapsed */
+        }
+
+        /* Main content area for canvas */
+        #mainContent {
+            flex-grow: 1; /* Takes all available space */
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            position: relative; /* For positioning rulers/indicators */
+            overflow: hidden; /* Hide canvas overflow, handled by its container */
+        }
+
         /* Container for canvas and rulers/indicators */
         .canvas-wrapper {
             position: relative;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column; /* Rulers above/below or left/right */
-            max-width: 100%; /* Ensure responsiveness */
-            margin: 0 auto;
+            flex-direction: column;
+            flex-grow: 1; /* Takes available vertical space */
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            background-color: #000;
         }
 
         .canvas-container {
             position: relative;
             overflow: hidden;
             border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             display: flex;
             justify-content: center;
             align-items: center;
             background-color: #000;
+            flex-grow: 1; /* Canvas container takes remaining space within wrapper */
         }
 
         .ruler-x, .ruler-y {
@@ -98,6 +168,7 @@
             font-family: monospace;
             font-size: 0.9rem;
             color: #4b5563;
+            margin-top: 0.5rem;
         }
 
         /* Side Indicators Styling */
@@ -135,156 +206,190 @@
         .indicator-right { right: 0; border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; }
     </style>
 </head>
-<body class="p-4 bg-gray-100 min-h-screen flex flex-col items-center justify-center">
+<body>
+    <!-- Sidebar Toggle Button -->
+    <button id="toggleSidebarBtn">
+        <span id="toggleIcon">◀</span>
+    </button>
 
-    <div class="max-w-4xl w-full bg-white rounded-lg shadow-xl p-6 space-y-6">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">ASCII Tilemap Editor</h1>
+    <!-- Sidebar -->
+    <div id="sidebar" class="bg-white p-4 shadow-lg flex flex-col transition-all duration-300 ease-in-out overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-800">Controls</h2>
+        </div>
+        <div id="sidebar-content" class="space-y-6">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">ASCII Tilemap Editor</h1>
 
-        <!-- Map Configuration -->
-        <div class="bg-gray-50 p-4 rounded-lg shadow-inner flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <div class="flex items-center space-x-2">
-                <label for="mapWidth" class="text-gray-700 font-medium">Width:</label>
-                <input type="number" id="mapWidth" value="40" min="20" max="65536"
-                       class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
-            </div>
-            <div class="flex items-center space-x-2">
-                <label for="mapHeight" class="text-gray-700 font-medium">Height:</label>
-                <input type="number" id="mapHeight" value="25" min="20" max="65536"
-                       class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
-            </div>
-            <div class="flex items-center space-x-2">
-                <label for="roomCount" id="roomCountLabel" class="text-gray-700 font-medium">Rooms:</label>
-                <input type="number" id="roomCount" value="5" min="2" max="65536"
-                       class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
-            </div>
-            <div class="flex items-center space-x-2">
-                <label for="mapStyle" class="text-gray-700 font-medium">Style:</label>
-                <select id="mapStyle" class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
-                    <option value="town">Town</option>
-                    <option value="cave">Cave</option>
-                    <option value="forest">Forest</option>
-                </select>
-            </div>
-            <button id="createMapBtn"
-                    class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                Create Map
-            </button>
-            <div class="flex items-center space-x-2">
+            <!-- Map Configuration -->
+            <div class="bg-gray-50 p-4 rounded-lg shadow-inner flex flex-col items-center justify-center space-y-4">
+                <div class="flex items-center space-x-2">
+                    <label for="mapWidth" class="text-gray-700 font-medium">Width:</label>
+                    <input type="number" id="mapWidth" value="40" min="20" max="65536"
+                           class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label for="mapHeight" class="text-gray-700 font-medium">Height:</label>
+                    <input type="number" id="mapHeight" value="25" min="20" max="65536"
+                           class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label for="roomCount" id="roomCountLabel" class="text-gray-700 font-medium">Rooms:</label>
+                    <input type="number" id="roomCount" value="5" min="2" max="65536"
+                           class="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label for="mapStyle" class="text-gray-700 font-medium">Style:</label>
+                    <select id="mapStyle" class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                        <option value="town">Town</option>
+                        <option value="cave">Cave</option>
+                        <option value="forest">Forest</option>
+                    </select>
+                </div>
+                <button id="createMapBtn"
+                        class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    Create Map
+                </button>
                 <button id="randomMapBtn"
                         class="px-5 py-2 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-150 ease-in-out">
                     Random Map
                 </button>
             </div>
+
+            <!-- Tool Selection and Character Input -->
+            <div class="bg-gray-50 p-4 rounded-lg shadow-inner flex flex-col items-center justify-center space-y-4">
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <input type="radio" id="toolPaint" name="tool" value="paint" checked class="hidden">
+                    <label for="toolPaint" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
+                        Paint
+                    </label>
+
+                    <input type="radio" id="toolBox" name="tool" value="box" class="hidden">
+                    <label for="toolBox" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
+                        Box
+                    </label>
+
+                    <input type="radio" id="toolFill" name="tool" value="fill" class="hidden">
+                    <label for="toolFill" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
+                        Fill
+                    </label>
+
+                    <input type="radio" id="toolDoor" name="tool" value="door" class="hidden">
+                    <label for="toolDoor" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
+                        Door
+                    </label>
+
+                    <input type="radio" id="toolStairs" name="tool" value="stairs" class="hidden">
+                    <label for="toolStairs" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
+                        Stairs
+                    </label>
+
+                    <input type="radio" id="toolMove" name="tool" value="move" class="hidden">
+                    <label for="toolMove" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
+                        Move
+                    </label>
+                </div>
+
+                <div class="flex items-center space-x-2 mt-4 lg:mt-0">
+                    <label for="drawCharInput" class="text-gray-700 font-medium">Custom Char:</label>
+                    <input type="text" id="drawCharInput" value="#" maxlength="1"
+                           class="w-16 px-3 py-2 text-center border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                </div>
+            </div>
+
+
+            <!-- Quick Characters Dropdowns -->
+            <div class="bg-gray-50 p-4 rounded-lg shadow-inner flex flex-wrap gap-4 justify-center">
+                <div class="flex items-center space-x-2">
+                    <label for="charGroupBasic" class="text-gray-700 font-medium">Basic:</label>
+                    <select id="charGroupBasic" name="quickCharGroup"
+                            class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                        <option value="#"># Wall</option>
+                        <option value=".">. Floor</option>
+                        <option value=" ">_ Empty</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <label for="charGroupEntryExit" class="text-gray-700 font-medium">Entry/Exit:</label>
+                    <select id="charGroupEntryExit" name="quickCharGroup"
+                            class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                        <option value="+">+ Door</option>
+                        <option value=">">> Stairs Down</option>
+                        <option value="<">< Stairs Up</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <label for="charGroupCreatures" class="text-gray-700 font-medium">Creatures:</label>
+                    <select id="charGroupCreatures" name="quickCharGroup"
+                            class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                        <option value="@">@ Player</option>
+                        <option value="X">X Monster</option>
+                        <option value="D">D Dragon</option>
+                        <option value="S">S Snake</option>
+                        <option value="G">G Goblin</option>
+                        <option value="E">E Eye</option>
+                        <option value="C">C Cyclops</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <label for="charGroupItems" class="text-gray-700 font-medium">Items/Objects:</label>
+                    <select id="charGroupItems" name="quickCharGroup"
+                            class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                        <option value="~">~ Liquid</option>
+                        <option value="$">$ Gold</option>
+                        <option value="P">P Potion</option>
+                        <option value="K">K Key</option>
+                        <option value="F">F Food</option>
+                        <option value="!">! Exclamation</option>
+                        <option value="?">? Question</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <label for="charGroupNumbers" class="text-gray-700 font-medium">Numbers:</label>
+                    <select id="charGroupNumbers" name="quickCharGroup"
+                            class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Zoom Controls & Action Buttons - Stacked Vertically -->
+            <div class="flex flex-col items-center space-y-2 mt-6">
+                <button id="zoomInBtn" class="w-full px-4 py-2 bg-gray-600 text-white font-semibold rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-150 ease-in-out">
+                    Zoom In (+)
+                </button>
+                <button id="zoomOutBtn" class="w-full px-4 py-2 bg-gray-600 text-white font-semibold rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-150 ease-in-out">
+                    Zoom Out (-)
+                </button>
+                <button id="clearMapBtn"
+                        class="w-full px-5 py-2 bg-red-600 text-white font-semibold rounded-md shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    Clear Map
+                </button>
+                <button id="exportMapBtn"
+                        class="w-full px-5 py-2 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    Export Map
+                </button>
+                <input type="file" id="loadFileInput" accept=".txt" class="hidden">
+                <button id="loadMapBtn"
+                        class="w-full px-5 py-2 bg-yellow-600 text-white font-semibold rounded-md shadow-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    Load Map
+                </button>
+            </div>
         </div>
+    </div>
 
-        <!-- Tool Selection and Character Input -->
-        <div class="bg-gray-50 p-4 rounded-lg shadow-inner flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0">
-            <div class="flex flex-wrap gap-2 justify-center lg:justify-start">
-                <input type="radio" id="toolPaint" name="tool" value="paint" checked class="hidden">
-                <label for="toolPaint" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
-                    Paint
-                </label>
-
-                <input type="radio" id="toolBox" name="tool" value="box" class="hidden">
-                <label for="toolBox" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
-                    Box
-                </label>
-
-                <input type="radio" id="toolFill" name="tool" value="fill" class="hidden">
-                <label for="toolFill" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
-                    Fill
-                </label>
-
-                <input type="radio" id="toolDoor" name="tool" value="door" class="hidden">
-                <label for="toolDoor" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
-                    Door
-                </label>
-
-                <input type="radio" id="toolStairs" name="tool" value="stairs" class="hidden">
-                <label for="toolStairs" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
-                    Stairs
-                </label>
-
-                <input type="radio" id="toolMove" name="tool" value="move" class="hidden">
-                <label for="toolMove" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 font-medium cursor-pointer hover:bg-blue-100 transition duration-150 ease-in-out">
-                    Move
-                </label>
-            </div>
-
-            <div class="flex items-center space-x-2 mt-4 lg:mt-0">
-                <label for="drawCharInput" class="text-gray-700 font-medium">Custom Char:</label>
-                <input type="text" id="drawCharInput" value="#" maxlength="1"
-                       class="w-16 px-3 py-2 text-center border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
-            </div>
-        </div>
-
-        <!-- Quick Characters Dropdowns -->
-        <div class="bg-gray-50 p-4 rounded-lg shadow-inner flex flex-wrap gap-4 justify-center">
-            <div class="flex items-center space-x-2">
-                <label for="charGroupBasic" class="text-gray-700 font-medium">Basic:</label>
-                <select id="charGroupBasic" name="quickCharGroup"
-                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
-                    <option value="#"># Wall</option>
-                    <option value=".">. Floor</option>
-                    <option value=" ">_ Empty</option>
-                </select>
-            </div>
-
-            <div class="flex items-center space-x-2">
-                <label for="charGroupEntryExit" class="text-gray-700 font-medium">Entry/Exit:</label>
-                <select id="charGroupEntryExit" name="quickCharGroup"
-                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
-                    <option value="+">+ Door</option>
-                    <option value=">">> Stairs Down</option>
-                    <option value="<">< Stairs Up</option>
-                </select>
-            </div>
-
-            <div class="flex items-center space-x-2">
-                <label for="charGroupCreatures" class="text-gray-700 font-medium">Creatures:</label>
-                <select id="charGroupCreatures" name="quickCharGroup"
-                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
-                    <option value="@">@ Player</option>
-                    <option value="X">X Monster</option>
-                    <option value="D">D Dragon</option>
-                    <option value="S">S Snake</option>
-                    <option value="G">G Goblin</option>
-                    <option value="E">E Eye</option>
-                    <option value="C">C Cyclops</option>
-                </select>
-            </div>
-
-            <div class="flex items-center space-x-2">
-                <label for="charGroupItems" class="text-gray-700 font-medium">Items/Objects:</label>
-                <select id="charGroupItems" name="quickCharGroup"
-                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
-                    <option value="~">~ Liquid</option>
-                    <option value="$">$ Gold</option>
-                    <option value="P">P Potion</option>
-                    <option value="K">K Key</option>
-                    <option value="F">F Food</option>
-                    <option value="!">! Exclamation</option>
-                    <option value="?">? Question</option>
-                </select>
-            </div>
-
-            <div class="flex items-center space-x-2">
-                <label for="charGroupNumbers" class="text-gray-700 font-medium">Numbers:</label>
-                <select id="charGroupNumbers" name="quickCharGroup"
-                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800">
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                </select>
-            </div>
-        </div>
-
-
-        <!-- Canvas for drawing with Rulers and Indicators -->
+    <!-- Main Content Area (Canvas + Rulers) -->
+    <div id="mainContent" class="flex flex-col flex-grow bg-gray-200">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">ASCII Tilemap Editor</h1>
         <div class="canvas-wrapper flex flex-col items-center">
             <div id="rulerX" class="ruler-x relative w-full h-[20px] rounded-t-lg bg-gray-700 overflow-hidden"></div>
-            <div class="flex w-full">
+            <div class="flex w-full flex-grow">
                 <div id="rulerY" class="ruler-y relative w-[20px] h-full rounded-l-lg bg-gray-700 overflow-hidden"></div>
                 <div class="canvas-container relative flex-grow">
                     <canvas id="tilemapCanvas"></canvas>
@@ -297,45 +402,16 @@
             </div>
             <div id="coordinatesDisplay" class="mt-2">Mouse: (X: -, Y: -)</div>
         </div>
+    </div>
 
-        <!-- Zoom Controls -->
-        <div class="flex justify-center space-x-2 mt-4">
-            <button id="zoomInBtn" class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-150 ease-in-out">
-                Zoom In (+)
-            </button>
-            <button id="zoomOutBtn" class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-150 ease-in-out">
-                Zoom Out (-)
-            </button>
-        </div>
-
-
-        <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
-            <button id="clearMapBtn"
-                    class="px-5 py-2 bg-red-600 text-white font-semibold rounded-md shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                Clear Map
-            </button>
-            <button id="exportMapBtn"
-                    class="px-5 py-2 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                Export Map
-            </button>
-            <input type="file" id="loadFileInput" accept=".txt" class="hidden">
-            <button id="loadMapBtn"
-                    class="px-5 py-2 bg-yellow-600 text-white font-semibold rounded-md shadow-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                Load Map
+    <!-- Message Box for user feedback -->
+    <div id="messageBox" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
+            <p id="messageText" class="text-gray-800 text-lg font-medium mb-4"></p>
+            <button id="closeMessageBoxBtn" class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                OK
             </button>
         </div>
-
-        <!-- Message Box for user feedback -->
-        <div id="messageBox" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
-                <p id="messageText" class="text-gray-800 text-lg font-medium mb-4"></p>
-                <button id="closeMessageBoxBtn" class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    OK
-                </button>
-            </div>
-        </div>
-
     </div>
 
     <script>
@@ -345,8 +421,8 @@
         const mapWidthInput = document.getElementById('mapWidth');
         const mapHeightInput = document.getElementById('mapHeight');
         const roomCountInput = document.getElementById('roomCount');
-        const roomCountLabel = document.getElementById('roomCountLabel'); // New: Get the label element
-        const mapStyleSelect = document.getElementById('mapStyle'); // New
+        const roomCountLabel = document.getElementById('roomCountLabel');
+        const mapStyleSelect = document.getElementById('mapStyle');
         const createMapBtn = document.getElementById('createMapBtn');
         const randomMapBtn = document.getElementById('randomMapBtn');
         const toolRadios = document.querySelectorAll('input[name="tool"]');
@@ -369,6 +445,11 @@
         const indicatorBottom = document.getElementById('indicatorBottom');
         const indicatorLeft = document.getElementById('indicatorLeft');
         const indicatorRight = document.getElementById('indicatorRight');
+
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const mainContent = document.getElementById('mainContent');
 
         // --- Global Variables ---
         let mapData = []; // 2D array to store ASCII characters
@@ -478,22 +559,17 @@
          * Call this after map size changes, window resize, or zoom changes.
          */
         function updateCanvasAndDraw() {
+            // Get the actual client dimensions of the canvas container
             const canvasContainer = canvas.parentElement;
-            const containerWidth = canvasContainer.clientWidth;
-            const containerHeight = window.innerHeight * 0.6; // Max height for canvas area
+            canvas.width = canvasContainer.clientWidth;
+            canvas.height = canvasContainer.clientHeight;
 
-            // Determine the base character size so the whole map fits at zoom 1.0
-            // This is the largest charSize at which the *entire* map would fit within the container
-            const maxCharSizeX = containerWidth / mapWidth;
-            const maxCharSizeY = containerHeight / mapHeight;
-            // Ensure charSize has a reasonable minimum, and max initial at 24 for readability
+            // Determine the base character size so the whole map fits at zoom 1.0 initially
+            const maxCharSizeX = canvas.width / mapWidth;
+            const maxCharSizeY = canvas.height / mapHeight;
             baseCharSize = Math.max(8, Math.min(maxCharSizeX, maxCharSizeY, 24));
 
             charSize = baseCharSize * currentZoom;
-
-            // Canvas dimensions are now the maximum visible area, not necessarily the full map size
-            canvas.width = containerWidth; // The actual pixel width of the canvas viewport
-            canvas.height = containerHeight; // The actual pixel height of the canvas viewport
 
             // Ensure view offsets are within valid range after zoom/resize
             clampViewOffsets();
@@ -739,35 +815,34 @@
         /**
          * Carves a connected region of a specific fill character into the map using a drunkard's walk.
          * Ensures distinct regions by preventing starting points near already carved areas.
-         * @param {number} startX Start X for the region.
-         * @param {number} startY Start Y for the region.
+         * @param {number} startX Candidate start X for the region.
+         * @param {number} startY Candidate start Y for the region.
          * @param {string} targetChar The character to replace (e.g., ' ' for cave, '#' for forest).
          * @param {string} fillChar The character to fill with (e.g., '.').
          * @param {Array<Array<boolean>>} globalVisitedMatrix Global visited matrix to track cells from all successfully carved regions.
          * @param {number} minSize Minimum size of the region (in cells).
          * @param {number} maxSize Maximum size of the region (in cells).
+         * @param {number} boundaryBuffer Minimum distance from already carved regions.
          * @returns {boolean} True if a region of sufficient size was carved.
          */
-        function carveRegion(startX, startY, targetChar, fillChar, globalVisitedMatrix, minSize, maxSize) {
-            // Check if the starting point is valid: it must be targetChar and not adjacent to an already filled region
-            const checkNeighborsForOverlap = (x, y) => {
-                const directNeighbors = [{dx:0,dy:1}, {dx:0,dy:-1}, {dx:1,dy:0}, {dx:-1,dy:0}, {dx:-1,dy:-1}, {dx:-1,dy:1}, {dx:1,dy:-1}, {dx:1,dy:1}]; // Include diagonals for stronger separation
-                for (const n of directNeighbors) {
-                    const nx = x + n.dx;
-                    const ny = y + n.dy;
-                    if (nx >= 0 && nx < mapWidth && ny >= 0 && ny < mapHeight &&
-                        globalVisitedMatrix[ny][nx]) { // Check if neighbor is part of an already completed region
-                        return true; // Overlaps with an existing filled region
+        function carveRegion(startX, startY, targetChar, fillChar, globalVisitedMatrix, minSize, maxSize, boundaryBuffer) {
+            // Check if the starting point is valid: it must be targetChar, not already visited, and sufficiently far from other regions
+            const isTooCloseToExistingRegion = (x, y) => {
+                for (let by = y - boundaryBuffer; by <= y + boundaryBuffer; by++) {
+                    for (let bx = x - boundaryBuffer; bx <= x + boundaryBuffer; bx++) {
+                        if (bx >= 0 && bx < mapWidth && by >= 0 && by < mapHeight && globalVisitedMatrix[by][bx]) {
+                            return true; // Too close to an already carved region
+                        }
                     }
                 }
                 return false;
             };
 
             // Ensure startX, startY are not on the immediate border and are valid
-            if (startX < 1 || startX >= mapWidth - 1 || startY < 1 || startY >= mapHeight - 1 ||
+            if (startX < boundaryBuffer || startX >= mapWidth - boundaryBuffer || startY < boundaryBuffer || startY >= mapHeight - boundaryBuffer ||
                 mapData[startY][startX] !== targetChar || globalVisitedMatrix[startY][startX] ||
-                checkNeighborsForOverlap(startX, startY)) {
-                return false; // Cannot start carving here due to boundary, already visited, or overlap
+                isTooCloseToExistingRegion(startX, startY)) {
+                return false; // Invalid start point
             }
 
             let currentRegionCells = [];
@@ -788,26 +863,26 @@
                 let nextX = currX + dx;
                 let nextY = currY + dy;
 
-                // Ensure potential next cell is within bounds and not part of an already carved *distinct* region
+                // Ensure potential next cell is within bounds (with a buffer) and not part of an already carved *distinct* region
                 if (nextX > 0 && nextX < mapWidth - 1 && nextY > 0 && nextY < mapHeight - 1 &&
-                    !globalVisitedMatrix[nextY][nextX]) {
+                    !globalVisitedRegions[nextY][nextX] && // Crucial: avoid merging with distinct regions
+                    mapData[nextY][nextX] === targetChar) { // Only carve if it's the target char
 
-                    // Only change if it's the target char (an uncarved area) or already part of this current region
-                    if (mapData[nextY][nextX] === targetChar || mapData[nextY][nextX] === fillChar) {
-                        if (mapData[nextY][nextX] === targetChar) {
-                            mapData[nextY][nextX] = fillChar;
-                            currentRegionCells.push({ x: nextX, y: nextY });
-                        }
-                        currX = nextX;
-                        currY = nextY;
-                    }
+                    mapData[nextY][nextX] = fillChar;
+                    currentRegionCells.push({ x: nextX, y: nextY });
+                    currX = nextX;
+                    currY = nextY;
+                } else if (mapData[nextY] && mapData[nextY][nextX] === fillChar) {
+                    // Allow moving into an already carved part of *this* region
+                    currX = nextX;
+                    currY = nextY;
                 }
             }
 
             if (currentRegionCells.length >= minSize) {
                 // Mark all cells of this successfully carved region in the global visited matrix
                 for (const cell of currentRegionCells) {
-                    globalVisitedMatrix[cell.y][cell.x] = true;
+                    globalVisitedRegions[cell.y][cell.x] = true;
                 }
                 return true;
             } else {
@@ -910,6 +985,7 @@
 
             const minCaveSize = Math.floor(mapWidth * mapHeight * MIN_REGION_SIZE_FACTOR);
             const maxCaveSize = Math.floor(mapWidth * mapHeight * MAX_REGION_SIZE_FACTOR);
+            const boundaryBuffer = 3; // Ensure clear separation between caves
 
             let cavesPlaced = 0;
             let attempts = 0;
@@ -919,7 +995,7 @@
                 const startY = Math.floor(Math.random() * (mapHeight - 2)) + 1; // Avoid immediate borders
 
                 // Try to carve a region
-                if (carveRegion(startX, startY, ' ', '.', globalVisitedRegions, minCaveSize, maxCaveSize)) {
+                if (carveRegion(startX, startY, ' ', '.', globalVisitedRegions, minCaveSize, maxCaveSize, boundaryBuffer)) {
                     cavesPlaced++;
                 }
                 attempts++;
@@ -951,6 +1027,7 @@
 
             const minClearingSize = Math.floor(mapWidth * mapHeight * MIN_REGION_SIZE_FACTOR);
             const maxClearingSize = Math.floor(mapWidth * mapHeight * MAX_REGION_SIZE_FACTOR);
+            const boundaryBuffer = 3; // Ensure clear separation between clearings
 
             let clearingsPlaced = 0;
             let attempts = 0;
@@ -960,7 +1037,7 @@
                 const startY = Math.floor(Math.random() * (mapHeight - 2)) + 1; // Avoid immediate borders
 
                 // Try to carve a region
-                if (carveRegion(startX, startY, '#', '.', globalVisitedRegions, minClearingSize, maxClearingSize)) {
+                if (carveRegion(startX, startY, '#', '.', globalVisitedRegions, minClearingSize, maxClearingSize, boundaryBuffer)) {
                     clearingsPlaced++;
                 }
                 attempts++;
@@ -1083,7 +1160,7 @@
                 } else if (currentTool === 'stairs') { // Stairs tool still available for manual drawing
                     if (gridX >= 0 && gridX < mapWidth && gridY >= 0 && gridY < mapHeight) {
                         // Use current drawChar, default to '>' if not specified for stairs
-                        mapData[gridY][gridX] = (drawChar === '>' || drawChar === '<') ? drawChar : '>';
+                        mapData[gridY][gridX] = (Math.random() < 0.5) ? '>' : '<'; // Randomly '>' or '<'
                         drawMap();
                     }
                 } else if (currentTool === 'fill') {
@@ -1215,6 +1292,21 @@
             // Initial update of the room count label based on default style
             updateRoomCountLabel();
         };
+
+        // Sidebar toggle functionality
+        toggleSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            toggleSidebarBtn.classList.toggle('collapsed');
+            if (sidebar.classList.contains('collapsed')) {
+                toggleIcon.textContent = '▶';
+            } else {
+                toggleIcon.textContent = '◀';
+            }
+            // Trigger a canvas redraw after sidebar transition completes
+            // This ensures the canvas resizes correctly after the layout change
+            setTimeout(updateCanvasAndDraw, 300); // Match CSS transition duration
+        });
+
 
         // Create Map button click
         createMapBtn.addEventListener('click', initializeMap);

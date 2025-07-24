@@ -1,4 +1,3 @@
-using System;
 using HHSGame.UI;
 
 namespace HHSGame.Core.Map

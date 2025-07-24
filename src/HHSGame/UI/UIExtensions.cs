@@ -21,6 +21,7 @@ namespace HHSGame.UI
             serviceCollection.AddSingleton<InventoryFrame>();
             serviceCollection.AddSingleton<SurroundingsFrame>();
             serviceCollection.AddSingleton<UtilityWindow>();
+            serviceCollection.AddSingleton<PlayerSetupWizard>();
 
             // Setup Game UI
             serviceCollection.AddSingleton<GameUI>();

@@ -12,6 +12,7 @@ namespace HHSGame.UI
             InventoryFrame inventoryFrame,
             SurroundingsFrame surroundingsFrame,
             UtilityWindow utilityWindow,
+            PlayerSetupWizard playerSetupWizard,
             Game game) : IDisposable
     {
         public Toplevel Start()
@@ -20,7 +21,7 @@ namespace HHSGame.UI
             Toplevel top = new();
             top.Add(mapFrame, inventoryFrame, surroundingsFrame, messageFrame, utilityWindow);
 
-            top.Add(new PlayerSetupWizard());
+            top.Add(playerSetupWizard);
             game.Start();
 
             Application.KeyDown += HandleKeyEvent;
@@ -31,10 +32,20 @@ namespace HHSGame.UI
         {
             Events.RaiseGameMessage($"Key pressed: {key}");
 
+            if (playerSetupWizard.Visible)
+            {
+                return;
+            }
+
+            if (key.Handled)
+            {
+                return;
+            }
             if (utilityWindow.Visible)
             {
                 if (utilityWindow.HandleKeyEvent(key))
                 {
+                    key.Handled = true;
                     return;
                 }
             }

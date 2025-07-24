@@ -52,13 +52,12 @@ namespace HHSGame.Core
         public SurroundingsChangeType Type { get; } = type;
     }
 
-    public static class EventSystem
+    public static class Events
     {
 
         public static event EventHandler<GameMessageEventArgs>? OnGameMessageEvent;
         public static event EventHandler<TurnEventArgs>? OnTurnChanged;
         public static event EventHandler<InventoryChangeEventArgs>? OnInventoryChange;
-
         public static event EventHandler<SurroundingsChangeEventArgs>? OnSurroundingsChange;
 
         public static void RaiseGameMessage(string message)

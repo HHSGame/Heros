@@ -6,14 +6,14 @@ namespace HHSGame.Core
 
     public interface IGameActor : IDrawable
     {
-        public int X { get; }
-        public int Y { get; }
+        int X { get; }
+        int Y { get; }
 
-        public abstract string Name { get; }
+        abstract string Name { get; }
 
-        public abstract char Glyph { get; }
+        abstract char Glyph { get; }
 
-        public abstract Terminal.Gui.Drawing.Attribute Attribute { get; }
+        abstract Terminal.Gui.Drawing.Attribute Attribute { get; }
 
         void IDrawable.Draw(IDrawingContext ctx)
         {

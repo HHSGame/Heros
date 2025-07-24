@@ -21,7 +21,7 @@ namespace HHSGame.Core
         public Coordinate Position => new (X, Y);
 
         public char Glyph => '☭';
-        public string Name => I18n.GetString("HHS.Core.Player.Name");
+        public string Name => I18n.T("HHS.Core.Player.Name");
 
         public Terminal.Gui.Drawing.Attribute Attribute => new(Color.BrightYellow, Color.Red);
 
@@ -42,7 +42,7 @@ namespace HHSGame.Core
             visibleTiles.Clear();
             CalculateFOV(Position, FOVRadius);
             mapState.MarkVisibleTiles(visibleTiles);
-            EventSystem.RaiseSurroundingsChange((X, Y), FOVRadius, SurroundingsChangeType.Movement);
+            Events.RaiseSurroundingsChange((X, Y), FOVRadius, SurroundingsChangeType.Movement);
         }
 
         private void CalculateFOV(Coordinate position, int radius)
@@ -161,12 +161,12 @@ namespace HHSGame.Core
                     X = newX;
                     Y = newY;
                     UpdateFOV();
-                    EventSystem.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
+                    Events.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
                 }
             }
             else
             {
-                EventSystem.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
+                Events.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
             }
             turnManager.EndPlayerTurn();
         }
@@ -178,7 +178,7 @@ namespace HHSGame.Core
                 return;
             }
 
-            EventSystem.RaiseGameMessage(I18n.GetString("PlayerAttacks", enemy.Name));
+            Events.RaiseGameMessage(I18n.T("PlayerAttacks", enemy.Name));
 
             int baseDamage = Strength;
             int weaponDamage = equippedWeapon?.Damage ?? 0;
@@ -198,7 +198,7 @@ namespace HHSGame.Core
                 return;
             }
 
-            EventSystem.RaiseGameMessage(I18n.GetString("PlayerTakesDamage", damage));
+            Events.RaiseGameMessage(I18n.T("PlayerTakesDamage", damage));
 
             int baseDefense = Defense;
             int armorDefense = equippedArmor?.Defense ?? 0;
@@ -215,7 +215,7 @@ namespace HHSGame.Core
             if (Health <= 0)
             {
                 Health = 0;
-                EventSystem.RaiseGameMessage(I18n.GetString("PlayerDefeated"));
+                Events.RaiseGameMessage(I18n.T("PlayerDefeated"));
                 Die();
             }
         }
@@ -261,7 +261,7 @@ namespace HHSGame.Core
                 inventoryManager.AddItem(equippedWeapon);
             }
             equippedWeapon = weapon;
-            EventSystem.RaiseGameMessage(I18n.GetString("EquippedWeapon", weapon.Name));
+            Events.RaiseGameMessage(I18n.T("EquippedWeapon", weapon.Name));
         }
 
         public void EquipArmor(Armor armor)
@@ -271,7 +271,7 @@ namespace HHSGame.Core
                 inventoryManager.AddItem(equippedArmor);
             }
             equippedArmor = armor;
-            EventSystem.RaiseGameMessage(I18n.GetString("EquippedArmor", armor.Name));
+            Events.RaiseGameMessage(I18n.T("EquippedArmor", armor.Name));
         }
 
         public void PickupItems()
@@ -279,7 +279,7 @@ namespace HHSGame.Core
             List<Item> items = itemManager.GetItemsAt(X, Y);
             if (items.Count == 0)
             {
-                EventSystem.RaiseGameMessage(I18n.GetString("NoItemsToPickUp"));
+                Events.RaiseGameMessage(I18n.T("NoItemsToPickUp"));
                 return;
             }
 
@@ -288,7 +288,7 @@ namespace HHSGame.Core
             {
                 AddItem(item);
             }
-            EventSystem.RaiseSurroundingsChange((X, Y), FOVRadius, SurroundingsChangeType.PickUpLoot);
+            Events.RaiseSurroundingsChange((X, Y), FOVRadius, SurroundingsChangeType.PickUpLoot);
         }
 
         public void ApplyEffect(ActiveEffect effect)

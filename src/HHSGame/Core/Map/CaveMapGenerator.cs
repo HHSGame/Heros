@@ -18,13 +18,13 @@ namespace HHSGame.Core.Map
                 {
                     if (x == 0 || x == MapWidth - 1 || y == 0 || y == MapHeight - 1)
                     {
-                        map[y, x] = new Cell { Character = '#', Attribute = GetTerrainColor('#') };
+                        map[y, x] = new Cell { Character = '#', Attribute = TilePresets.GetTerrainColor('#') };
                     }
                     else
                     {
                         map[y, x] = Random.Next(0, 100) < InitialFillPercent
-                            ? new Cell { Character = '#', Attribute = GetTerrainColor('#') }
-                            : new Cell { Character = '.', Attribute = GetTerrainColor('.') };
+                            ? new Cell { Character = '#', Attribute = TilePresets.GetTerrainColor('#') }
+                            : new Cell { Character = '.', Attribute = TilePresets.GetTerrainColor('.') };
                     }
                 }
             }

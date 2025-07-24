@@ -49,16 +49,16 @@ namespace HHSGame.Core.Map
         {
             if (!mapState.IsWalkable(x, y))
             {
-                return I18n.GetString("HHS.Core.Map.CollisionSystem.BlockedByTerrain", actor.Name, x, y);
+                return I18n.T("HHS.Core.Map.CollisionSystem.BlockedByTerrain", actor.Name, x, y);
             }
 
             IGameActor? collision = GetCollisionAt(x, y);
             if (collision != null && collision != actor)
             {
-                return I18n.GetString("HHS.Core.Map.CollisionSystem.BlockedByOthers", actor.Name, collision.Name, x, y);
+                return I18n.T("HHS.Core.Map.CollisionSystem.BlockedByOthers", actor.Name, collision.Name, x, y);
             }
 
-            return I18n.GetString("HHS.Core.Map.CollisionSystem.Movement", actor.Name, x, y);
+            return I18n.T("HHS.Core.Map.CollisionSystem.Movement", actor.Name, x, y);
         }
     }
 }

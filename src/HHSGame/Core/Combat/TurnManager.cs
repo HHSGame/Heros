@@ -10,7 +10,7 @@ namespace HHSGame.Core.Combat
         public TurnManager()
         {
 
-            EventSystem.OnTurnChanged += HandleTurnChanged;
+            Events.OnTurnChanged += HandleTurnChanged;
         }
 
         private void HandleTurnChanged(object? sender, TurnEventArgs e)
@@ -22,7 +22,7 @@ namespace HHSGame.Core.Combat
         {
             if (currentTurnState == TurnState.PlayerTurn)
             {
-                EventSystem.RaiseTurnChanged(TurnState.EnemyTurn);
+                Events.RaiseTurnChanged(TurnState.EnemyTurn);
             }
         }
 
@@ -30,7 +30,7 @@ namespace HHSGame.Core.Combat
         {
             if (currentTurnState == TurnState.EnemyTurn)
             {
-                EventSystem.RaiseTurnChanged(TurnState.PlayerTurn);
+                Events.RaiseTurnChanged(TurnState.PlayerTurn);
             }
         }
 

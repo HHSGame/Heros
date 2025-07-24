@@ -35,7 +35,7 @@ namespace HHSGame.UI.Views
                     Character = (char)character,
                     Attribute = attribute
                 };
-               SetNeedsDraw(new Rectangle(x, y, 1, 1));
+                SetNeedsDraw(new Rectangle(x, y, 1, 1));
             }
         }
 

@@ -138,7 +138,7 @@ namespace HHSGame.Core.Enemies
         public void Attack(Player player)
         {
             int damage = Strength;
-            EventSystem.RaiseGameMessage(I18n.GetString("HHS.Core.Enemies.Enemy.Attack", Name, damage));
+            Events.RaiseGameMessage(I18n.T("HHS.Core.Enemies.Enemy.Attack", Name, damage));
 
             abilitySystem.TryApplySpecialEffect(player);
             player.TakeDamage(damage);
@@ -157,12 +157,12 @@ namespace HHSGame.Core.Enemies
             if (Health <= 0)
             {
                 Health = 0;
-                EventSystem.RaiseGameMessage(I18n.GetString("HHS.Core.Enemies.Enemy.Defeated", Name));
+                Events.RaiseGameMessage(I18n.T("HHS.Core.Enemies.Enemy.Defeated", Name));
                 Die();
             }
             else
             {
-                EventSystem.RaiseGameMessage(I18n.GetString("HHS.Core.Enemies.Enemy.TakeDamage", Name, actualDamage, Health));
+                Events.RaiseGameMessage(I18n.T("HHS.Core.Enemies.Enemy.TakeDamage", Name, actualDamage, Health));
             }
         }
 
@@ -184,11 +184,11 @@ namespace HHSGame.Core.Enemies
             {
                 X = newX;
                 Y = newY;
-                EventSystem.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
+                Events.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
             }
             else
             {
-                EventSystem.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
+                Events.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
             }
         }
 

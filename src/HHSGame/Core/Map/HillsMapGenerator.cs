@@ -23,19 +23,19 @@ namespace HHSGame.Core.Map
 
                     if (height > MountainThreshold)
                     {
-                        map[y, x] = new Cell { Character = '^', Attribute = GetTerrainColor('^') };
+                        map[y, x] = new Cell { Character = '^', Attribute = TilePresets.GetTerrainColor('^') };
                     }
                     else if (height > HillThreshold)
                     {
-                        map[y, x] = new Cell { Character = '*', Attribute = GetTerrainColor('*') };
+                        map[y, x] = new Cell { Character = '*', Attribute = TilePresets.GetTerrainColor('*') };
                     }
                     else if (height > ForestThreshold)
                     {
-                        map[y, x] = new Cell { Character = '*', Attribute = GetTerrainColor('*') };
+                        map[y, x] = new Cell { Character = '*', Attribute = TilePresets.GetTerrainColor('*') };
                     }
                     else
                     {
-                        map[y, x] = new Cell { Character = '.', Attribute = GetTerrainColor('.') };
+                        map[y, x] = new Cell { Character = '.', Attribute = TilePresets.GetTerrainColor('.') };
                     }
                 }
             }

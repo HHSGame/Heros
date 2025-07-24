@@ -22,8 +22,15 @@ namespace HHSGame.Core
 
             // Start game loop with refresh rate
             Application.AddTimeout(TimeSpan.FromMilliseconds(TargetFrameTime), GameLoop);
+
+            Events.OnGameMessageEvent += (sender, e) =>
+            {
+                LogMessage(logger, e.Message);
+            };
         }
 
+        [LoggerMessage(LogLevel.Information, "{message}")]
+        public static partial void LogMessage(ILogger logger, string message);
         [LoggerMessage(LogLevel.Information, "Game Starting: {message}")]
         public static partial void LogStartup(ILogger logger, string message);
 

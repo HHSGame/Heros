@@ -21,7 +21,7 @@ namespace HHSGame.Core.Enemies
                 item.Y = enemy.Y;
                 itemManager.AddLoot(item);
             }
-            EventSystem.RaiseSurroundingsChange((enemy.X, enemy.Y), 1, SurroundingsChangeType.DropLoot);
+            Events.RaiseSurroundingsChange((enemy.X, enemy.Y), 1, SurroundingsChangeType.DropLoot);
         }
 
 

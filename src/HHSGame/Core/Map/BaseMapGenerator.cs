@@ -1,41 +1,14 @@
 using HHSGame.UI;
-using Attribute = Terminal.Gui.Drawing.Attribute;
 
 namespace HHSGame.Core.Map
 {
     public abstract class BaseMapGenerator(int mapWidth, int mapHeight, Random random)
     {
-        protected static readonly Dictionary<char, Attribute> terrainColors = new()
-        {
-            { '#', ColorPresets.Terrain.Stone },    // Walls
-            { '.', ColorPresets.Terrain.Grass },    // Floors
-            { '~', ColorPresets.Terrain.Water },    // Water
-            { '^', ColorPresets.Terrain.Lava },     // Lava/Hills
-            { '*', ColorPresets.Terrain.Forest },   // Vegetation
-            { 'H', ColorPresets.Terrain.Stone },    // Houses
-            { 'S', ColorPresets.Terrain.Sand },     // Shops
-            { '║', ColorPresets.Terrain.Stone },    // Town walls
-            { '═', ColorPresets.Terrain.Stone },    // Town walls
-            { '╔', ColorPresets.Terrain.Stone },    // Town walls`
-            { '╗', ColorPresets.Terrain.Stone },    // Town walls
-            { '╚', ColorPresets.Terrain.Stone },    // Town walls
-            { '╝', ColorPresets.Terrain.Stone },    // Town walls
-            { '▒', ColorPresets.Terrain.Grass },    // Town streets
-        };
-
-
         protected Random Random => random;
         protected int MapWidth => mapWidth;
         protected int MapHeight => mapHeight;
 
         public abstract Cell[,] Generate();
-
-        public static Attribute GetTerrainColor(char terrainChar)
-        {
-            return terrainColors.TryGetValue(terrainChar, out Attribute color)
-                ? color
-                : ColorPresets.Terrain.Grass;
-        }
 
         protected Cell[,] SmoothMap(Cell[,] map, char wallChar = '#')
         {
@@ -49,7 +22,7 @@ namespace HHSGame.Core.Map
 
                     if (neighborCount > 4)
                     {
-                        newMap[y, x] = new Cell { Character = wallChar, Attribute = GetTerrainColor(wallChar) };
+                        newMap[y, x] = new Cell { Character = wallChar, Attribute = TilePresets.GetTerrainColor(wallChar) };
                     }
                     else if (neighborCount < 4)
                     {

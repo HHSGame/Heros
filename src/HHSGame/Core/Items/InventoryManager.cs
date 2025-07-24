@@ -16,13 +16,13 @@ namespace HHSGame.Core.Items
         public void AddItem(Item item)
         {
             ObservableItems.Add(item);
-            EventSystem.RaiseGameMessage(I18n.GetString("PickedUpItem", item.Name));
-            EventSystem.RaiseInventoryChange(InventoryEventType.PickUp, item);
+            Events.RaiseGameMessage(I18n.T("PickedUpItem", item.Name));
+            Events.RaiseInventoryChange(InventoryEventType.PickUp, item);
         }
 
         public void RemoveItem(Item item)
         {
-            EventSystem.RaiseInventoryChange(InventoryEventType.Remove, item);
+            Events.RaiseInventoryChange(InventoryEventType.Remove, item);
             ObservableItems.Remove(item);
         }
 

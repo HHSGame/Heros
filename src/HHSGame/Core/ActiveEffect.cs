@@ -15,7 +15,7 @@ namespace HHSGame.Core
     {
         public override void ApplyEffect(Player player)
         {
-            EventSystem.RaiseGameMessage(I18n.GetString("HHS.Core.PoisonEffect.Message", player.Name));
+            Events.RaiseGameMessage(I18n.T("HHS.Core.PoisonEffect.Message", player.Name));
             player.TakeDamage(damagePerTurn);
         }
     }
@@ -24,7 +24,7 @@ namespace HHSGame.Core
     {
         public override void ApplyEffect(Player player)
         {
-            EventSystem.RaiseGameMessage(I18n.GetString("HHS.Core.StunEffect.Message", player.Name));
+            Events.RaiseGameMessage(I18n.T("HHS.Core.StunEffect.Message", player.Name));
             // Stun prevents actions but doesn't deal damage
         }
     }

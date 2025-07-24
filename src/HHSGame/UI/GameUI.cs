@@ -3,30 +3,24 @@ using Terminal.Gui.App;
 using Terminal.Gui.Drivers;
 using Terminal.Gui.Input;
 using Terminal.Gui.Views;
-using HHSGame.UI.Windows;
+using HHSGame.UI.Views;
 
 namespace HHSGame.UI
 {
-    public class GameUI(MapWindow mapWindow,
-            MessageWindow messageWindow,
-            InventoryWindow inventoryWindow,
-            SurroundingsWindow surroundingsWindow,
+    public class GameUI(MapFrame mapFrame,
+            MessageFrame messageFrame,
+            InventoryFrame inventoryFrame,
+            SurroundingsFrame surroundingsFrame,
             UtilityWindow utilityWindow,
             Game game) : IDisposable
     {
-
-        public MapWindow MapWindow => mapWindow;
-        public MessageWindow MessageWindow => messageWindow;
-        public InventoryWindow InventoryWindow => inventoryWindow;
-        public UtilityWindow ItemUsageWindow => utilityWindow;
-        public SurroundingsWindow SurroundingsWindow => surroundingsWindow;
-
         public Toplevel Start()
         {
             // Create main window
             Toplevel top = new();
-            top.Add(mapWindow, inventoryWindow, surroundingsWindow, messageWindow, utilityWindow);
+            top.Add(mapFrame, inventoryFrame, surroundingsFrame, messageFrame, utilityWindow);
 
+            top.Add(new PlayerSetupWizard());
             game.Start();
 
             Application.KeyDown += HandleKeyEvent;
@@ -35,7 +29,7 @@ namespace HHSGame.UI
 
         private void HandleKeyEvent(object? sender, Key key)
         {
-            EventSystem.RaiseGameMessage($"Key pressed: {key}");
+            Events.RaiseGameMessage($"Key pressed: {key}");
 
             if (utilityWindow.Visible)
             {

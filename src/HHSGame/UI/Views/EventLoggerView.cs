@@ -1,15 +1,13 @@
 
 
 using HHSGame.Core;
-using Terminal.Gui.Drawing;
-using Terminal.Gui.Configuration;
 using Terminal.Gui.ViewBase;
 
 namespace HHSGame.UI.Views
 {
     public class EventLoggerView : View
     {
-        private readonly List<string> eventMessages = [];
+        private readonly Queue<string> eventMessages = [];
         private const int MaxEventMessages = 10;
 
         public EventLoggerView()
@@ -17,7 +15,7 @@ namespace HHSGame.UI.Views
             Width = Dim.Fill();
             Height = Dim.Fill();
             Height = MaxEventMessages + 2;
-            EventSystem.OnGameMessageEvent += HandleGameEvent;
+            Events.OnGameMessageEvent += HandleGameEvent;
         }
 
         private void HandleGameEvent(object? sender, GameMessageEventArgs e)
@@ -27,23 +25,24 @@ namespace HHSGame.UI.Views
 
         public void LogEvent(string message)
         {
-            eventMessages.Insert(0, message);
+            eventMessages.Enqueue(message);
             if (eventMessages.Count > MaxEventMessages)
             {
-                eventMessages.RemoveAt(MaxEventMessages);
+                eventMessages.Dequeue();
             }
             SetNeedsDraw();
         }
 
         protected override bool OnDrawingContent()
         {
-            for (int i = 0; i < eventMessages.Count; i++)
+            int i = 0;
+            foreach (string message in eventMessages.Reverse())
             {
                 Move(0, i);
-                SetAttribute(SchemeManager.GetScheme(Schemes.Base).GetAttributeForRole(VisualRole.Focus));
-                AddStr(eventMessages[i]);
+                AddStr(message);
+                i++;
             }
-            return false;
+            return true;
         }
     }
 }

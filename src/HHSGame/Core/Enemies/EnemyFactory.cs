@@ -7,7 +7,7 @@ namespace HHSGame.Core.Enemies
     {
         public List<Enemy> SpawnEnemies()
         {
-            EventSystem.RaiseGameMessage("Spawning enemies...");
+            Events.RaiseGameMessage("Spawning enemies...");
 
             List<Enemy> enemies = [];
 
@@ -19,7 +19,7 @@ namespace HHSGame.Core.Enemies
             SpawnEnemyType(enemies, EnemyType.Soldier, 60);
             SpawnEnemyType(enemies, EnemyType.Sniper, 5);
 
-            EventSystem.RaiseGameMessage("Enemies spawned: 50 Gangsters, 30 Bandits, 5 Bandit Leaders, 100 Thugs, 60 Soldiers, 5 Snipers");
+            Events.RaiseGameMessage("Enemies spawned: 50 Gangsters, 30 Bandits, 5 Bandit Leaders, 100 Thugs, 60 Soldiers, 5 Snipers");
             return enemies;
         }
 

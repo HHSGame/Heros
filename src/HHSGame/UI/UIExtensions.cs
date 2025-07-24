@@ -1,7 +1,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using HHSGame.UI.Views;
-using HHSGame.UI.Windows;
 
 namespace HHSGame.UI
 {
@@ -14,15 +13,13 @@ namespace HHSGame.UI
 
             // Setup Views
             serviceCollection.AddSingleton<MapView>();
-            serviceCollection.AddSingleton<InventoryListView>();
             serviceCollection.AddSingleton<EventLoggerView>();
-            serviceCollection.AddSingleton<SurroundingsListView>();
 
             // Setup Windows
-            serviceCollection.AddSingleton<MapWindow>();
-            serviceCollection.AddSingleton<MessageWindow>();
-            serviceCollection.AddSingleton<InventoryWindow>();
-            serviceCollection.AddSingleton<SurroundingsWindow>();
+            serviceCollection.AddSingleton<MapFrame>();
+            serviceCollection.AddSingleton<MessageFrame>();
+            serviceCollection.AddSingleton<InventoryFrame>();
+            serviceCollection.AddSingleton<SurroundingsFrame>();
             serviceCollection.AddSingleton<UtilityWindow>();
 
             // Setup Game UI

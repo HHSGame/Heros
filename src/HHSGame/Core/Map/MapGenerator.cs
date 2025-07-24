@@ -1,7 +1,6 @@
 using HHSGame.UI;
 using System.Globalization;
 using HHSGame.Core.Items;
-using Attribute = Terminal.Gui.Drawing.Attribute;
 
 namespace HHSGame.Core.Map
 {
@@ -14,44 +13,13 @@ namespace HHSGame.Core.Map
 
     public class MapGenerator(GameParameters parameters, Random random, ItemManager itemManager, ItemFactory itemFactory)
     {
-        private static readonly Dictionary<char, Attribute> terrainColors = new()
-        {
-            { '#', ColorPresets.Terrain.Stone },    // Walls
-            { '.', ColorPresets.Terrain.Grass },    // Floors
-            { '~', ColorPresets.Terrain.Water },    // Water
-            { '^', ColorPresets.Terrain.Lava },     // Lava/Hills
-            { '*', ColorPresets.Terrain.Forest },   // Vegetation
-            { 'H', ColorPresets.Terrain.Stone },    // Houses
-            { 'S', ColorPresets.Terrain.Sand },     // Shops
-            { '║', ColorPresets.Terrain.Stone },    // Town walls
-            { '═', ColorPresets.Terrain.Stone },    // Town walls
-            { '╔', ColorPresets.Terrain.Stone },    // Town walls
-            { '╗', ColorPresets.Terrain.Stone },    // Town walls
-            { '╚', ColorPresets.Terrain.Stone },    // Town walls
-            { '╝', ColorPresets.Terrain.Stone },    // Town walls
-            { '│', ColorPresets.Terrain.Stone },    // House/Room walls
-            { '─', ColorPresets.Terrain.Stone },    // House/Room walls
-            { '┌', ColorPresets.Terrain.Stone },    // House/Room walls
-            { '┐', ColorPresets.Terrain.Stone },    // House/Room walls
-            { '└', ColorPresets.Terrain.Stone },    // House/Room walls
-            { '┘', ColorPresets.Terrain.Stone },    // House/Room walls
-            { '▒', ColorPresets.Terrain.Grass },    // Town streets
-        };
-
-        public static Attribute GetTerrainColor(char terrainChar)
-        {
-            return terrainColors.TryGetValue(terrainChar, out Attribute color)
-                ? color
-                : ColorPresets.Terrain.Grass;
-        }
-
         private readonly int mapWidth = parameters.MapWidth;
         private readonly int mapHeight = parameters.MapHeight;
         private readonly MapStyle style = parameters.MapStyle;
 
         public Cell[,] GenerateDungeon()
         {
-            EventSystem.RaiseGameMessage($"Generating {style.ToString().ToLower(CultureInfo.InvariantCulture)} map...");
+            Events.RaiseGameMessage($"Generating {style.ToString().ToLower(CultureInfo.InvariantCulture)} map...");
 
             BaseMapGenerator generator = style switch
             {
@@ -65,7 +33,7 @@ namespace HHSGame.Core.Map
             // Place random items in the dungeon
             PlaceRandomItems(map);
 
-            EventSystem.RaiseGameMessage($"{style} map generated successfully");
+            Events.RaiseGameMessage($"{style} map generated successfully");
             return map;
         }
 

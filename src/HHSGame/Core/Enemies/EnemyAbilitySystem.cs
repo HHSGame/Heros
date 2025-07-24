@@ -31,7 +31,7 @@ namespace HHSGame.Core.Enemies
                     EnemyType.BanditLeader => $"{enemy.Name} heals itself!",
                     _ => $"{enemy.Name} uses a special ability!"
                 };
-                EventSystem.RaiseGameMessage(abilityMessage);
+                Events.RaiseGameMessage(abilityMessage);
             }
         }
     }

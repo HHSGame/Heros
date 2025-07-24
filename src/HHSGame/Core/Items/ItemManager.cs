@@ -24,7 +24,7 @@ namespace HHSGame.Core.Items
 
         public void AddLoot(Item item)
         {
-            EventSystem.RaiseGameMessage($"Dropped {item.Name} at ({item.X}, {item.Y}).");
+            Events.RaiseGameMessage($"Dropped {item.Name} at ({item.X}, {item.Y}).");
             Loot.Add(item);
         }
 

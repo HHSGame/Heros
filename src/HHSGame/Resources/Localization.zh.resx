@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Localizable strings -->
+  <data name="HHS.Core.Player.Name" xml:space="preserve">
+    <value>英雄</value>
+  </data>
+  <data name="PlayerAttacks" xml:space="preserve">
+    <value>玩家打出了 {0} 点攻击！</value>
+  </data>
+  <data name="PlayerTakesDamage" xml:space="preserve">
+    <value>玩家受到了 {0} 点伤害！</value>
+  </data>
+  <data name="PlayerDefeated" xml:space="preserve">
+    <value>玩家被击败了！</value>
+  </data>
+  <data name="EquippedWeapon" xml:space="preserve">
+    <value>装备了 {0}</value>
+  </data>
+  <data name="EquippedArmor" xml:space="preserve">
+    <value>装备了 {0}</value>
+  </data>
+  <data name="NoItemsToPickUp" xml:space="preserve">
+    <value>没有可以拾取的物品。</value>
+  </data>
+  <data name="PickedUpItem" xml:space="preserve">
+    <value>拾取了 {0}</value>
+  </data>
+  <data name="HHS.Core.PoisonEffect.Message" xml:space="preserve">
+    <value>{0} 中毒了！</value>
+  </data>
+  <data name="HHS.Core.StunEffect.Message" xml:space="preserve">
+    <value>{0} 被击晕了！</value>
+  </data>
+  <data name="HHS.Core.Enemies.Enemy.Attack" xml:space="preserve">
+    <value>{0} 攻击玩家造成了 {1} 点伤害！</value>
+  </data>
+  <data name="HHS.Core.Enemies.Enemy.Defeated" xml:space="preserve">
+    <value>{0} 被击败了!</value>
+  </data>
+  <data name="HHS.Core.Enemies.Enemy.TakeDamage" xml:space="preserve">
+    <value>{0} 受到了 {1} 点伤害！ HP剩余 {2}.</value>
+  </data>
+  <data name="HHS.Core.Map.CollisionSystem.BlockedByTerrain" xml:space="preserve">
+    <value>检测到碰撞: {0} 在点 ({1}, {2}) 被地形阻挡。</value>
+  </data>
+  <data name="HHS.Core.Map.CollisionSystem.BlockedByOthers" xml:space="preserve">
+    <value>检测到碰撞: {0} 在点 ({2}, {3}) 被 {1} 阻挡。</value>
+  </data>
+  <data name="HHS.Core.Map.CollisionSystem.Movement" xml:space="preserve">
+    <value>检测到移动: {0} 移动到点 ({1}, {2})</value>
+  </data>
+</root>

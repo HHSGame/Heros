@@ -22,9 +22,14 @@ namespace HHSGame.UI
             top.Add(mapFrame, inventoryFrame, surroundingsFrame, messageFrame, utilityWindow);
 
             top.Add(playerSetupWizard);
-            game.Start();
+            // Show player setup wizard before starting the game
+            playerSetupWizard.Finished += (sender, args) =>
+            {
+                game.Start();
+                Application.KeyDown += HandleKeyEvent;
+            };
+            playerSetupWizard.Visible = true;
 
-            Application.KeyDown += HandleKeyEvent;
             return top;
         }
 

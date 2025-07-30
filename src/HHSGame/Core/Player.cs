@@ -4,17 +4,18 @@ using HHSGame.Core.Combat;
 using HHSGame.Core.Map;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
+using HHSGame.Core.Stats;
 
 namespace HHSGame.Core
 {
-    public class Player(int x, int y, GameContext context) : IGameActor
+    public class Player(int x, int y, GameContext context, CoreAttributes? attributes = null) : IGameActor
     {
         public int X { get; set; } = x;
         public int Y { get; set; } = y;
         public int Health { get; internal set; } = 100;
         public int MaxHealth { get; internal set; } = 100;
-        public int Strength { get; internal set; } = 10;
-        public int Defense { get; internal set; } = 5;
+        public int Strength { get; internal set; } = attributes?.Strength ?? 10;
+        public int Defense { get; internal set; } = 5 + ((attributes?.Agility ?? 5) / 2);
         public int Experience { get; private set; }
         public int Level { get; private set; } = 1;
 

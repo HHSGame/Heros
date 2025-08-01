@@ -6,27 +6,35 @@ namespace HHSGame.Core.Map
     public class MapState : IDrawable
     {
         private Cell[,] map;
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public int Width { get; private set; } = Constant.WIDTH;
+        public int Height { get; private set; } = Constant.HEIGHT;
 
-        private readonly bool[,] visitedTiles;
+
+        private readonly HashSet<Coordinate> visitedTileSet = [];
         private readonly HashSet<Coordinate> currentVisibleTiles = [];
 
         public ImmutableHashSet<Coordinate> CurrentVisibleTiles => [.. currentVisibleTiles];
 
-        public MapState(GameParameters parameters, MapGenerator generator)
+        // Default Initialize
+        public MapState()
         {
-            Width = parameters.MapWidth;
-            Height = parameters.MapWidth;
+            Width = Constant.WIDTH;
+            Height = Constant.HEIGHT;
             map = new Cell[Height, Width];
-            visitedTiles = new bool[Height, Width];
-            Init(generator.GenerateDungeon());
         }
 
-        public void Init(Cell[,] map)
+        public void Init(MapData mapData)
+        {
+            Width = mapData.Width;
+            Height = mapData.Height;
+            map = mapData.Map;
+            Init(mapData.Map);
+        }
+
+        private void Init(Cell[,] map)
         {
             this.map = map;
-            visitedTiles.Initialize();
+            visitedTileSet.Clear();
             currentVisibleTiles.Clear();
         }
 
@@ -45,12 +53,12 @@ namespace HHSGame.Core.Map
             return IsInBounds(x, y) && map[y, x].IsWalkable;
         }
 
-        public bool IsWalkable(Coordinate coordinate) 
+        public bool IsWalkable(Coordinate coordinate)
         {
             return IsInBounds(coordinate) && map[coordinate.Y, coordinate.X].IsWalkable;
         }
 
-        public bool IsInBounds(Coordinate coordinate) 
+        public bool IsInBounds(Coordinate coordinate)
         {
             return IsInBounds(coordinate.X, coordinate.Y);
         }
@@ -74,8 +82,8 @@ namespace HHSGame.Core.Map
             {
                 if (IsInBounds(x, y))
                 {
-                    visitedTiles[y, x] = true;
-                    currentVisibleTiles.Add(new (x, y));
+                    visitedTileSet.Add(new(x, y));
+                    currentVisibleTiles.Add(new(x, y));
                 }
             }
         }
@@ -89,25 +97,25 @@ namespace HHSGame.Core.Map
             {
                 if (IsInBounds(x, y))
                 {
-                    visitedTiles[y, x] = true;
-                    currentVisibleTiles.Add(new (x, y));
+                    visitedTileSet.Add(new(x, y));
+                    currentVisibleTiles.Add(new(x, y));
                 }
             }
         }
 
-        public bool IsVisible(Coordinate coordinate) 
+        public bool IsVisible(Coordinate coordinate)
         {
             return currentVisibleTiles.Contains(coordinate);
         }
 
         public bool IsVisible(int x, int y)
         {
-            return currentVisibleTiles.Contains(new (x, y));
+            return currentVisibleTiles.Contains(new(x, y));
         }
 
         public bool WasVisited(int x, int y)
         {
-            return IsInBounds(x, y) && visitedTiles[y, x];
+            return IsInBounds(x, y) && visitedTileSet.Contains(new(x, y));
         }
 
 

@@ -2,13 +2,22 @@ using HHSGame.UI;
 
 namespace HHSGame.Core.Map
 {
-    public abstract class BaseMapGenerator(int mapWidth, int mapHeight, Random random)
+
+    public interface IMapGenerator
+    {
+
+        int MapWidth { get; }
+        int MapHeight { get; }
+        MapData Generate();
+    }
+
+    public abstract class BaseMapGenerator(int mapWidth, int mapHeight, Random random) : IMapGenerator
     {
         protected Random Random => random;
-        protected int MapWidth => mapWidth;
-        protected int MapHeight => mapHeight;
+        public int MapWidth => mapWidth;
+        public int MapHeight => mapHeight;
 
-        public abstract Cell[,] Generate();
+        public abstract MapData Generate();
 
         protected Cell[,] SmoothMap(Cell[,] map, char wallChar = '#')
         {

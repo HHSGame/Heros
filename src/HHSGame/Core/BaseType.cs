@@ -9,9 +9,15 @@ namespace HHSGame.Core
 
         public (int x, int y) ToTuple => (X, Y);
 
-        public Coordinate Target(int dx, int dy) => new(X + dx, Y + dy);
+        public Coordinate Target(int dx, int dy)
+        {
+            return new(X + dx, Y + dy);
+        }
 
-        public Coordinate Move(Vec2D vec) => Target(vec.X, vec.Y);
+        public Coordinate Move(Vec2D vec)
+        {
+            return Target(vec.X, vec.Y);
+        }
     }
 
     public sealed record Vec2D(int X, int Y)
@@ -23,7 +29,8 @@ namespace HHSGame.Core
             return $"({X}, {Y})";
         }
 
-        public static Vec2D operator+ (Vec2D self, Vec2D other) {
+        public static Vec2D operator +(Vec2D self, Vec2D other)
+        {
             return new Vec2D(self.X + other.X, self.Y + other.Y);
         }
     }
@@ -36,14 +43,17 @@ namespace HHSGame.Core
         Right
     }
 
-    public abstract record Move {
-        private Move() {}
+    public abstract record Move
+    {
+        private Move() { }
         public sealed record None() : Move;
         public sealed record Forward(Direction Direction) : Move;
         public sealed record Diagonal(Direction First, Direction Second) : Move;
 
-        public Vec2D ToVec() {
-            return this switch {
+        public Vec2D ToVec()
+        {
+            return this switch
+            {
                 Forward f => f.Direction.ToVec(),
                 Diagonal d => d.First.ToVec() + d.Second.ToVec(),
                 _ => Vec2D.Zero
@@ -51,7 +61,8 @@ namespace HHSGame.Core
         }
     }
 
-    public enum ExtendedDirection : byte {
+    public enum ExtendedDirection : byte
+    {
         Up,
         Down,
         Left,
@@ -77,8 +88,10 @@ namespace HHSGame.Core
             };
         }
 
-        public static Move ToDirections(this ExtendedDirection extendedDirection) {
-            return extendedDirection switch {
+        public static Move ToDirections(this ExtendedDirection extendedDirection)
+        {
+            return extendedDirection switch
+            {
                 ExtendedDirection.Up => new Move.Forward(Direction.Up),
                 ExtendedDirection.Down => new Move.Forward(Direction.Down),
                 ExtendedDirection.Left => new Move.Forward(Direction.Left),
@@ -92,7 +105,8 @@ namespace HHSGame.Core
         }
     }
 
-    public interface IBasicTraits {
+    public interface IBasicTraits
+    {
         int Health { get; set; }
     }
 }

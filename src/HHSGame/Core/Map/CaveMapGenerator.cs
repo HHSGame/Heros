@@ -7,7 +7,7 @@ namespace HHSGame.Core.Map
         private const int InitialFillPercent = 45;
         private const int SmoothingIterations = 5;
 
-        public override Cell[,] Generate()
+        public override MapData Generate()
         {
             Cell[,] map = new Cell[MapHeight, MapWidth];
 
@@ -40,7 +40,7 @@ namespace HHSGame.Core.Map
             map = AddRandomFeature(map, new Cell { Character = '^', Attribute = ColorPresets.Terrain.Lava }, 5, 3);  // Lava
             map = AddRandomFeature(map, new Cell { Character = '*', Attribute = ColorPresets.Terrain.Forest }, 15, 7); // Vegetation
 
-            return map;
+            return new MapData(map, []);
         }
     }
 }

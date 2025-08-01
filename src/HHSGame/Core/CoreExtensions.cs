@@ -36,9 +36,6 @@ namespace HHSGame.Core
             serviceCollection.AddSingleton<GameContext>();
             serviceCollection.AddSingleton<GameWorld>();
 
-            // Create Player  (which depends on GameWorld)
-            serviceCollection.AddSingleton((provider) => provider.GetRequiredService<GameWorld>().NewPlayer(Classes.Classes.Warrior.ToClass()));
-
             // Setup Game
             serviceCollection.AddSingleton<Game>();
 

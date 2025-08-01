@@ -9,7 +9,7 @@ namespace HHSGame.Core.Map
         private const float HillThreshold = 0.5f;
         private const float ForestThreshold = 0.3f;
 
-        public override Cell[,] Generate()
+        public override MapData Generate()
         {
             Cell[,] map = new Cell[MapHeight, MapWidth];
             float[,] heightMap = GenerateHeightMap();
@@ -42,7 +42,7 @@ namespace HHSGame.Core.Map
             map = AddRandomFeature(map, new Cell { Character = '~', Attribute = ColorPresets.Terrain.Water }, 5, 3);  // Streams
             map = AddRandomFeature(map, new Cell { Character = '*', Attribute = ColorPresets.Terrain.Forest }, 10, 5); // Scrub
 
-            return map;
+            return new MapData(map, []);
         }
 
         private float[,] GenerateHeightMap()

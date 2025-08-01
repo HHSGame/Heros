@@ -13,6 +13,8 @@ namespace HHSGame.Core
         public int MapWidth { get; set; }
         public int MapHeight { get; set; }
         public bool InitialItems { get; set; } = true;
+        public string? CustomMapPath { get; set; }
+        public bool UseCustomMap { get; set; }
     }
 
     public class GameContext(

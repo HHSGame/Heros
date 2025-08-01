@@ -1,4 +1,5 @@
 using HHSGame.Core;
+using HHSGame.Core.Map;
 using Terminal.Gui.App;
 using Terminal.Gui.Drivers;
 using Terminal.Gui.Input;
@@ -25,6 +26,21 @@ namespace HHSGame.UI
             // Show player setup wizard before starting the game
             playerSetupWizard.Finished += (sender, args) =>
             {
+                // Apply map selection from wizard
+                if (playerSetupWizard.UseCustomMap && !string.IsNullOrEmpty(playerSetupWizard.SelectedMap))
+                {
+                    GameParameters parameters = game.Context.Parameters;
+
+                    parameters.UseCustomMap = true;
+                    parameters.CustomMapPath = Path.Combine("data/maps", playerSetupWizard.SelectedMap + ".txt");
+                }
+                // else if (!string.IsNullOrEmpty(playerSetupWizard.SelectedMap) && Enum.TryParse<MapStyle>(playerSetupWizard.SelectedMap, out var mapStyle))
+                // {
+                //     GameParameters parameters = game.Context.Parameters;
+
+                //     parameters.MapStyle = mapStyle;
+                // }
+
                 game.Start();
                 Application.KeyDown += HandleKeyEvent;
             };

@@ -5,7 +5,7 @@ namespace HHSGame.Core.Map
     public class TownMapGenerator(int MapWidth, int MapHeight, Random Random) : BaseMapGenerator(MapWidth, MapHeight, Random)
     {
 
-        public override Cell[,] Generate()
+        public override MapData Generate()
         {
             Cell[,] map = GenerateTown();
 
@@ -13,7 +13,7 @@ namespace HHSGame.Core.Map
             map = AddRandomFeature(map, new Cell { Character = '*', Attribute = ColorPresets.Terrain.Forest }, 5, 2); // Trees
 
 
-            return map;
+            return new MapData(map, []);
         }
 
         private Cell[,] GenerateTown()

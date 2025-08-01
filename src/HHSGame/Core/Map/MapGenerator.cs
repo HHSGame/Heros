@@ -9,6 +9,7 @@ namespace HHSGame.Core.Map
         Cave,
         Hills,
         Town,
+        Forest,
     }
 
     public class MapGenerator(GameParameters parameters, Random random, ItemManager itemManager, ItemFactory itemFactory)
@@ -16,9 +17,15 @@ namespace HHSGame.Core.Map
         private readonly int mapWidth = parameters.MapWidth;
         private readonly int mapHeight = parameters.MapHeight;
         private readonly MapStyle style = parameters.MapStyle;
+        private readonly GameParameters parameters = parameters;
 
-        public Cell[,] GenerateDungeon()
+        public MapData GenerateDungeon()
         {
+            if (parameters.UseCustomMap && !string.IsNullOrEmpty(parameters.CustomMapPath))
+            {
+                return new CustomMapGenerator(parameters.CustomMapPath, random, itemManager, itemFactory).Generate();
+            }
+
             Events.RaiseGameMessage($"Generating {style.ToString().ToLower(CultureInfo.InvariantCulture)} map...");
 
             BaseMapGenerator generator = style switch
@@ -28,10 +35,10 @@ namespace HHSGame.Core.Map
                 _ => new CaveMapGenerator(mapWidth, mapHeight, random)
             };
 
-            Cell[,] map = generator.Generate();
+            MapData map = generator.Generate();
 
             // Place random items in the dungeon
-            PlaceRandomItems(map);
+            PlaceRandomItems(map.Map);
 
             Events.RaiseGameMessage($"{style} map generated successfully");
             return map;

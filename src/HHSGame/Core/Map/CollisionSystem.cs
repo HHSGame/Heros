@@ -8,7 +8,7 @@ namespace HHSGame.Core.Map
         public bool CanMoveTo(int x, int y, IGameActor actor)
         {
             // Check map boundaries
-            if (x < 0 || y < 0 || x >= GameWorld.MapWidth || y >= GameWorld.MapHeight)
+            if (x < 0 || y < 0 || x >= mapState.Width || y >= mapState.Height)
             {
                 return false;
             }

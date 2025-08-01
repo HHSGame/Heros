@@ -19,7 +19,7 @@ namespace HHSGame.Core
         public int Experience { get; private set; }
         public int Level { get; private set; } = 1;
 
-        public Coordinate Position => new (X, Y);
+        public Coordinate Position => new(X, Y);
 
         public char Glyph => '☭';
         public string Name => I18n.T("HHS.Core.Player.Name");

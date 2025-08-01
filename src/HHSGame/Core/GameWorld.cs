@@ -5,16 +5,14 @@ namespace HHSGame.Core
 {
     public class GameWorld(GameContext context) : IDrawable
     {
-        public static int MapWidth { get; } = 500;
-        public static int MapHeight { get; } = 500;
-
         public GameContext Context => context;
 
         public Player NewPlayer(AbstractClass playerClass)
         {
+            context.MapState.Init(context.MapGenerator.GenerateDungeon());
             // create a player at the center of the map but avoid any obstacles
-            int x = MapWidth / 2, y = MapHeight / 2;
-            int round = 0;
+            int x = context.MapState.Width / 2, y = context.MapState.Height / 2;
+            int round = 1;
             while (!Context.MapState.IsWalkable(x, y))
             {
                 x = Context.Random.Next(x - round, x + round);

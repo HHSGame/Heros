@@ -4,21 +4,24 @@ using Terminal.Gui.App;
 
 namespace HHSGame.Core
 {
-    public partial class Game(ILogger<Game> logger, GameContext context, GameWorld world, Player player)
+    public partial class Game(ILogger<Game> logger, GameContext context, GameWorld world)
     {
-        public Player Player => player;
+        public Player? Player { get; private set; }
         private bool isRunning;
         private DateTime lastFrameTime;
         private const double TargetFrameTime = 1000.0 / 60.0; // 60 FPS
 
+        public GameContext Context => context;
+
         public void Start()
         {
+            Player = world.NewPlayer(Classes.Classes.Warrior.ToClass());
             LogStartup(logger, "Intializing Context");
-            context.InitializeContext(player);
+            context.InitializeContext(Player);
             isRunning = true;
 
             LogStartup(logger, "Player setup");
-            player.AddItem(new HealthPotion(10));
+            Player.AddItem(new HealthPotion(10));
 
             // Start game loop with refresh rate
             Application.AddTimeout(TimeSpan.FromMilliseconds(TargetFrameTime), GameLoop);
@@ -36,7 +39,7 @@ namespace HHSGame.Core
 
         private bool GameLoop()
         {
-            if (!isRunning || world == null || player == null)
+            if (!isRunning || world == null || Player == null)
             {
                 return false;
             }
@@ -48,10 +51,10 @@ namespace HHSGame.Core
 
             UpdateGame(deltaTime);
 
-            drawingContext.Viewport.UpdateViewport(player.X, player.Y, GameWorld.MapWidth, GameWorld.MapHeight);
+            drawingContext.Viewport.UpdateViewport(Player.X, Player.Y, context.MapState.Width, context.MapState.Width);
 
             world.Draw(drawingContext);
-            (player as IGameActor).Draw(drawingContext);
+            (Player as IGameActor).Draw(drawingContext);
 
             // Render to view
             drawingContext.Render();
@@ -82,12 +85,12 @@ namespace HHSGame.Core
 
         private void UpdateGame(double _)
         {
-            if (world == null || player == null)
+            if (world == null || Player == null)
             {
                 return;
             }
 
-            world.Update(player);
+            world.Update(Player);
         }
     }
 }

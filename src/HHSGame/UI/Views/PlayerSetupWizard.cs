@@ -2,6 +2,8 @@
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
 using HHSGame.Core.Stats;
+using HHSGame.Core.Map;
+using System.Collections.ObjectModel;
 
 namespace HHSGame.UI.Views
 {
@@ -9,6 +11,10 @@ namespace HHSGame.UI.Views
     {
         private readonly Label _pointsLabel;
         private readonly Dictionary<CoreAttributeType, (Label valueLabel, Button plusBtn, Button minusBtn)> _attributeControls = [];
+        private readonly ListView _customMapList;
+        private readonly ComboBox _mapStyleCombo;
+        private readonly RadioGroup _mapTypeRadio;
+        private readonly List<string> _availableMaps;
         private int _availablePoints = 10;
 
         public CoreAttributes SelectedAttributes { get; } = new()
@@ -20,6 +26,9 @@ namespace HHSGame.UI.Views
             Intelligence = 5
         };
 
+        public string? SelectedMap { get; private set; }
+        public bool UseCustomMap { get; private set; }
+
         public PlayerSetupWizard()
         {
             Title = "Player Setup Wizard";
@@ -27,6 +36,97 @@ namespace HHSGame.UI.Views
             Y = Pos.Percent(25);
             Width = Dim.Percent(50);
             Height = Dim.Percent(60);
+
+            // Map selection step
+            WizardStep mapStep = new()
+            {
+                Title = "Map Selection",
+                HelpText = "Choose between generated maps or load a custom map from file.",
+                NextButtonText = "Next",
+            };
+
+            FrameView mapContainer = new()
+            {
+                Title = "Map Options",
+                X = 1,
+                Y = 1,
+                Width = Dim.Fill() - 2,
+                Height = Dim.Fill() - 2
+            };
+
+            RadioGroup mapTypeRadio = new()
+            {
+                X = 1,
+                Y = 1,
+                Width = Dim.Fill() - 2,
+                Height = 3,
+                RadioLabels = new[] { "Generated Map", "Custom Map" },
+                SelectedItem = 0
+            };
+            mapContainer.Add(mapTypeRadio);
+
+            ComboBox mapStyleCombo = new()
+            {
+                X = 1,
+                Y = 5,
+                Width = Dim.Fill() - 2,
+                Height = 1,
+                ReadOnly = true,
+                Text = "Cave"
+            };
+            mapStyleCombo.SetSource<string>(new ObservableCollection<string>(Enum.GetValues<MapStyle>().Select(s => s.ToString()).ToList()));
+            mapContainer.Add(mapStyleCombo);
+
+            Label customMapLabel = new()
+            {
+                Text = "Available Maps:",
+                X = 1,
+                Y = 7,
+                Width = Dim.Fill()
+            };
+            mapContainer.Add(customMapLabel);
+
+            ListView customMapList = new()
+            {
+                X = 1,
+                Y = 9,
+                Width = Dim.Fill() - 2,
+                Height = Dim.Fill() - 10
+            };
+
+            _availableMaps = MapLoader.GetAvailableMaps("data/maps");
+            _customMapList = customMapList;
+            _mapStyleCombo = mapStyleCombo;
+            _mapTypeRadio = mapTypeRadio;
+
+            customMapList.SetSource<string>(new ObservableCollection<string>(_availableMaps));
+
+            if (_availableMaps.Count > 0)
+            {
+                customMapList.SelectedItem = 0;
+            }
+            else
+            {
+                customMapList.SetSource<string>(new ObservableCollection<string>(new[] { "No maps found" }));
+                customMapList.Enabled = false;
+            }
+
+            mapContainer.Add(customMapList);
+
+            // Toggle custom map controls based on radio selection
+            mapTypeRadio.SelectedItemChanged += (sender, args) =>
+            {
+                bool useCustom = args.SelectedItem == 1;
+                mapStyleCombo.Enabled = !useCustom;
+                customMapList.Enabled = useCustom && _availableMaps.Count > 0;
+            };
+
+            // Initial state
+            mapStyleCombo.Enabled = true;
+            customMapList.Enabled = false;
+
+            mapStep.Add(mapContainer);
+            AddStep(mapStep);
 
             // Attributes step
             WizardStep attributesStep = new()
@@ -85,6 +185,19 @@ namespace HHSGame.UI.Views
 
             this.Finished += (sender, args) =>
             {
+                // Capture map selection
+                UseCustomMap = _mapTypeRadio.SelectedItem == 1;
+
+                if (UseCustomMap && _availableMaps.Count > 0 && _customMapList.SelectedItem is int selectedIndex && selectedIndex >= 0 && selectedIndex < _availableMaps.Count)
+                {
+                    SelectedMap = _availableMaps[selectedIndex];
+                }
+                else
+                {
+                    // Use generated map style
+                    SelectedMap = _mapStyleCombo.Text;
+                }
+
                 this.Visible = false;
             };
         }
@@ -102,7 +215,7 @@ namespace HHSGame.UI.Views
 
             Label valueLabel = new()
             {
-                Text = GetAttributeValue(attrType).ToString(),
+                Text = GetAttributeValue(attrType).ToString(System.Globalization.CultureInfo.InvariantCulture),
                 X = 14,
                 Y = yPos,
                 Width = 3
@@ -158,7 +271,7 @@ namespace HHSGame.UI.Views
 
             _pointsLabel.Text = $"Points Remaining: {_availablePoints}";
             args.Handled = true;
-            _attributeControls[attrType].valueLabel.Text = newValue.ToString();
+            _attributeControls[attrType].valueLabel.Text = newValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
             UpdateButtonStates();
         }
 

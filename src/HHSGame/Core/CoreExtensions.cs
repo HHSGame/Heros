@@ -31,6 +31,7 @@ namespace HHSGame.Core
             serviceCollection.AddSingleton<SurroundingsManager>();
             serviceCollection.AddSingleton<InventoryManager>();
             serviceCollection.AddSingleton<TurnManager>();
+            serviceCollection.AddSingleton<GameStateMachine>();
 
             // Setup GameContext
             serviceCollection.AddSingleton<GameContext>();

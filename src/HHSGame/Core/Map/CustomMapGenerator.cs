@@ -32,7 +32,7 @@ namespace HHSGame.Core.Map
                 Events.RaiseGameMessage($"Failed to load custom map: {ex.Message}");
 
                 // Fallback to a simple cave map
-                return new CaveMapGenerator(80, 25, random).Generate();
+                return new HillsMapGenerator(80, 25, random).Generate();
             }
         }
 

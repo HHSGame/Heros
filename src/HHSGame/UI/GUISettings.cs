@@ -8,6 +8,7 @@ namespace HHSGame.UI
     {
         public static int SidebarWidth => 20;
         public static int MessageWindowHeight => 10;
+        public static int StatusBarHeight => 1;
 
         public static string MapWindowTitle => "Main Map";
         public static string MessageWindowTitle => "Messages";

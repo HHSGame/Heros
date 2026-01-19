@@ -30,6 +30,7 @@ namespace HHSGame.Core
         SurroundingsManager surroundingsManager,
         InventoryManager inventoryManager,
         TurnManager turnManager,
+        GameStateMachine stateMachine,
         IDrawingContext drawingContext
     )
     {
@@ -46,8 +47,10 @@ namespace HHSGame.Core
         public SurroundingsManager SurroundingsManager => surroundingsManager;
         public InventoryManager InventoryManager => inventoryManager;
         public TurnManager TurnManager => turnManager;
+        public GameStateMachine StateMachine => stateMachine;
         public IDrawingContext DrawingContext => drawingContext;
         public Player Player => player!;
+        public Player? PlayerOrNull => player;
 
         public void InitializeContext(Player player)
         {

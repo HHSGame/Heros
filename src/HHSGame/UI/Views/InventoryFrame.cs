@@ -14,7 +14,7 @@ namespace HHSGame.UI.Views
             X = Pos.Right(mapWindow);
             Y = 0;
             Width = GUISettings.SidebarWidth;
-            Height = Dim.Fill(GUISettings.MessageWindowHeight)! - Dim.Percent(50)!;
+            Height = Dim.Fill(GUISettings.MessageWindowHeight + GUISettings.StatusBarHeight)! - Dim.Percent(50)!;
 
             listView = new ListView
             {

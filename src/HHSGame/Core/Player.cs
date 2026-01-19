@@ -14,6 +14,8 @@ namespace HHSGame.Core
         public int Y { get; set; } = y;
         public int Health { get; internal set; } = 100;
         public int MaxHealth { get; internal set; } = 100;
+        public int Mana { get; internal set; } = 50;
+        public int MaxMana { get; internal set; } = 50;
         public int Strength { get; internal set; } = attributes?.Strength ?? 10;
         public int Defense { get; internal set; } = 5 + ((attributes?.Agility ?? 5) / 2);
         public int Experience { get; private set; }
@@ -169,7 +171,6 @@ namespace HHSGame.Core
             {
                 Events.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
             }
-            turnManager.EndPlayerTurn();
         }
 
         public void Attack(Enemy enemy)

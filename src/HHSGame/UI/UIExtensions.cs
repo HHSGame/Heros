@@ -14,6 +14,7 @@ namespace HHSGame.UI
             // Setup Views
             serviceCollection.AddSingleton<MapView>();
             serviceCollection.AddSingleton<EventLoggerView>();
+            serviceCollection.AddSingleton<StatusBarView>();
 
             // Setup Windows
             serviceCollection.AddSingleton<MapFrame>();

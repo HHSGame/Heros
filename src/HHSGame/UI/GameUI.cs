@@ -9,6 +9,7 @@ using HHSGame.UI.Views;
 namespace HHSGame.UI
 {
     public class GameUI(MapFrame mapFrame,
+            StatusBarView statusBarView,
             MessageFrame messageFrame,
             InventoryFrame inventoryFrame,
             SurroundingsFrame surroundingsFrame,
@@ -20,7 +21,7 @@ namespace HHSGame.UI
         {
             // Create main window
             Toplevel top = new();
-            top.Add(mapFrame, inventoryFrame, surroundingsFrame, messageFrame, utilityWindow);
+            top.Add(mapFrame, inventoryFrame, surroundingsFrame, statusBarView, messageFrame, utilityWindow);
 
             top.Add(playerSetupWizard);
             // Show player setup wizard before starting the game
@@ -64,57 +65,113 @@ namespace HHSGame.UI
             }
             if (utilityWindow.Visible)
             {
+                bool wasUtilityVisible = utilityWindow.Visible;
                 if (utilityWindow.HandleKeyEvent(key))
                 {
+                    if (wasUtilityVisible != utilityWindow.Visible)
+                    {
+                        SyncStateWithUtilityWindow();
+                    }
                     key.Handled = true;
                     return;
                 }
             }
+            bool handled = false;
             // Process movement keys
             switch (key.KeyCode)
             {
                 case KeyCode.CursorUp:
                 case KeyCode.J:
-                    game.Player.Move(new Move.Forward(Direction.Up));
+                    handled = game.PerformPlayerAction(
+                        () => game.Player.Move(new Move.Forward(Direction.Up)),
+                        true,
+                        GameStateType.Exploration,
+                        GameStateType.Combat);
                     break;
                 case KeyCode.CursorDown:
                 case KeyCode.K:
-                    game.Player.Move(new Move.Forward(Direction.Down));
+                    handled = game.PerformPlayerAction(
+                        () => game.Player.Move(new Move.Forward(Direction.Down)),
+                        true,
+                        GameStateType.Exploration,
+                        GameStateType.Combat);
                     break;
                 case KeyCode.CursorLeft:
                 case KeyCode.H:
-                    game.Player.Move(new Move.Forward(Direction.Left));
+                    handled = game.PerformPlayerAction(
+                        () => game.Player.Move(new Move.Forward(Direction.Left)),
+                        true,
+                        GameStateType.Exploration,
+                        GameStateType.Combat);
                     break;
                 case KeyCode.CursorRight:
                 case KeyCode.L:
-                    game.Player.Move(new Move.Forward(Direction.Right));
+                    handled = game.PerformPlayerAction(
+                        () => game.Player.Move(new Move.Forward(Direction.Right)),
+                        true,
+                        GameStateType.Exploration,
+                        GameStateType.Combat);
                     break;
                 case KeyCode.Y:
-                    game.Player.Move(ExtendedDirection.UpLeft.ToDirections());
+                    handled = game.PerformPlayerAction(
+                        () => game.Player.Move(ExtendedDirection.UpLeft.ToDirections()),
+                        true,
+                        GameStateType.Exploration,
+                        GameStateType.Combat);
                     break;
                 case KeyCode.U:
-                    game.Player.Move(ExtendedDirection.UpRight.ToDirections());
+                    handled = game.PerformPlayerAction(
+                        () => game.Player.Move(ExtendedDirection.UpRight.ToDirections()),
+                        true,
+                        GameStateType.Exploration,
+                        GameStateType.Combat);
                     break;
                 case KeyCode.B:
-                    game.Player.Move(ExtendedDirection.DownLeft.ToDirections());
+                    handled = game.PerformPlayerAction(
+                        () => game.Player.Move(ExtendedDirection.DownLeft.ToDirections()),
+                        true,
+                        GameStateType.Exploration,
+                        GameStateType.Combat);
                     break;
                 case KeyCode.N:
-                    game.Player.Move(ExtendedDirection.DownRight.ToDirections());
+                    handled = game.PerformPlayerAction(
+                        () => game.Player.Move(ExtendedDirection.DownRight.ToDirections()),
+                        true,
+                        GameStateType.Exploration,
+                        GameStateType.Combat);
                     break;
                 case KeyCode.Q:
                     game.Stop();
                     Application.Shutdown();
                     return;
                 case KeyCode.G:
-                    game.Player.PickupItems();
+                    handled = game.PerformPlayerAction(
+                        () => game.Player.PickupItems(),
+                        true,
+                        GameStateType.Exploration,
+                        GameStateType.Combat);
                     break;
                 case KeyCode.I:
                     utilityWindow.ToggleUtilityWindow();
+                    SyncStateWithUtilityWindow();
+                    handled = true;
                     break;
                 default:
                     return;
             }
+            if (handled)
+            {
+                key.Handled = true;
+            }
             return;
+        }
+
+        private void SyncStateWithUtilityWindow()
+        {
+            GameStateType nextState = utilityWindow.Visible
+                ? GameStateType.Inventory
+                : GameStateType.Exploration;
+            game.Context.StateMachine.TryChangeState(nextState);
         }
 
         public void Dispose()

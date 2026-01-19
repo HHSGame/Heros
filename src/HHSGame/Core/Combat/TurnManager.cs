@@ -6,6 +6,7 @@ namespace HHSGame.Core.Combat
     {
 
         private TurnState currentTurnState = TurnState.PlayerTurn;
+        public int TurnCount { get; private set; }
 
         public TurnManager()
         {
@@ -22,6 +23,7 @@ namespace HHSGame.Core.Combat
         {
             if (currentTurnState == TurnState.PlayerTurn)
             {
+                TurnCount++;
                 Events.RaiseTurnChanged(TurnState.EnemyTurn);
             }
         }

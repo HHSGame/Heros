@@ -10,20 +10,22 @@ namespace HHSGame.UI.Views
     public class UtilityWindow : Window
     {
         private readonly InventoryManager inventoryManager;
+        private readonly Game game;
         private readonly Lazy<Player> playerHolder;
         private readonly ListView listView;
         private readonly MapFrame mapWindow;
 
-        public UtilityWindow(InventoryManager inventoryManager, GameContext context, MapFrame mapWindow)
+        public UtilityWindow(InventoryManager inventoryManager, GameContext context, MapFrame mapWindow, Game game)
         {
             Title = GUISettings.UtilityWindowTitle;
             X = Pos.Right(mapWindow);
             Y = 0;
-            Height = Dim.Fill()! - GUISettings.MessageWindowHeight;
+            Height = Dim.Fill()! - (GUISettings.MessageWindowHeight + GUISettings.StatusBarHeight);
             Visible = false;
             playerHolder = new(() => context.Player);
             this.inventoryManager = inventoryManager;
             this.mapWindow = mapWindow;
+            this.game = game;
 
             listView = new ListView
             {
@@ -47,9 +49,12 @@ namespace HHSGame.UI.Views
         private void HandleOpenSelectedItem(object? sender, ListViewItemEventArgs args)
         {
             int index = args.Item;
-            Item item = inventoryManager.ObservableItems.ElementAt(index);
-            item.Use(playerHolder.Value);
-            inventoryManager.RemoveItem(item);
+            game.PerformPlayerAction(() =>
+            {
+                Item item = inventoryManager.ObservableItems.ElementAt(index);
+                item.Use(playerHolder.Value);
+                inventoryManager.RemoveItem(item);
+            }, true, GameStateType.Inventory);
         }
 
         private void HandleInventoryChange(object? sender, InventoryChangeEventArgs e)

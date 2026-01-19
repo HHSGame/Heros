@@ -1,127 +1,288 @@
-# **HHSGame: Revised Attribute and Skill System**
+# HHSGame: Game Design Specification (GDS)
 
-## **1\. Core Concepts**
+## 1. Executive Summary
 
-This document expands upon the original system, refining mechanics for balance and adding new layers of depth appropriate for a WWII Northern China setting. The core design philosophy remains: a gritty, survival-focused RPG where player choices and skills have a meaningful impact.
+This document serves as the authoritative Game Design Specification for *HHSGame*, a terminal-based roguelike RPG set in a post-apocalyptic world. The design philosophy emphasizes **Rule of Scarcity**: every resource—from ammunition to Action Points—must be meaningful. The game combines the tactical depth of traditional CRPGs with the unforgiving survival elements of roguelikes.
 
-## **2\. Core Attributes (基本属性)**
+The core pillars are:
+*   **Tactical Combat:** A grid-based system where positioning and Action Point (AP) management determine survival.
+*   **Character Agency:** Attributes and Skills unlock unique dialogue, exploration paths, and tactical options.
+*   **Reactive World:** Factions and environments respond to player reputation and history.
 
-The five core attributes remain the foundation of the character. Attributes are set during character creation and are considered fixed, representing a character's innate potential. They can only be temporarily or permanently modified by equipment, chems, or rare in-game events.
+---
 
-* **Strength (力量):** Raw physical power.  
-* **Perception (感知):** Environmental and situational awareness.  
-* **Agility (敏捷):** Speed, reflexes, and dexterity.  
-* **Charisma (魅力):** Force of personality and social acumen.  
-* **Intelligence (智力):** Logic, knowledge, and reasoning.
+## 2. Core Attributes (基本属性)
 
-## **3\. Skills (技能)**
+### 2.1 Concept Definition & Design Intent
+Attributes represent the raw biological and mental potential of a character. Unlike Skills, which can be trained, Attributes are largely static, defining the "hard limits" of a character's capabilities.
+*   **Design Intent:** To force distinct character archetypes (e.g., the nimble thief vs. the brute soldier) at the start of the game, ensuring replayability.
+*   **Mechanics:** Attributes range from **1 to 10** (default 5). Players start with **25 points** to distribute.
 
-Skills are grouped under their parent attribute. The list has been slightly expanded for clarity and to cover more actions.
+### 2.2 Attribute List
 
-### **Strength Skills**
+#### Strength (力量)
+*   **Concept:** Raw physical power and muscle density.
+*   **Mechanics:** Determines `Carry Capacity` and `Melee Damage`. Prerequisite for heavy weapons and Perks like *Strong Back*.
 
-* **Melee (格斗):** Proficiency with hand-to-hand combat and melee weapons (bayonets, dao swords, improvised weapons).  
-* **Athletics (运动):** Covers running, climbing, swimming, and resisting physical hardship. Your ability to march long distances or scale a cliff is governed by this.  
-* **Survival (生存):** Wilderness survival, foraging for food and herbs, finding clean water, building shelter, and tracking.
+#### Perception (感知)
+*   **Concept:** Environmental awareness and sensory acuity.
+*   **Mechanics:** Determines `Initiative`, `Ranged Accuracy`, and the ability to spot traps or hidden loot.
 
-### **Perception Skills**
+#### Agility (敏捷)
+*   **Concept:** Reflexes, balance, and coordination.
+*   **Mechanics:** The primary driver for `Action Points (AP)` and `Evasion (Dodge)`. Critical for stealth builds.
 
-* **Firearms (射术):** Proficiency with all ranged weapons, from pistols and rifles to machine guns. This skill is crucial for effective ranged combat.  
-* **Awareness (警觉):** The ability to spot ambushes, detect hidden items or traps, and notice small but important details in the environment.  
-* **Resolution (决心):** Mental fortitude, focus under pressure, and the will to resist interrogation, fear, and psychological manipulation.
+#### Charisma (魅力)
+*   **Concept:** Force of personality, appearance, and social intuition.
+*   **Mechanics:** Influences `Barter` prices, `NPC Disposition`, and `Sanity Points (SP)`.
 
-### **Agility Skills**
+#### Intelligence (智力)
+*   **Concept:** Cognitive processing speed, memory, and logical reasoning.
+*   **Mechanics:** Determines `Skill Points` gained per level and unlocks complex crafting recipes.
 
-* **Stealth (潜行):** Moving silently, hiding, and remaining undetected.  
-* **Dexterity (灵巧):** Governs manual dexterity for tasks like pickpocketing, disarming traps, sleight of hand, and reloading weapons quickly.  
-* **Mechanics (机械):** Technical skill with repairing weapons and equipment, sabotaging enemy infrastructure, and operating complex machinery.
+### 2.3 The "Karma" Attribute (业力)
+*   **Concept:** A measure of cosmic balance rather than random luck. A well-rounded character is "in tune" with the world.
+*   **Design Intent:** To reward balanced builds and punish "min-maxing" (extreme dumping of stats).
+*   **Mechanics:**
+    *   **Formula:** `Karma` = **Median** of the 5 Core Attributes.
+    *   *Calculation Example:* Str 8, Per 6, Agi 5, Cha 4, Int 4. Sorted List: `[4, 4, 5, 6, 8]`. Median is 5.
+    *   **Impact:** Affects Critical Hit Chance and rare "Saving Throws" against environmental hazards.
 
-### **Charisma Skills**
+---
 
-* **Barter (交易):** Negotiation and trading to get better prices for goods and information.  
-* **Leadership (领导):** Inspiring allies, organizing militia, and giving effective commands in combat. Boosts the morale and effectiveness of friendly NPCs under your command.  
-* **Persuasion (说服):** The art of convincing others through diplomacy, deception, or intimidation.
+## 3. Skills (技能)
 
-### **Intelligence Skills**
+### 3.1 Concept Definition & Design Intent
+Skills represent learned expertise governed by a parent Attribute.
+*   **Design Intent:** To allow granular character growth. While Attributes are static, Skills grow with Experience (XP).
+*   **Mechanics:** Base Value = Parent Attribute. Max Value = 100.
 
-* **Knowledge (知识):** General and specialized knowledge, including local dialects, military insignia, political factions, and history. Can be used to identify enemy weaknesses or understand cultural nuances.  
-* **Medicine (医疗):** First aid, treating wounds and diseases, and using both modern and traditional herbal remedies.  
-* **Religion (宗教):** Understanding of local folk beliefs, superstitions, and formal religious practices (Buddhism, Taoism, folk traditions). Essential for gaining the trust of certain communities.
+### 3.2 Skill Categories
 
-## **4\. Game Mechanics**
+#### Strength Skills
+*   **Melee (格斗):** Proficiency with hand-to-hand combat and melee weapons (bayonets, dao swords).
+*   **Athletics (运动):** Running, climbing, swimming, and resisting physical hardship.
+*   **Survival (生存):** Wilderness survival, foraging, and tracking.
 
-### **Character Progression**
+#### Perception Skills
+*   **Firearms (射术):** Proficiency with all ranged weapons.
+*   **Awareness (警觉):** Spotting ambushes, hidden items, and detailed observation.
+*   **Resolution (决心):** Mental fortitude, focus under pressure, and resisting fear/interrogation.
 
-* **Attributes:** Range from 1-10 (5 is average). Start with 25 points to distribute at character creation.  
-* **Skill Points:** Base Skill Value \= Parent Attribute.  
-* **Leveling Up:**  
-  * Each level grants **10 \+ (Intelligence / 2\)** skill points to distribute (rounded down).
+#### Agility Skills
+*   **Stealth (潜行):** Moving silently and remaining undetected.
+*   **Dexterity (灵巧):** Manual dexterity (lockpicking, reloading, disarming).
+*   **Mechanics (机械):** Repairing weapons and operating machinery.
 
-### **Checks and Rolls (Revised)**
+#### Charisma Skills
+*   **Barter (交易):** Negotiation and trading prices.
+*   **Leadership (领导):** Inspiring allies and organizing NPC effectiveness.
+*   **Persuasion (说服):** Diplomacy, deception, or intimidation.
 
-The check system has been revised for consistency and balance. The goal is to make outcomes less swingy and more predictable based on character skill.
+#### Intelligence Skills
+*   **Knowledge (知识):** General lore, factions, history, and cultural nuances.
+*   **Medicine (医疗):** First aid, treating wounds and diseases.
+*   **Religion (宗教):** Understanding beliefs and gaining trust of communities.
 
-* **The Core Mechanic:** Roll a **1d20**. To succeed, you must roll **equal to or under** your target score. A 1 is always a critical success, and a 20 is always a critical failure.  
-* **Attribute Checks:** Target Score \= Attribute \* 2\. Used for raw, untrained actions (e.g., a Strength check to break down a door).  
-* **Skill Checks:** Target Score \= Attribute \+ Skill. Used for any action covered by a skill. This provides a more linear and balanced progression.
+### 3.3 Skill Synergies (Passive Bonuses)
+High proficiency grants passive bonuses, rewarding specialization.
+*   **Medicine (Lv 50+):** Stimpacks heal +20% more.
+*   **Athletics (Lv 50+):** +1 Base AP.
+*   **Melee (Lv 75+):** Unarmed attacks gain +2 Armor Penetration.
+*   **Firearms (Lv 75+):** "Reload" action costs -1 AP.
 
-## **5\. Derived Statistics (Revised)**
+> **Designer Note:** Future expansions should add synergies for every skill at thresholds 50, 75, and 100 to encourage deep specialization.
 
-These stats are derived from your core attributes and skills.
+---
 
-### **Core Stats**
+## 4. Game Mechanics
 
-* **Hit Points (HP):** 20 \+ (Strength \* 2\) \+ Athletics Skill  
-* **Sanity Points (SP):** (Charisma \+ Resolution Skill) \* 2\. Represents your mental resilience.  
-* **Action Points (AP):** 5 \+ (Agility / 2). Determines how many actions you can take per combat turn.  
-* **Carry Capacity:** Strength \* 10 kg.
+### 4.1 Resolution System (Checks and Rolls)
+The game uses a **Roll-Under** system to determine success.
+*   **Standard Check:** Roll `1d20` <= `Target Score`.
+    *   **Attribute Check Target:** `Attribute * 2`
+    *   **Skill Check Target:** `Attribute + Skill`
+    *   **Critical Success:** Roll of 1 (Always succeeds, bonus effects).
+    *   **Critical Failure:** Roll of 20 (Always fails, negative effects).
 
-### **Combat Stats**
+### 4.2 Dynamic Modifiers
+Context determines difficulty. The equation is:
+$$ \text{Effective Target} = (\text{Base Stat}) - \text{Penalties} + \text{Bonuses} $$
 
-* **Initiative:** Perception \+ Dexterity Skill. Determines turn order in combat.  
-* **Melee Damage:** (Strength / 2\) \+ Weapon Base Damage.  
-* **Dodge:** 5 \+ Agility \+ Dexterity Skill. An attacker's roll must beat this number. This is a static defense value.  
-* **Armor Value (AV):** Armor's Base Value. Reduces incoming damage by a flat amount.  
-* **Attack Roll (Melee):** 1d20 \<= (Strength \+ Melee Skill)  
-* **Attack Roll (Ranged):** 1d20 \<= (Perception \+ Firearms Skill) (Note: Penalties for range, cover, and movement apply).
+| Condition | Modifier | Context |
+| :--- | :--- | :--- |
+| **Range (Point Blank)** | +2 | Target is adjacent. |
+| **Range (Optimal)** | 0 | Within weapon's ideal range. |
+| **Range (Long)** | -5 | Beyond effective range. |
+| **Partial Cover** | -3 | Target behind waist-high obstacle. |
+| **Full Cover** | -6 | Target observing from corner/window. |
+| **Dim Light** | -3 | Dusk or poor indoor lighting. |
+| **Darkness** | -8 | Night or unlit cave (mitigated by Night Vision). |
 
-### **Attack Roll and Damage**
+### 4.3 Action Economy (AP)
+Action Points (AP) represent the time budget for a turn.
+*   **Calculation:** `Base AP = 5 + (Agility / 2)`.
 
-The quality of your successful attack determines the damage dealt.
+#### Comprehensive AP Cost Table
+| Action | Cost (AP) | Tactical Note |
+| :--- | :--- | :--- |
+| **Movement** | 1 | +1 cost if difficult terrain (mud, rubble). |
+| **Stance Change** | 2 | Crouch (Gain Cover) or Stand (Run speed). |
+| **Melee (Light)** | 3 | Knives, fast strikes. |
+| **Melee (Heavy)** | 5 | Sledgehammers, wind-up attacks. |
+| **Ranged (Snap)** | 3 | Pistol/SMG quick fire. |
+| **Ranged (Aimed)** | 5 | Rifle/Sniper precise shot. |
+| **Burst Fire** | 6 | Automatic weapons only (AOE/Multi-hit). |
+| **Reload** | 2-4 | Mag vs. Shell reloading. |
+| **Throw** | 4 | Grenades or Rocks. |
+| **Inventory** | 4 | High cost simulates rummaging in backpack. |
 
-* **Standard Hit:** If your attack roll succeeds, you deal normal damage.  
-* **Quality Hit:** If your attack roll is **5 or less**, you have hit a vulnerable area. Add **\+2** to your final damage.  
-* **Critical Hit (Roll of 1):** A perfectly placed shot or strike. You deal **maximum possible weapon damage** and add an additional effect based on the weapon type (e.g., bleeding, stun, ignore a portion of armor).
+**Defensive Reserve:** Unspent AP at turn end converts to **Evasion** (1 AP = +1 AC) for the enemy phase. This allows players to "wait and defend."
 
-## **6\. New Systems**
+---
 
-### **Reputation System (声望)**
+## 5. Combat Architecture
 
-Your actions will be noticed. Your Reputation is tracked with different factions.
+### 5.1 Combat Logic Flow
+```mermaid
+graph TD
+    A[Start Turn] --> B{Check Status}
+    B -- Stunned/Dead --> C[Skip Turn]
+    B -- Active --> D[Calculate AP]
+    D --> E[Player Action Phase]
+    E --> F{Select Action}
+    F -- Attack --> G[Calc Hit Chance]
+    F -- Move --> H[Check Mobility]
+    F -- Item --> I[Apply Effect]
+    G --> J{Roll 1d20}
+    J -- <= Target --> K[Hit: Roll Dmg]
+    J -- > Target --> L[Miss]
+    K --> M[Apply Damage Reduction]
+    M --> N[Update HP]
+    N --> O{AP Remaining?}
+    O -- Yes --> E
+    O -- No --> P[End Turn]
+```
 
-### **Factions**
+### 5.2 Derived Statistics
+Calculated values derived from Core Attributes.
 
-The complex landscape of Northern China is home to many groups:
+*   **Hit Points (HP):** `20 + (Strength * 2) + Athletics Skill`
+*   **Sanity Points (SP):** `(Charisma + Resolution Skill) * 2`. Represents mental resilience against horror/stress.
+*   **Carry Capacity:** `Strength * 10` kg. Exceeding this causes `Overburdened` (AP penalty).
+*   **Initiative:** `Perception + Dexterity Skill`. Higher acts first.
+*   **Armor Value (AV):** Flat damage reduction.
 
-* **Japanese Imperial Army (IJA):** The primary invading force.  
-* **Kuomintang (KMT):** The official Nationalist army, often stretched thin and prone to corruption.  
-* **Communist Party (CCP):** The guerrilla forces of the Eighth Route Army, highly disciplined and ideological.  
-* **Puppet Troops:** Chinese soldiers serving the Japanese, such as the Manchukuo Imperial Army or Collaborationist Chinese Army. Often poorly equipped and motivated.  
-* **Bandits (土匪):** Disorganized groups of outlaws who prey on the weak. A danger to everyone, but can sometimes be negotiated with.  
-* **Local Villagers:** The civilian population. Their trust is the key to survival, providing shelter, food, and information.  
-* **Independent Traders:** Merchants and smugglers who operate in the grey areas between factions.  
-* **Foreign Nationals:** A rare sight. Could be journalists, missionaries, doctors, or academics from Europe or America, often with their own agendas.
+### 5.3 Damage Calculation
+The damage pipeline prioritizes penetration logic.
+$$ \text{Effective Damage} = \max(1, \text{Raw Damage} - \max(0, \text{AV} - \text{Weapon Penetration})) $$
 
-### **Reputation Tiers**
+**Example:**
+*   **Weapon:** Assault Rifle (Dmg 10, Pen 3)
+*   **Target:** Power Armor (AV 8)
+*   **Calculation:**
+    1.  Effective Armor = $\max(0, 8 - 3) = 5$
+    2.  Damage Taken = $10 - 5 = 5$
 
-Reputation is tracked on a 21-point scale, from Hated to Idolized.
+---
 
-* **\-10: Hated (深恶痛绝)** \- Kill on sight. No negotiation is possible.  
-* **\-9 to \-7: Hostile (敌对)** \- Will attack unless severely outmatched. Will never offer aid.  
-* **\-6 to \-4: Unfriendly (不友好)** \- Distrusted. Will refuse most requests and offer terrible prices.  
-* **\-3 to \-1: Wary (警惕)** \- Suspicious of you. Interactions are difficult and tense.  
-* **0: Neutral (中立)** \- You are an unknown quantity.  
-* **1 to 3: Acquaintance (相识)** \- Recognized in a neutral or slightly positive light. Basic interactions are possible.  
-* **4 to 6: Friendly (友好)** \- You are trusted. Will offer favorable prices and may provide minor quests or aid.  
-* **7 to 9: Ally (盟友)** \- Considered a valuable friend. Will offer significant support, unique quests, and shelter.  
-* **10: Idolized (崇拜)** \- You are a hero to this faction. They will follow your lead and offer their best resources.
+## 6. Character Progression
+
+### 6.1 Leveling Mechanics
+*   **Experience (XP):** `XP Required = 100 * (Current Level)^1.5`
+*   **Skill Points:** `10 + (Intelligence / 2)` per level.
+*   **Caps:**
+    *   **Soft Cap:** `Level * 5 + 20` (prevents early maxing).
+    *   **Hard Cap:** 100.
+
+| Level | Total XP | Rewards |
+| :--- | :--- | :--- |
+| 1 | 0 | Start |
+| 2 | 100 | +Skill Points, +Trait Choice |
+| 3 | 280 | +Skill Points |
+| 4 | 520 | +Skill Points |
+| 5 | 1100 | +Skill Points, +Perk Choice |
+
+---
+
+## 7. Survival & Economy
+
+### 7.1 Recovery Systems
+In a survival setting, health does not regenerate automatically.
+*   **Short Rest (1h):** Restores 10% HP. Costs 1 Ration + Water.
+*   **Long Rest (8h):** Restores 50% HP & 100% SP. Requires Shelter + 2 Rations + Water.
+*   **Medical Treatment:**
+    *   **First Aid (Skill):** Heals `Medicine / 4` HP. Cooldown: Once per wound.
+    *   **Surgery:** Needed for "Crippled Limb" status.
+
+### 7.2 Economic Exchange
+**Currency:** Old World Cash (Fiat) and Trade Goods.
+**Barter Formula:**
+*   **Buy Price:** $\text{Base} \times (1.5 - (\text{Barter} \times 0.02))$
+*   **Sell Price:** $\text{Base} \times (0.3 + (\text{Barter} \times 0.02))$
+
+> **Extension Guide:** Designers can add "Regional Inflation" modifiers where specific goods (e.g., Water in a desert) have a `x2.0` value multiplier.
+
+---
+
+## 8. Reputation & Factions
+
+### 8.1 Reputation Scale (声望)
+Range: **-10 (Hated)** to **10 (Idolized)**.
+
+| Tier | Range | Effect |
+| :--- | :--- | :--- |
+| **Hated** | -10 | Kill on sight. Faction sends hit-squads. |
+| **Hostile** | -9 to -7 | Attack on sight unless outgunned. |
+| **Neutral** | 0 | Standard prices. No access to restricted areas. |
+| **Friendly** | 4 to 6 | 5% Discount. Unlocks Tier 1 Tasks. |
+| **Ally** | 7 to 9 | Unlocks Faction Safehouse & unique Perks. |
+
+### 8.2 Faction Perks
+Unique bonuses unlocked by reaching reputation thresholds.
+
+*   **Military (Army Remnants)**
+    *   *Friendly:* **Standard Issue** - Loot +20% ammo in military crates.
+    *   *Ally:* **Tactical Superiority** - +1 Accuracy with Rifles; +5% Combat XP.
+*   **Merchants (Trade Union)**
+    *   *Friendly:* **Preferred Customer** - Buy prices -5% (stacks).
+    *   *Ally:* **Caravan Master** - Carry Capacity +15kg.
+*   **Outlaws (Raider Clans)**
+    *   *Friendly:* **Streetwise** - Intimidation +2 effective skill.
+    *   *Ally:* **Dirty Fighting** - Melee attacks: 10% chance to Blind.
+*   **Cultists (The Awakened)**
+    *   *Friendly:* **Open Mind** - +10 Max Sanity Points (SP).
+    *   *Ally:* **Martyr's Blood** - Auto-heal 25 HP when dropping below 20% HP (1/day).
+
+---
+
+## 9. Perks & Traits (Specialization)
+
+### 9.1 Traits (特质)
+**Concept:** Innate characteristics defined at birth/creation. They follow the "Flaw" design pattern: a significant benefit paired with a significant penalty.
+*   **Design Intent:** To create "perfectly imperfect" characters and varied playstyles.
+
+| Trait | Benefit | Drawback |
+| :--- | :--- | :--- |
+| **Small Frame** | +1 Agility | -25% Limb Health (easiers to cripple). |
+| **Heavy Handed** | +4 Melee Dmg | -20% Critical Hit Damage. |
+| **Four Eyes** | +1 Per (w/ glasses) | -2 Per (w/o glasses). |
+| **Lone Wolf** | +10% XP (Solo) | -1 Cha per ally in party. |
+| **Claustrophobia** | +1 Stats (Outdoors) | -1 Stats (Indoors). |
+
+### 9.2 Adaptive Traits (Gameplay-Driven)
+**Concept:** Traits earned dynamically based on player history.
+*   **Bullet Shy:** Take >50% HP dmg from guns in one fight -> **+2 Perception** but **+20% Incoming Ranged Dmg**.
+*   **Scarred Hide:** Accumulate 1000 dmg taken -> **+2 Armor Value** but **-1 Agility** (Stiff joints).
+*   **Pyromaniac:** Kill 20 enemies with fire -> **+1 Explosion Radius** but **Compulsion** (Must use explosives if equipped).
+
+### 9.3 Perks (天赋)
+**Concept:** Positive-only abilities gained every 3 levels.
+*   **Mechanics:** Require specific attribute thresholds.
+*   **Sniper:** Hit chance x2 at Long Range. (Req: Per 6, Firearms 40).
+*   **Action Boy/Girl:** +2 Max AP. (Req: Agi 6).
+*   **Strong Back:** +20kg Carry Capacity. (Req: Str 5).
+*   **Field Medic:** Medkits cost -1 AP. (Req: Medicine 40).
+*   **Slayer (Lv 12):** All Melee attacks Crit on 1-2. (Req: Str 8).
+*   **Grim Reaper's Sprint (Lv 12):** Kill restores 5 AP. (Req: Agi 8).
+

@@ -44,7 +44,7 @@ namespace HHSGame.Core.Enemies
         private int specialAbilityCooldown;
         private readonly Random random;
 
-        public Coordinate Position => new (X, Y);
+        public Coordinate Position => new(X, Y);
 
         public Enemy(EnemyType type, int x, int y, CollisionSystem collisionSystem, Pathfinder pathfinder)
         {

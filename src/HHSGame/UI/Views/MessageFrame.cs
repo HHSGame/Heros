@@ -5,11 +5,11 @@ namespace HHSGame.UI.Views
 {
     public class MessageFrame : FrameView
     {
-        public MessageFrame(MapFrame mapWindow, EventLoggerView eventLoggerView)
+        public MessageFrame(MapFrame mapWindow, StatusBarView statusBarView, EventLoggerView eventLoggerView)
         {
             Title = GUISettings.MessageWindowTitle;
             X = 0;
-            Y = Pos.Bottom(mapWindow);
+            Y = Pos.Bottom(statusBarView);
             Width = Dim.Fill();
             Height = GUISettings.MessageWindowHeight;
 

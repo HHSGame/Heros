@@ -13,7 +13,7 @@ namespace HHSGame.UI.Views
             X = 0;
             Y = 0;
             Width = Dim.Fill()! - GUISettings.SidebarWidth;
-            Height = Dim.Fill()! - GUISettings.MessageWindowHeight;
+            Height = Dim.Fill()! - (GUISettings.MessageWindowHeight + GUISettings.StatusBarHeight);
 
             drawingContext.AttachTo(this);
         }

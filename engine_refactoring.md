@@ -36,8 +36,8 @@ Split HHSGame into a data-driven engine that loads a game configuration file to 
 - `conditions`: win/lose rules (player death, goal reached, turn limit, etc).
 
 ## Test Script Format (Draft)
-- `script`: array of steps: `{ input: "C" }`, `{ input: "M", target: [x,y] }`, `{ input: "Enter" }`, `{ input: "Q" }`
-- `assertions`: expected state snapshot after script
+- Simple: `{ "inputs": ["C", "M", "Right", "Enter", "Enter", "C", "Q"] }` or top-level string array.
+- Conditional steps: `steps` list with `waitUntil`, `when` (`then`/`else`), `repeat` (`while`, `steps`), and `assert`.
 
 ## Test Script Considerations
 Linear scripts are simple but brittle for interactive games. If we need to decide the next input based on game state, add conditional/guarded steps:
@@ -64,6 +64,10 @@ Decision: keep both a minimal linear script format (for quick smoke flows) and a
 - 2025-01-20: Added config mapper + config-driven bootstrap in `Program`, plus starting item/start position hooks.
 - 2025-01-20: Added `GameEngineFactory` wrapper for config loading and parameter mapping.
 - 2025-01-20: Added `--config` CLI handling to load `data/game.json` or override path.
+- 2025-01-20: Added scripted input schema + loader + runner, plus input adapter for headless/UI execution.
+- 2025-01-20: Added `--test-script` (optional `--test-step-ms`) to auto-run scripts with UI and skip the wizard.
+- 2025-01-20: Added sample script `data/scripts/combat_toggle_smoke.json` and runner tests.
 
 ## Next Actions
-- Start Milestone 4: add scripted input runner (UI + headless) and define script schema.
+- Continue Milestone 2: finish engine bootstrap so `GameEngine` builds the full `GameContext` and owns startup/shutdown.
+- Expand config-driven win/lose conditions and move `Program` boot logic into engine services.

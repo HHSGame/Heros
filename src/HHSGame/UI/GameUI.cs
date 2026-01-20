@@ -18,6 +18,7 @@ namespace HHSGame.UI
             SurroundingsFrame surroundingsFrame,
             UtilityWindow utilityWindow,
             PlayerSetupWizard playerSetupWizard,
+            GameUiOptions options,
             Game game) : IDisposable
     {
         private GameStateType lastNonInventoryState = GameStateType.Exploration;
@@ -31,54 +32,76 @@ namespace HHSGame.UI
             Toplevel top = new();
             top.Add(mapFrame, inventoryFrame, surroundingsFrame, statusBarView, messageFrame, actionSequenceFrame, utilityWindow);
 
-            top.Add(playerSetupWizard);
-            // Show player setup wizard before starting the game
-            playerSetupWizard.Finished += (sender, args) =>
+            if (options.SkipWizard)
             {
-                if (isGameStarted)
-                {
-                    return;
-                }
-                isGameStarted = true;
-                GameParameters parameters = game.Context.Parameters;
-                // Apply map selection from wizard
-                if (playerSetupWizard.UseCustomMap && !string.IsNullOrEmpty(playerSetupWizard.SelectedMap))
-                {
-                    parameters.UseCustomMap = true;
-                    parameters.CustomMapPath = Path.Combine("data/maps", playerSetupWizard.SelectedMap + ".txt");
-                }
-                parameters.PlayerClass = playerSetupWizard.SelectedClass;
-
-                if (playerSetupWizard.UseCustomCharacter)
-                {
-                    parameters.PlayerAttributes = playerSetupWizard.SelectedAttributes;
-                    parameters.PlayerSkills = playerSetupWizard.SelectedSkills;
-                }
-                else
-                {
-                    parameters.PlayerAttributes = null;
-                    parameters.PlayerSkills = null;
-                }
-                // else if (!string.IsNullOrEmpty(playerSetupWizard.SelectedMap) && Enum.TryParse<MapStyle>(playerSetupWizard.SelectedMap, out var mapStyle))
-                // {
-                //     GameParameters parameters = game.Context.Parameters;
-
-                //     parameters.MapStyle = mapStyle;
-                // }
-
-                game.Start();
                 playerSetupWizard.Visible = false;
-                top.Remove(playerSetupWizard);
-                if (!isKeyHandlerRegistered)
+                StartGame(false);
+            }
+            else
+            {
+                top.Add(playerSetupWizard);
+                // Show player setup wizard before starting the game
+                playerSetupWizard.Finished += (sender, args) =>
                 {
-                    Application.KeyDown -= HandleKeyEvent;
-                    Application.KeyDown += HandleKeyEvent;
-                    isKeyHandlerRegistered = true;
-                }
-            };
-            playerSetupWizard.Visible = true;
+                    if (isGameStarted)
+                    {
+                        return;
+                    }
+                    StartGame(true);
+                    playerSetupWizard.Visible = false;
+                    top.Remove(playerSetupWizard);
+                };
+                playerSetupWizard.Visible = true;
+            }
 
             return top;
+        }
+
+        private void StartGame(bool applyWizardSelections)
+        {
+            if (isGameStarted)
+            {
+                return;
+            }
+
+            isGameStarted = true;
+
+            if (applyWizardSelections)
+            {
+                ApplyWizardSelections();
+            }
+
+            game.Start();
+
+            if (!isKeyHandlerRegistered)
+            {
+                Application.KeyDown -= HandleKeyEvent;
+                Application.KeyDown += HandleKeyEvent;
+                isKeyHandlerRegistered = true;
+            }
+        }
+
+        private void ApplyWizardSelections()
+        {
+            GameParameters parameters = game.Context.Parameters;
+            if (playerSetupWizard.UseCustomMap && !string.IsNullOrEmpty(playerSetupWizard.SelectedMap))
+            {
+                parameters.UseCustomMap = true;
+                parameters.CustomMapPath = Path.Combine("data/maps", playerSetupWizard.SelectedMap + ".txt");
+            }
+
+            parameters.PlayerClass = playerSetupWizard.SelectedClass;
+
+            if (playerSetupWizard.UseCustomCharacter)
+            {
+                parameters.PlayerAttributes = playerSetupWizard.SelectedAttributes;
+                parameters.PlayerSkills = playerSetupWizard.SelectedSkills;
+            }
+            else
+            {
+                parameters.PlayerAttributes = null;
+                parameters.PlayerSkills = null;
+            }
         }
 
         private void HandleKeyEvent(object? sender, Key key)

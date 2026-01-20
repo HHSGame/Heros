@@ -8,6 +8,13 @@ namespace HHSGame.UI
     {
         public static IServiceCollection AddHHSGameUI(this IServiceCollection serviceCollection)
         {
+            return AddHHSGameUI(serviceCollection, new GameUiOptions());
+        }
+
+        public static IServiceCollection AddHHSGameUI(this IServiceCollection serviceCollection, GameUiOptions options)
+        {
+            serviceCollection.AddSingleton(options);
+
             // Setup UI Basics
             serviceCollection.AddSingleton<IDrawingContext, MapViewDrawingContext>();
 

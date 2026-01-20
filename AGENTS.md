@@ -25,4 +25,11 @@
 
 ## Notes
 - Logs appear in `hss.log` at repo root and under `src/HHSGame`.
-- `PROJECT.md` and `CLAUDE.md` contain detailed architecture and dev guidance.
+
+## Guidelines
+
+- Git Commit History contains detailed recent changes.
+- Add Unit test as soon as possible and as much as possible, Make sure most of chages are test covered.
+- Design and implement the features from a game player's viewpoint, make sure it's fun and challenging.
+- Make a friendly user experience by improve clear and simple guidance.
+- Consider build a engine-based game to make sure it supports different genres (RPG, Turn-Based Strategy, etc.).

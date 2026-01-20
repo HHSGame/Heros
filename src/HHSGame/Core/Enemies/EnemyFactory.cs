@@ -34,7 +34,8 @@ namespace HHSGame.Core.Enemies
                     y = random.Next(1, mapState.Height - 1);
                 } while (!mapState.IsWalkable(x, y) || GetEnemyAt(enemies, x, y) != null);
 
-                enemies.Add(new Enemy(type, x, y, collisionSystem, pathfinder));
+                EnemyRegistry.EnemyConfig config = EnemyRegistry.GetConfig(type);
+                enemies.Add(new Enemy(type, x, y, collisionSystem, pathfinder, config));
             }
         }
 

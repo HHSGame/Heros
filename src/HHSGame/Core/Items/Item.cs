@@ -22,7 +22,7 @@ namespace HHSGame.Core.Items
         public float Weight { get; } = weight;
         public bool Consumable { get; set; }
 
-        public List<CoreAttributeModifier> AttributeModifiers { get; set; } = [];
+        public List<AttributeModifier> AttributeModifiers { get; set; } = [];
 
         public List<SkillModifier> SkillModifiers { get; set; } = [];
 
@@ -33,6 +33,62 @@ namespace HHSGame.Core.Items
         public override string ToString()
         {
             return $"{Name} - {Rarity} [{Value}] {Weight}";
+        }
+    }
+
+    public enum WeaponType
+    {
+        MeleeLight,
+        MeleeHeavy,
+        RangedSnap,
+        RangedAimed,
+        Burst
+    }
+
+    public static class WeaponRules
+    {
+        public static int GetApCost(WeaponType type)
+        {
+            return type switch
+            {
+                WeaponType.MeleeLight => 3,
+                WeaponType.MeleeHeavy => 5,
+                WeaponType.RangedSnap => 3,
+                WeaponType.RangedAimed => 5,
+                WeaponType.Burst => 6,
+                _ => 3
+            };
+        }
+
+        public static SkillType GetSkill(WeaponType type)
+        {
+            return type switch
+            {
+                WeaponType.MeleeLight => SkillType.Melee,
+                WeaponType.MeleeHeavy => SkillType.Melee,
+                WeaponType.RangedSnap => SkillType.Firearms,
+                WeaponType.RangedAimed => SkillType.Firearms,
+                WeaponType.Burst => SkillType.Firearms,
+                _ => SkillType.Melee
+            };
+        }
+
+        public static AttributeType GetAttribute(WeaponType type)
+        {
+            return type switch
+            {
+                WeaponType.MeleeLight => AttributeType.Strength,
+                WeaponType.MeleeHeavy => AttributeType.Strength,
+                WeaponType.RangedSnap => AttributeType.Perception,
+                WeaponType.RangedAimed => AttributeType.Perception,
+                WeaponType.Burst => AttributeType.Perception,
+                _ => AttributeType.Strength
+            };
+        }
+
+        public static bool IsRanged(WeaponType type)
+        {
+            return type is WeaponType.RangedSnap or WeaponType.RangedAimed or WeaponType.Burst;
         }
     }
 
@@ -52,10 +108,14 @@ namespace HHSGame.Core.Items
     }
 
     public class Weapon(string name, ItemRarity rarity, int value, float weight,
-        int damage, float attackSpeed) : Item(name, rarity, value, weight)
+        int damage, int penetration, int range, WeaponType weaponType) : Item(name, rarity, value, weight)
     {
         public int Damage { get; } = damage;
-        public float AttackSpeed { get; } = attackSpeed;
+        public int Penetration { get; } = penetration;
+        public int Range { get; } = range;
+        public WeaponType WeaponType { get; } = weaponType;
+
+        public int ApCost => WeaponRules.GetApCost(WeaponType);
 
         public override void Use(Player player)
         {
@@ -64,9 +124,9 @@ namespace HHSGame.Core.Items
     }
 
     public class Armor(string name, ItemRarity rarity, int value, float weight,
-        int defense) : Item(name, rarity, value, weight)
+        int armorValue) : Item(name, rarity, value, weight)
     {
-        public int Defense { get; } = defense;
+        public int ArmorValue { get; } = armorValue;
 
         public override void Use(Player player)
         {

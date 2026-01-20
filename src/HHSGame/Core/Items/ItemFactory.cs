@@ -49,8 +49,17 @@ namespace HHSGame.Core.Items
 
         private Weapon CreateRandomWeapon(ItemRarity rarity)
         {
-            string[] weaponNames = { "Sword", "Axe", "Mace", "Dagger", "Spear" };
-            string name = $"{rarity} {weaponNames[random.Next(weaponNames.Length)]}";
+            (string Name, WeaponType Type)[] weapons =
+            [
+                ("Sword", WeaponType.MeleeLight),
+                ("Axe", WeaponType.MeleeHeavy),
+                ("Mace", WeaponType.MeleeHeavy),
+                ("Dagger", WeaponType.MeleeLight),
+                ("Rifle", WeaponType.RangedAimed),
+                ("SMG", WeaponType.RangedSnap)
+            ];
+            (string baseName, WeaponType weaponType) = weapons[random.Next(weapons.Length)];
+            string name = $"{rarity} {baseName}";
 
             int damage = rarity switch
             {
@@ -62,11 +71,21 @@ namespace HHSGame.Core.Items
                 _ => throw new ArgumentOutOfRangeException(nameof(rarity), "Invalid rarity value")
             };
 
-            float attackSpeed = (float)random.NextDouble() * 2 + 0.5f;
+            int penetration = rarity switch
+            {
+                ItemRarity.Common => 0,
+                ItemRarity.Uncommon => 1,
+                ItemRarity.Rare => 2,
+                ItemRarity.Epic => 3,
+                ItemRarity.Legendary => 4,
+                _ => 0
+            };
+
+            int range = WeaponRules.IsRanged(weaponType) ? random.Next(6, 12) : 1;
             int value = damage * 10;
             float weight = (float)random.NextDouble() * 5 + 1;
 
-            return new Weapon(name, rarity, value, weight, damage, attackSpeed);
+            return new Weapon(name, rarity, value, weight, damage, penetration, range, weaponType);
         }
 
         private Armor CreateRandomArmor(ItemRarity rarity)
@@ -74,7 +93,7 @@ namespace HHSGame.Core.Items
             string[] armorNames = { "Helmet", "Chestplate", "Leggings", "Boots", "Shield" };
             string name = $"{rarity} {armorNames[random.Next(armorNames.Length)]}";
 
-            int defense = rarity switch
+            int armorValue = rarity switch
             {
                 ItemRarity.Common => random.Next(1, 3),
                 ItemRarity.Uncommon => random.Next(3, 6),
@@ -84,10 +103,10 @@ namespace HHSGame.Core.Items
                 _ => throw new ArgumentOutOfRangeException(nameof(rarity), "Invalid rarity value")
             };
 
-            int value = defense * 15;
+            int value = armorValue * 15;
             float weight = (float)random.NextDouble() * 10 + 2;
 
-            return new Armor(name, rarity, value, weight, defense);
+            return new Armor(name, rarity, value, weight, armorValue);
         }
     }
 }

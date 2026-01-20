@@ -36,12 +36,13 @@ namespace HHSGame.UI.Views
 
             if (player == null)
             {
-                return PadToWidth("HP --/-- MP --/-- XP -- Lv -- Pos --,-- Time --");
+                return PadToWidth("HP --/-- SP --/-- AP --/-- XP -- Lv -- Pos --,-- Time --");
             }
 
             string status =
                 $"HP {player.Health}/{player.MaxHealth} " +
-                $"MP {player.Mana}/{player.MaxMana} " +
+                $"SP {player.Sanity}/{player.MaxSanity} " +
+                $"AP {player.CurrentAp}/{player.MaxAp} " +
                 $"XP {player.Experience} " +
                 $"Lv {player.Level} " +
                 $"Pos {player.X},{player.Y} " +

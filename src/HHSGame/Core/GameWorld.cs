@@ -22,14 +22,19 @@ namespace HHSGame.Core
             Player player = new(x, y, Context);
             playerClass.ApplyClassBonuses(player);
             playerClass.ApplyStartupEquipment(player);
+            if (Context.Parameters.PlayerAttributes != null)
+            {
+                player.ApplyBaseStats(
+                    Context.Parameters.PlayerAttributes,
+                    Context.Parameters.PlayerSkills ?? new Stats.Skills());
+            }
             player.UpdateFOV();
             return player;
         }
 
         public void Update(Player player)
         {
-            // Update all enemies
-            Context.EnemyManager.UpdateEnemies(player);
+            Context.EnemyManager.ExecuteTurn(player);
         }
 
         public void Draw(IDrawingContext ctx)

@@ -1,4 +1,6 @@
 using HHSGame.Core;
+using HHSGame.Core.Combat;
+using HHSGame.Core.Stats;
 using HHSGame.Core.Map;
 using Terminal.Gui.App;
 using Terminal.Gui.Drivers;
@@ -17,6 +19,7 @@ namespace HHSGame.UI
             PlayerSetupWizard playerSetupWizard,
             Game game) : IDisposable
     {
+        private GameStateType lastNonInventoryState = GameStateType.Exploration;
         public Toplevel Start()
         {
             // Create main window
@@ -35,6 +38,8 @@ namespace HHSGame.UI
                     parameters.UseCustomMap = true;
                     parameters.CustomMapPath = Path.Combine("data/maps", playerSetupWizard.SelectedMap + ".txt");
                 }
+                game.Context.Parameters.PlayerAttributes = playerSetupWizard.SelectedAttributes;
+                game.Context.Parameters.PlayerSkills = new Skills();
                 // else if (!string.IsNullOrEmpty(playerSetupWizard.SelectedMap) && Enum.TryParse<MapStyle>(playerSetupWizard.SelectedMap, out var mapStyle))
                 // {
                 //     GameParameters parameters = game.Context.Parameters;
@@ -82,61 +87,53 @@ namespace HHSGame.UI
             {
                 case KeyCode.CursorUp:
                 case KeyCode.J:
-                    handled = game.PerformPlayerAction(
-                        () => game.Player.Move(new Move.Forward(Direction.Up)),
-                        true,
+                    handled = game.TryMovePlayer(
+                        new Move.Forward(Direction.Up),
                         GameStateType.Exploration,
                         GameStateType.Combat);
                     break;
                 case KeyCode.CursorDown:
                 case KeyCode.K:
-                    handled = game.PerformPlayerAction(
-                        () => game.Player.Move(new Move.Forward(Direction.Down)),
-                        true,
+                    handled = game.TryMovePlayer(
+                        new Move.Forward(Direction.Down),
                         GameStateType.Exploration,
                         GameStateType.Combat);
                     break;
                 case KeyCode.CursorLeft:
                 case KeyCode.H:
-                    handled = game.PerformPlayerAction(
-                        () => game.Player.Move(new Move.Forward(Direction.Left)),
-                        true,
+                    handled = game.TryMovePlayer(
+                        new Move.Forward(Direction.Left),
                         GameStateType.Exploration,
                         GameStateType.Combat);
                     break;
                 case KeyCode.CursorRight:
                 case KeyCode.L:
-                    handled = game.PerformPlayerAction(
-                        () => game.Player.Move(new Move.Forward(Direction.Right)),
-                        true,
+                    handled = game.TryMovePlayer(
+                        new Move.Forward(Direction.Right),
                         GameStateType.Exploration,
                         GameStateType.Combat);
                     break;
                 case KeyCode.Y:
-                    handled = game.PerformPlayerAction(
-                        () => game.Player.Move(ExtendedDirection.UpLeft.ToDirections()),
-                        true,
+                    handled = game.TryMovePlayer(
+                        ExtendedDirection.UpLeft.ToDirections(),
                         GameStateType.Exploration,
                         GameStateType.Combat);
                     break;
                 case KeyCode.U:
-                    handled = game.PerformPlayerAction(
-                        () => game.Player.Move(ExtendedDirection.UpRight.ToDirections()),
-                        true,
+                    handled = game.TryMovePlayer(
+                        ExtendedDirection.UpRight.ToDirections(),
                         GameStateType.Exploration,
                         GameStateType.Combat);
                     break;
                 case KeyCode.B:
-                    handled = game.PerformPlayerAction(
-                        () => game.Player.Move(ExtendedDirection.DownLeft.ToDirections()),
-                        true,
+                    handled = game.TryMovePlayer(
+                        ExtendedDirection.DownLeft.ToDirections(),
                         GameStateType.Exploration,
                         GameStateType.Combat);
                     break;
                 case KeyCode.N:
-                    handled = game.PerformPlayerAction(
-                        () => game.Player.Move(ExtendedDirection.DownRight.ToDirections()),
-                        true,
+                    handled = game.TryMovePlayer(
+                        ExtendedDirection.DownRight.ToDirections(),
                         GameStateType.Exploration,
                         GameStateType.Combat);
                     break;
@@ -147,7 +144,8 @@ namespace HHSGame.UI
                 case KeyCode.G:
                     handled = game.PerformPlayerAction(
                         () => game.Player.PickupItems(),
-                        true,
+                        ActionCosts.Pickup,
+                        false,
                         GameStateType.Exploration,
                         GameStateType.Combat);
                     break;
@@ -168,10 +166,18 @@ namespace HHSGame.UI
 
         private void SyncStateWithUtilityWindow()
         {
-            GameStateType nextState = utilityWindow.Visible
-                ? GameStateType.Inventory
-                : GameStateType.Exploration;
-            game.Context.StateMachine.TryChangeState(nextState);
+            if (utilityWindow.Visible)
+            {
+                GameStateType current = game.Context.StateMachine.CurrentState;
+                if (current != GameStateType.Inventory)
+                {
+                    lastNonInventoryState = current;
+                }
+                game.Context.StateMachine.TryChangeState(GameStateType.Inventory);
+                return;
+            }
+
+            game.Context.StateMachine.TryChangeState(lastNonInventoryState);
         }
 
         public void Dispose()

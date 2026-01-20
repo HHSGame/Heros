@@ -1,44 +1,93 @@
-using Terminal.Gui.Drawing;
-using HHSGame.Utils;
+using HHSGame.Core.Classes;
 using HHSGame.Core.Combat;
-using HHSGame.Core.Map;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
+using HHSGame.Core.Map;
 using HHSGame.Core.Stats;
+using HHSGame.Utils;
+using Terminal.Gui.Drawing;
 
 namespace HHSGame.Core
 {
-    public class Player(int x, int y, GameContext context, CoreAttributes? attributes = null) : IGameActor
+    public class Player : IGameActor, ICombatant, ITrader
     {
-        public int X { get; set; } = x;
-        public int Y { get; set; } = y;
-        public int Health { get; internal set; } = 100;
-        public int MaxHealth { get; internal set; } = 100;
-        public int Mana { get; internal set; } = 50;
-        public int MaxMana { get; internal set; } = 50;
-        public int Strength { get; internal set; } = attributes?.Strength ?? 10;
-        public int Defense { get; internal set; } = 5 + ((attributes?.Agility ?? 5) / 2);
-        public int Experience { get; private set; }
-        public int Level { get; private set; } = 1;
-
-        public Coordinate Position => new(X, Y);
-
-        public char Glyph => '☭';
-        public string Name => I18n.T("HHS.Core.Player.Name");
-
-        public Terminal.Gui.Drawing.Attribute Attribute => new(Color.BrightYellow, Color.Red);
-
+        private const int FOVRadius = 7;
+        private readonly HashSet<Coordinate> visibleTiles = [];
         private readonly List<ActiveEffect> activeEffects = [];
-        private readonly CollisionSystem collisionSystem = context.CollisionSystem;
-        private readonly InventoryManager inventoryManager = context.InventoryManager;
-        private readonly ItemManager itemManager = context.ItemManager;
-        private readonly MapState mapState = context.MapState;
-        private readonly TurnManager turnManager = context.TurnManager;
+
+        private readonly CollisionSystem collisionSystem;
+        private readonly InventoryManager inventoryManager;
+        private readonly ItemManager itemManager;
+        private readonly MapState mapState;
+        private readonly Random random;
+
         private Weapon? equippedWeapon;
         private Armor? equippedArmor;
 
-        private const int FOVRadius = 7;
-        private readonly HashSet<Coordinate> visibleTiles = [];
+        public Player(int x, int y, GameContext context, Attributes? attributes = null, Skills? skills = null)
+        {
+            X = x;
+            Y = y;
+            collisionSystem = context.CollisionSystem;
+            inventoryManager = context.InventoryManager;
+            itemManager = context.ItemManager;
+            mapState = context.MapState;
+            random = context.Random;
+
+            Attributes baseAttributes = attributes ?? new Attributes
+            {
+                Strength = 5,
+                Perception = 5,
+                Agility = 5,
+                Charisma = 5,
+                Intelligence = 5
+            };
+            Skills baseSkills = skills ?? new Skills();
+            Stats = new CharacterStats(baseAttributes, baseSkills);
+        }
+
+        public int X { get; set; }
+        public int Y { get; set; }
+
+        public CharacterStats Stats { get; private set; }
+        public InventoryManager Inventory => inventoryManager;
+
+        public int Health => Stats.CurrentHp;
+        public int MaxHealth => Stats.MaxHp;
+        public int Sanity => Stats.CurrentSp;
+        public int MaxSanity => Stats.MaxSp;
+        public int CurrentAp => Stats.CurrentAp;
+        public int MaxAp => Stats.MaxAp;
+        public int Experience => Stats.Progression.Experience;
+        public int Level => Stats.Progression.Level;
+        public int EvasionBonus => Stats.EvasionBonus;
+
+        public int ArmorValue => equippedArmor?.ArmorValue ?? 0;
+        public Weapon EquippedWeapon => equippedWeapon ?? Classes.Weapons.UnknownWeapon;
+
+        public Coordinate Position => new(X, Y);
+        public char Glyph => '☭';
+        public string Name => I18n.T("HHS.Core.Player.Name");
+        public Terminal.Gui.Drawing.Attribute Attribute => new(Color.BrightYellow, Color.Red);
+
+        public void ApplyBaseStats(Attributes attributes, Skills skills)
+        {
+            Attributes clonedAttributes = attributes with { };
+            Skills clonedSkills = skills.Clone();
+            Stats = new CharacterStats(clonedAttributes, clonedSkills, Stats.Progression);
+        }
+
+        public void ResetTurn()
+        {
+            Stats.ResetTurn();
+            TickEffects();
+            UpdateFOV();
+        }
+
+        public void EndTurn()
+        {
+            Stats.EndTurn();
+        }
 
         public void UpdateFOV()
         {
@@ -52,12 +101,10 @@ namespace HHSGame.Core
         {
             visibleTiles.Clear();
 
-            // Check all tiles within radius
             for (int dx = -radius; dx <= radius; dx++)
             {
                 for (int dy = -radius; dy <= radius; dy++)
                 {
-                    // Skip if outside radius
                     if (dx * dx + dy * dy > radius * radius)
                     {
                         continue;
@@ -70,7 +117,6 @@ namespace HHSGame.Core
                         continue;
                     }
 
-                    // Check line of sight
                     if (HasLineOfSight(position, target))
                     {
                         visibleTiles.Add(target);
@@ -78,7 +124,6 @@ namespace HHSGame.Core
                 }
             }
 
-            // Always see current position
             visibleTiles.Add(position);
         }
 
@@ -94,16 +139,13 @@ namespace HHSGame.Core
 
             while (true)
             {
-                // Add current tile to visible tiles
                 visibleTiles.Add(new(x0, y0));
 
-                // If we hit an opaque tile, stop here but include it
                 if (!mapState.IsTransparent(x0, y0))
                 {
                     return true;
                 }
 
-                // If we reached the target, we have line of sight
                 if (x0 == x1 && y0 == y1)
                 {
                     return true;
@@ -123,10 +165,8 @@ namespace HHSGame.Core
             }
         }
 
-        public void Update()
+        private void TickEffects()
         {
-            UpdateFOV();
-
             foreach (ActiveEffect effect in activeEffects.ToArray())
             {
                 effect.Duration--;
@@ -143,29 +183,14 @@ namespace HHSGame.Core
 
         public void Move(Move move)
         {
-            if (!turnManager.IsPlayerTurn())
-            {
-                return;
-            }
-
-            Update();
-
             (int newX, int newY) = Position.Move(move.ToVec());
 
             if (collisionSystem.CanMoveTo(newX, newY, this))
             {
-                IGameActor? collision = collisionSystem.GetCollisionAt(newX, newY);
-                if (collision is Enemy enemy)
-                {
-                    Attack(enemy);
-                }
-                else
-                {
-                    X = newX;
-                    Y = newY;
-                    UpdateFOV();
-                    Events.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
-                }
+                X = newX;
+                Y = newY;
+                UpdateFOV();
+                Events.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
             }
             else
             {
@@ -180,14 +205,9 @@ namespace HHSGame.Core
                 return;
             }
 
-            Events.RaiseGameMessage(I18n.T("PlayerAttacks", enemy.Name));
+            CombatResolver.ResolveAttack(this, enemy, EquippedWeapon, random);
 
-            int baseDamage = Strength;
-            int weaponDamage = equippedWeapon?.Damage ?? 0;
-            int totalDamage = baseDamage + weaponDamage;
-            enemy.TakeDamage(totalDamage);
-
-            if (enemy.Health <= 0)
+            if (enemy.IsDead)
             {
                 AddExperience(enemy.ExperienceValue);
             }
@@ -201,22 +221,10 @@ namespace HHSGame.Core
             }
 
             Events.RaiseGameMessage(I18n.T("PlayerTakesDamage", damage));
+            Stats.ApplyDamage(damage);
 
-            int baseDefense = Defense;
-            int armorDefense = equippedArmor?.Defense ?? 0;
-            int totalDefense = baseDefense + armorDefense;
-
-            int actualDamage = damage - totalDefense;
-            if (actualDamage < 0)
+            if (Stats.CurrentHp <= 0)
             {
-                actualDamage = 0;
-            }
-
-            Health -= actualDamage;
-
-            if (Health <= 0)
-            {
-                Health = 0;
                 Events.RaiseGameMessage(I18n.T("PlayerDefeated"));
                 Die();
             }
@@ -224,31 +232,12 @@ namespace HHSGame.Core
 
         public void Heal(int amount)
         {
-            Health += amount;
-            if (Health > MaxHealth)
-            {
-                Health = MaxHealth;
-            }
+            Stats.Heal(amount);
         }
 
         public void AddExperience(int amount)
         {
-            Experience += amount;
-            CheckLevelUp();
-        }
-
-        private void CheckLevelUp()
-        {
-            int requiredExp = Level * 100;
-            if (Experience >= requiredExp)
-            {
-                Level++;
-                Experience -= requiredExp;
-                MaxHealth += 20;
-                Strength += 2;
-                Defense += 1;
-                Health = MaxHealth;
-            }
+            Stats.Progression.TryAddExperience(amount, Stats.Attributes);
         }
 
         public void AddItem(Item item)
@@ -305,7 +294,7 @@ namespace HHSGame.Core
 
         private void Die()
         {
-            Health = 0;
+            Stats.ApplyDamage(Stats.CurrentHp);
         }
     }
 }

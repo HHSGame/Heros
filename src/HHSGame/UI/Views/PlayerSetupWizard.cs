@@ -10,14 +10,14 @@ namespace HHSGame.UI.Views
     public class PlayerSetupWizard : Wizard
     {
         private readonly Label _pointsLabel;
-        private readonly Dictionary<CoreAttributeType, (Label valueLabel, Button plusBtn, Button minusBtn)> _attributeControls = [];
+        private readonly Dictionary<AttributeType, (Label valueLabel, Button plusBtn, Button minusBtn)> _attributeControls = [];
         private readonly ListView _customMapList;
         private readonly ComboBox _mapStyleCombo;
         private readonly RadioGroup _mapTypeRadio;
         private readonly List<string> _availableMaps;
-        private int _availablePoints = 10;
+        private int _availablePoints = 0;
 
-        public CoreAttributes SelectedAttributes { get; } = new()
+        public Attributes SelectedAttributes { get; } = new()
         {
             Strength = 5,
             Perception = 5,
@@ -156,7 +156,7 @@ namespace HHSGame.UI.Views
             container.Add(_pointsLabel);
 
             int yPos = 3;
-            foreach (CoreAttributeType attrType in Enum.GetValues<CoreAttributeType>())
+            foreach (AttributeType attrType in Enum.GetValues<AttributeType>().Where(type => type != AttributeType.Karma))
             {
                 CreateAttributeRow(container, attrType, ref yPos);
                 yPos += 2;
@@ -202,7 +202,7 @@ namespace HHSGame.UI.Views
             };
         }
 
-        private void CreateAttributeRow(FrameView container, CoreAttributeType attrType, ref int yPos)
+        private void CreateAttributeRow(FrameView container, AttributeType attrType, ref int yPos)
         {
             Label label = new()
             {
@@ -246,7 +246,7 @@ namespace HHSGame.UI.Views
             UpdateButtonStates();
         }
 
-        private void ModifyAttribute(CoreAttributeType attrType, int delta, Terminal.Gui.Input.CommandEventArgs args)
+        private void ModifyAttribute(AttributeType attrType, int delta, Terminal.Gui.Input.CommandEventArgs args)
         {
             int currentValue = GetAttributeValue(attrType);
             int newValue = currentValue + delta;
@@ -277,7 +277,7 @@ namespace HHSGame.UI.Views
 
         private void UpdateButtonStates()
         {
-            foreach (CoreAttributeType attrType in Enum.GetValues<CoreAttributeType>())
+            foreach (AttributeType attrType in Enum.GetValues<AttributeType>().Where(type => type != AttributeType.Karma))
             {
                 if (_attributeControls.TryGetValue(attrType, out (Label _, Button plusBtn, Button minusBtn) value))
                 {
@@ -290,36 +290,36 @@ namespace HHSGame.UI.Views
             }
         }
 
-        private int GetAttributeValue(CoreAttributeType type)
+        private int GetAttributeValue(AttributeType type)
         {
             return type switch
             {
-                CoreAttributeType.Strength => SelectedAttributes.Strength,
-                CoreAttributeType.Perception => SelectedAttributes.Perception,
-                CoreAttributeType.Agility => SelectedAttributes.Agility,
-                CoreAttributeType.Charisma => SelectedAttributes.Charisma,
-                CoreAttributeType.Intelligence => SelectedAttributes.Intelligence,
+                AttributeType.Strength => SelectedAttributes.Strength,
+                AttributeType.Perception => SelectedAttributes.Perception,
+                AttributeType.Agility => SelectedAttributes.Agility,
+                AttributeType.Charisma => SelectedAttributes.Charisma,
+                AttributeType.Intelligence => SelectedAttributes.Intelligence,
                 _ => 5
             };
         }
 
-        private void SetAttributeValue(CoreAttributeType type, int value)
+        private void SetAttributeValue(AttributeType type, int value)
         {
             switch (type)
             {
-                case CoreAttributeType.Strength:
+                case AttributeType.Strength:
                     SelectedAttributes.Strength = value;
                     break;
-                case CoreAttributeType.Perception:
+                case AttributeType.Perception:
                     SelectedAttributes.Perception = value;
                     break;
-                case CoreAttributeType.Agility:
+                case AttributeType.Agility:
                     SelectedAttributes.Agility = value;
                     break;
-                case CoreAttributeType.Charisma:
+                case AttributeType.Charisma:
                     SelectedAttributes.Charisma = value;
                     break;
-                case CoreAttributeType.Intelligence:
+                case AttributeType.Intelligence:
                     SelectedAttributes.Intelligence = value;
                     break;
             }

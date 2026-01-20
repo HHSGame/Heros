@@ -1,12 +1,11 @@
 
 using System.Collections.Immutable;
-using HHSGame.Core.Combat;
 using HHSGame.UI;
 using HHSGame.Core.Items;
 
 namespace HHSGame.Core.Enemies
 {
-    public class EnemyManager(ItemManager itemManager, TurnManager turnManager) : IDrawable
+    public class EnemyManager(ItemManager itemManager) : IDrawable
     {
         private readonly List<Enemy> enemies = [];
 
@@ -25,11 +24,11 @@ namespace HHSGame.Core.Enemies
         }
 
 
-        public void UpdateEnemies(Player player)
+        public void ExecuteTurn(Player player)
         {
             foreach (Enemy enemy in enemies.ToArray())
             {
-                if (enemy.Health <= 0)
+                if (enemy.IsDead)
                 {
                     // Handle enemy death
                     enemies.Remove(enemy);
@@ -37,9 +36,10 @@ namespace HHSGame.Core.Enemies
                     continue;
                 }
 
-                enemy.Update(player, turnManager.IsEnemyTurn());
+                enemy.ResetTurn();
+                enemy.TakeTurn(player);
+                enemy.EndTurn();
             }
-            turnManager.EndEnemyTurn();
         }
 
         public void Draw(IDrawingContext ctx)

@@ -1,3 +1,5 @@
+using HHSGame.Core.Combat;
+using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
 using Microsoft.Extensions.Logging;
 
@@ -17,6 +19,8 @@ namespace HHSGame.Core
             context.InitializeContext(Player);
             isRunning = true;
             context.StateMachine.TryChangeState(GameStateType.Exploration);
+            Player.ResetTurn();
+            context.TurnManager.BeginPlayerTurn();
 
             LogStartup(logger, "Player setup");
             Player.AddItem(new HealthPotion(10));
@@ -34,7 +38,7 @@ namespace HHSGame.Core
         [LoggerMessage(LogLevel.Information, "Game Starting: {message}")]
         public static partial void LogStartup(ILogger logger, string message);
 
-        public bool PerformPlayerAction(Action action, bool consumesTurn = true, params GameStateType[] allowedStates)
+        public bool PerformPlayerAction(Action action, int apCost, bool endTurn, params GameStateType[] allowedStates)
         {
             if (!isRunning || Player == null)
             {
@@ -46,27 +50,72 @@ namespace HHSGame.Core
                 return false;
             }
 
-            if (consumesTurn && !context.TurnManager.IsPlayerTurn())
+            if (!context.TurnManager.IsPlayerTurn())
+            {
+                return false;
+            }
+
+            if (!Player.Stats.TrySpendAp(apCost))
             {
                 return false;
             }
 
             action();
 
-            if (consumesTurn)
+            RenderFrame();
+            if (endTurn || Player.Stats.CurrentAp <= 0)
             {
-                context.TurnManager.EndPlayerTurn();
-                world.Update(Player);
+                EndPlayerTurn();
+            }
+            return true;
+        }
+
+        public bool TryMovePlayer(Move move, params GameStateType[] allowedStates)
+        {
+            if (!isRunning || Player == null)
+            {
+                return false;
             }
 
-            RenderFrame();
-            return true;
+            if (!IsStateAllowed(allowedStates))
+            {
+                return false;
+            }
+
+            Coordinate target = Player.Position.Move(move.ToVec());
+            Enemy? enemy = context.EnemyManager.GetEnemyAt(target.X, target.Y);
+            if (enemy != null)
+            {
+                return PerformPlayerAction(
+                    () => Player.Attack(enemy),
+                    Player.EquippedWeapon.ApCost,
+                    false,
+                    allowedStates);
+            }
+
+            return PerformPlayerAction(() => Player.Move(move), ActionCosts.Movement, false, allowedStates);
         }
 
         public void Stop()
         {
             isRunning = false;
             context.StateMachine.TryChangeState(GameStateType.GameOver);
+        }
+
+        private void EndPlayerTurn()
+        {
+            if (Player == null)
+            {
+                return;
+            }
+
+            Player.EndTurn();
+            context.TurnManager.EndPlayerTurn();
+            world.Update(Player);
+            context.TurnManager.EndEnemyTurn();
+            Player.ResetTurn();
+            context.TurnManager.BeginPlayerTurn();
+            RenderFrame();
         }
 
         private void RenderFrame()

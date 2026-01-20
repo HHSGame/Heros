@@ -4,36 +4,43 @@ namespace HHSGame.Core.Combat
 {
     public class TurnManager
     {
-
         private TurnState currentTurnState = TurnState.PlayerTurn;
+
         public int TurnCount { get; private set; }
+        public TurnState CurrentState => currentTurnState;
 
-        public TurnManager()
+        public void BeginPlayerTurn()
         {
-
-            Events.OnTurnChanged += HandleTurnChanged;
+            currentTurnState = TurnState.PlayerTurn;
+            Events.RaiseTurnChanged(TurnState.PlayerTurn);
         }
 
-        private void HandleTurnChanged(object? sender, TurnEventArgs e)
+        public void BeginEnemyTurn()
         {
-            currentTurnState = e.State;
+            currentTurnState = TurnState.EnemyTurn;
+            Events.RaiseTurnChanged(TurnState.EnemyTurn);
         }
 
         public void EndPlayerTurn()
         {
-            if (currentTurnState == TurnState.PlayerTurn)
+            if (currentTurnState != TurnState.PlayerTurn)
             {
-                TurnCount++;
-                Events.RaiseTurnChanged(TurnState.EnemyTurn);
+                return;
             }
+
+            TurnCount++;
+            BeginEnemyTurn();
         }
 
         public void EndEnemyTurn()
         {
-            if (currentTurnState == TurnState.EnemyTurn)
+            if (currentTurnState != TurnState.EnemyTurn)
             {
-                Events.RaiseTurnChanged(TurnState.PlayerTurn);
+                return;
             }
+
+            currentTurnState = TurnState.PlayerTurn;
+            Events.RaiseTurnChanged(TurnState.PlayerTurn);
         }
 
         public bool IsPlayerTurn()

@@ -15,6 +15,8 @@ namespace HHSGame.Core
         public bool InitialItems { get; set; } = true;
         public string? CustomMapPath { get; set; }
         public bool UseCustomMap { get; set; }
+        public Stats.Attributes? PlayerAttributes { get; set; }
+        public Stats.Skills? PlayerSkills { get; set; }
     }
 
     public class GameContext(

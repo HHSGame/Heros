@@ -37,10 +37,10 @@ namespace HHSGame.Core
                     GameStateType.Menu,
                     GameStateType.Inventory
                 ],
-                [GameStateType.Combat] = [GameStateType.Exploration, GameStateType.Menu],
+                [GameStateType.Combat] = [GameStateType.Exploration, GameStateType.Menu, GameStateType.Inventory],
                 [GameStateType.Dialogue] = [GameStateType.Exploration, GameStateType.Menu],
                 [GameStateType.Menu] = [GameStateType.Exploration],
-                [GameStateType.Inventory] = [GameStateType.Exploration],
+                [GameStateType.Inventory] = [GameStateType.Exploration, GameStateType.Combat],
                 [GameStateType.GameOver] = []
             };
         }

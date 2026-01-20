@@ -1,4 +1,5 @@
 using HHSGame.Core;
+using HHSGame.Core.Combat;
 using HHSGame.Core.Items;
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
@@ -54,7 +55,7 @@ namespace HHSGame.UI.Views
                 Item item = inventoryManager.ObservableItems.ElementAt(index);
                 item.Use(playerHolder.Value);
                 inventoryManager.RemoveItem(item);
-            }, true, GameStateType.Inventory);
+            }, ActionCosts.Inventory, false, GameStateType.Inventory);
         }
 
         private void HandleInventoryChange(object? sender, InventoryChangeEventArgs e)

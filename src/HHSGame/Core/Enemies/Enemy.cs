@@ -1,6 +1,9 @@
-using HHSGame.Core.Map;
-using HHSGame.Utils;
+using HHSGame.Core.Classes;
+using HHSGame.Core.Combat;
 using HHSGame.Core.Items;
+using HHSGame.Core.Map;
+using HHSGame.Core.Stats;
+using HHSGame.Utils;
 
 namespace HHSGame.Core.Enemies
 {
@@ -11,7 +14,7 @@ namespace HHSGame.Core.Enemies
         BanditLeader,
         Thug,
         Soldier,
-        Sniper,
+        Sniper
     }
 
     public enum EnemyState
@@ -22,31 +25,42 @@ namespace HHSGame.Core.Enemies
         Fleeing
     }
 
-    public class Enemy : IGameActor
+    public class Enemy : IGameActor, ICombatant
     {
         private readonly CollisionSystem collisionSystem;
         private readonly EnemyAbilitySystem abilitySystem;
         private readonly EnemyLootSystem lootSystem;
         private readonly Pathfinder pathfinder;
+        private readonly Random random;
+
+        public EnemyType Type { get; }
+        public EnemyState State { get; private set; }
+        public int ExperienceValue { get; }
+
+        public CharacterStats Stats { get; }
+        public int ArmorValue => equippedArmor?.ArmorValue ?? 0;
+        public Weapon EquippedWeapon => equippedWeapon ?? Classes.Weapons.UnknownWeapon;
+        public int EvasionBonus => Stats.EvasionBonus;
+        public bool IsDead => Stats.CurrentHp <= 0;
+
         public int X { get; set; }
         public int Y { get; set; }
-        public int Health { get; private set; }
-        public int MaxHealth { get; private set; }
-        public int Strength { get; private set; }
-        public int Defense { get; private set; }
-        public int ExperienceValue { get; private set; }
         public string Name { get; }
-        public EnemyType Type { get; private set; }
-        public EnemyState State { get; private set; }
         public char Glyph { get; }
         public Terminal.Gui.Drawing.Attribute Attribute { get; }
-        private int attackCooldown;
-        private int specialAbilityCooldown;
-        private readonly Random random;
+
+        private Weapon? equippedWeapon;
+        private Armor? equippedArmor;
 
         public Coordinate Position => new(X, Y);
 
-        public Enemy(EnemyType type, int x, int y, CollisionSystem collisionSystem, Pathfinder pathfinder)
+        public Enemy(
+            EnemyType type,
+            int x,
+            int y,
+            CollisionSystem collisionSystem,
+            Pathfinder pathfinder,
+            EnemyRegistry.EnemyConfig config)
         {
             random = new Random();
             Type = type;
@@ -56,123 +70,118 @@ namespace HHSGame.Core.Enemies
             this.pathfinder = pathfinder;
             State = EnemyState.Chasing;
 
-            EnemyRegistry.EnemyConfig config = EnemyRegistry.GetConfig(type);
             Name = config.Name;
-            MaxHealth = config.MaxHealth;
-            Strength = config.Strength;
-            Defense = config.Defense;
             ExperienceValue = config.ExperienceValue;
             Glyph = config.Glyph;
             Attribute = config.Attribute;
+            equippedWeapon = config.Weapon;
+            equippedArmor = config.Armor;
 
-            Health = MaxHealth;
-            attackCooldown = 0;
-            specialAbilityCooldown = 0;
+            Stats = new CharacterStats(config.Attributes with { }, config.Skills.Clone());
 
             abilitySystem = new EnemyAbilitySystem(this, random);
             lootSystem = new EnemyLootSystem(type, random);
         }
 
-        public void Update(Player player, bool isEnemyTurn)
+        public void ResetTurn()
         {
-            if (!isEnemyTurn)
+            Stats.ResetTurn();
+        }
+
+        public void EndTurn()
+        {
+            Stats.EndTurn();
+        }
+
+        public void TakeTurn(Player player)
+        {
+            if (IsDead)
             {
                 return;
             }
 
-            if (attackCooldown > 0)
+            while (Stats.CurrentAp > 0)
             {
-                attackCooldown--;
-            }
+                int dx = player.X - X;
+                int dy = player.Y - Y;
+                int sqDistance = dx * dx + dy * dy;
 
-            if (specialAbilityCooldown > 0)
-            {
-                specialAbilityCooldown--;
-            }
+                if (sqDistance <= 1)
+                {
+                    State = EnemyState.Attacking;
+                }
+                else if (sqDistance <= 64)
+                {
+                    State = EnemyState.Chasing;
+                }
+                else
+                {
+                    State = EnemyState.Idle;
+                }
 
-            // Calculate squared distance to player (avoid expensive sqrt)
-            int dx = player.X - X;
-            int dy = player.Y - Y;
-            int sqDistance = dx * dx + dy * dy;
-
-            // Update state based on squared distance
-            if (sqDistance <= 1) // 1^2 = 1
-            {
-                State = EnemyState.Attacking;
-            }
-            else if (sqDistance <= 64) // 8^2 = 64
-            {
-                State = EnemyState.Chasing;
-            }
-            else
-            {
-                State = EnemyState.Idle;
-            }
-
-            // Handle state-specific behavior
-            switch (State)
-            {
-                case EnemyState.Attacking:
-                    if (attackCooldown <= 0)
-                    {
+                switch (State)
+                {
+                    case EnemyState.Attacking:
+                        if (!Stats.TrySpendAp(EquippedWeapon.ApCost))
+                        {
+                            return;
+                        }
                         Attack(player);
-                        attackCooldown = 2; // 2 turn cooldown
-                    }
-                    break;
+                        break;
+                    case EnemyState.Chasing:
+                        if (!Stats.TrySpendAp(ActionCosts.Movement))
+                        {
+                            return;
+                        }
+                        MoveTowards(player);
+                        break;
+                    default:
+                        return;
+                }
+            }
+        }
 
-                case EnemyState.Chasing:
-                    // Get path to player
-                    List<Coordinate> path = pathfinder.FindPath(Position, player.Position);
-
-                    if (path.Count > 1) // First element is current position
-                    {
-                        Coordinate nextStep = path[1];
-                        int moveX = nextStep.X - X;
-                        int moveY = nextStep.Y - Y;
-                        Move(moveX, moveY);
-                    }
-                    break;
+        private void MoveTowards(Player player)
+        {
+            List<Coordinate> path = pathfinder.FindPath(Position, player.Position);
+            if (path.Count > 1)
+            {
+                Coordinate nextStep = path[1];
+                int moveX = nextStep.X - X;
+                int moveY = nextStep.Y - Y;
+                Move(moveX, moveY);
             }
         }
 
         public void Attack(Player player)
         {
-            int damage = Strength;
-            Events.RaiseGameMessage(I18n.T("HHS.Core.Enemies.Enemy.Attack", Name, damage));
-
+            CombatResolver.ResolveAttack(this, player, EquippedWeapon, random);
             abilitySystem.TryApplySpecialEffect(player);
-            player.TakeDamage(damage);
         }
 
         public void TakeDamage(int damage)
         {
-            int actualDamage = damage - Defense;
-            if (actualDamage < 0)
+            if (damage <= 0)
             {
-                actualDamage = 0;
+                return;
             }
 
-            Health -= actualDamage;
+            Stats.ApplyDamage(damage);
 
-            if (Health <= 0)
+            if (IsDead)
             {
-                Health = 0;
                 Events.RaiseGameMessage(I18n.T("HHS.Core.Enemies.Enemy.Defeated", Name));
                 Die();
             }
             else
             {
-                Events.RaiseGameMessage(I18n.T("HHS.Core.Enemies.Enemy.TakeDamage", Name, actualDamage, Health));
+                Events.RaiseGameMessage(I18n.T("HHS.Core.Enemies.Enemy.TakeDamage", Name, damage, Stats.CurrentHp));
             }
         }
 
         public void Heal(int amount)
         {
-            Health += amount;
-            if (Health > MaxHealth)
-            {
-                Health = MaxHealth;
-            }
+            Stats.Heal(amount);
         }
 
         public void Move(int dx, int dy)
@@ -194,9 +203,7 @@ namespace HHSGame.Core.Enemies
 
         private void Die()
         {
-            // Drop loot
             _ = GenerateLoot();
-            // TODO: Add loot to game world
         }
 
         public List<Item> GenerateLoot()
@@ -206,7 +213,7 @@ namespace HHSGame.Core.Enemies
 
         public override string ToString()
         {
-            return $"[0]{Name} - {Health}/{MaxHealth}";
+            return $"[0]{Name} - {Stats.CurrentHp}/{Stats.MaxHp}";
         }
     }
 }

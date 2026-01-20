@@ -61,6 +61,9 @@ Decision: keep both a minimal linear script format (for quick smoke flows) and a
 - 2025-01-20: Added test-script flexibility considerations (conditional/guarded steps).
 - 2025-01-20: Confirmed support for both linear and conditional script modes.
 - 2025-01-20: Added config models + loader (`Core/Engine/Config`, `GameConfigLoader`) and default `data/game.json` with unit tests.
+- 2025-01-20: Added config mapper + config-driven bootstrap in `Program`, plus starting item/start position hooks.
+- 2025-01-20: Added `GameEngineFactory` wrapper for config loading and parameter mapping.
+- 2025-01-20: Added `--config` CLI handling to load `data/game.json` or override path.
 
 ## Next Actions
-- Start Milestone 2: engine bootstrap using config and wiring `Program` to load default config.
+- Start Milestone 4: add scripted input runner (UI + headless) and define script schema.

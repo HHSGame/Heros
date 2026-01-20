@@ -12,10 +12,14 @@ namespace HHSGame.Core
 
         public static IServiceCollection AddHHSGameCore(this IServiceCollection serviceCollection)
         {
+            return AddHHSGameCore(serviceCollection, new GameParameters { MapStyle = MapStyle.Cave, MapHeight = 500, MapWidth = 500 });
+        }
 
+        public static IServiceCollection AddHHSGameCore(this IServiceCollection serviceCollection, GameParameters parameters)
+        {
             // Setup Initial Parameters;
             serviceCollection.AddSingleton((_) => new Random());
-            serviceCollection.AddSingleton((_) => new GameParameters { MapStyle = MapStyle.Cave, MapHeight = 500, MapWidth = 500 });
+            serviceCollection.AddSingleton(parameters);
 
             // Setup Generators
             serviceCollection.AddSingleton<MapGenerator>();

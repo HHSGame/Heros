@@ -33,7 +33,7 @@ namespace HHSGame.Core
             context.TurnManager.BeginPlayerTurn();
 
             LogStartup(logger, "Player setup");
-            Player.AddItem(new HealthPotion(10));
+            AddStartingItems(Player, context.Parameters.StartingItems);
 
             Events.OnGameMessageEvent += (sender, e) =>
             {
@@ -361,6 +361,17 @@ namespace HHSGame.Core
             (Player as IGameActor).Draw(drawingContext);
 
             drawingContext.Render();
+        }
+
+        private static void AddStartingItems(Player player, IEnumerable<string> itemIds)
+        {
+            foreach (string itemId in itemIds)
+            {
+                if (Items.ItemCatalog.TryCreate(itemId, out Items.Item item))
+                {
+                    player.AddItem(item);
+                }
+            }
         }
 
         private bool IsStateAllowed(GameStateType[] allowedStates)

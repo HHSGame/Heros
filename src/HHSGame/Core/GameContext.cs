@@ -19,6 +19,8 @@ namespace HHSGame.Core
         public Stats.Attributes? PlayerAttributes { get; set; }
         public Stats.Skills? PlayerSkills { get; set; }
         public ClassConfig? PlayerClass { get; set; }
+        public List<string> StartingItems { get; set; } = new() { "HealthPotion" };
+        public Coordinate? PlayerStartPosition { get; set; }
     }
 
     public class GameContext(

@@ -11,7 +11,15 @@ namespace HHSGame.Core
         {
             context.MapState.Init(context.MapGenerator.GenerateDungeon());
             // create a player at the center of the map but avoid any obstacles
-            int x = context.MapState.Width / 2, y = context.MapState.Height / 2;
+            int x = context.MapState.Width / 2;
+            int y = context.MapState.Height / 2;
+            Coordinate? startPosition = context.Parameters.PlayerStartPosition;
+            if (startPosition != null)
+            {
+                x = startPosition.X;
+                y = startPosition.Y;
+            }
+
             int round = 1;
             while (!Context.MapState.IsWalkable(x, y))
             {

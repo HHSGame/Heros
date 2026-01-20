@@ -1,6 +1,8 @@
 using System.Text;
+using ClassCatalog = HHSGame.Core.Classes.Classes;
 using HHSGame.Core.Engine;
 using HHSGame.Core.Engine.Config;
+using HHSGame.Core.Map;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace HHSGame.Core
@@ -33,11 +35,29 @@ namespace HHSGame.Core
             Assert.ThrowsException<InvalidDataException>(() => loader.Load(path));
         }
 
+        [TestMethod]
+        public void MapConfigToParametersUsesDefaults()
+        {
+            GameConfig config = new()
+            {
+                Map = new MapConfig(),
+                Player = new PlayerConfig()
+            };
+
+            GameParameters parameters = GameConfigMapper.ToParameters(config);
+
+            Assert.AreEqual(MapStyle.Cave, parameters.MapStyle);
+            Assert.AreEqual(50, parameters.MapWidth);
+            Assert.AreEqual(30, parameters.MapHeight);
+            Assert.AreEqual(ClassCatalog.Warrior, parameters.PlayerClass);
+        }
+
         private static GameConfigLoader CreateLoader()
         {
             GameDataLoader dataLoader = new(NullLogger<GameDataLoader>.Instance);
             return new GameConfigLoader(dataLoader);
         }
+
 
         private static string WriteTempConfig(string json)
         {

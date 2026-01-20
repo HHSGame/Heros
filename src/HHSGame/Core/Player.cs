@@ -77,9 +77,9 @@ namespace HHSGame.Core
             Stats = new CharacterStats(clonedAttributes, clonedSkills, Stats.Progression);
         }
 
-        public void ResetTurn()
+        public void ResetTurn(bool includeAp = true)
         {
-            Stats.ResetTurn();
+            Stats.ResetTurn(includeAp);
             TickEffects();
             UpdateFOV();
         }

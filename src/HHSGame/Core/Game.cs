@@ -20,7 +20,7 @@ namespace HHSGame.Core
             context.InitializeContext(Player);
             isRunning = true;
             context.StateMachine.TryChangeState(GameStateType.Exploration);
-            Player.ResetTurn();
+            Player.ResetTurn(false);
             context.TurnManager.BeginPlayerTurn();
 
             LogStartup(logger, "Player setup");
@@ -56,7 +56,8 @@ namespace HHSGame.Core
                 return false;
             }
 
-            if (!Player.Stats.TrySpendAp(apCost))
+            bool useAp = context.StateMachine.CurrentState == GameStateType.Combat;
+            if (useAp && !Player.Stats.TrySpendAp(apCost))
             {
                 return false;
             }
@@ -64,7 +65,14 @@ namespace HHSGame.Core
             action();
 
             RenderFrame();
-            if (endTurn || Player.Stats.CurrentAp <= 0)
+            if (useAp)
+            {
+                if (endTurn || Player.Stats.CurrentAp <= 0)
+                {
+                    EndPlayerTurn();
+                }
+            }
+            else
             {
                 EndPlayerTurn();
             }
@@ -110,11 +118,17 @@ namespace HHSGame.Core
                 return;
             }
 
-            Player.EndTurn();
+            bool useAp = context.StateMachine.CurrentState == GameStateType.Combat;
+            if (useAp)
+            {
+                Player.EndTurn();
+            }
             context.TurnManager.EndPlayerTurn();
-            world.Update(Player);
+            world.Update(Player, useAp);
             context.TurnManager.EndEnemyTurn();
-            Player.ResetTurn();
+            UpdateCombatState();
+            bool nextUseAp = context.StateMachine.CurrentState == GameStateType.Combat;
+            Player.ResetTurn(nextUseAp);
             context.TurnManager.BeginPlayerTurn();
             RenderFrame();
         }
@@ -153,6 +167,24 @@ namespace HHSGame.Core
             }
 
             return false;
+        }
+
+        private void UpdateCombatState()
+        {
+            if (Player == null)
+            {
+                return;
+            }
+
+            bool hasVisibleEnemies = context.EnemyManager.Enemies.Any(enemy => context.MapState.IsVisible(enemy.X, enemy.Y));
+            if (hasVisibleEnemies)
+            {
+                context.StateMachine.TryChangeState(GameStateType.Combat);
+            }
+            else if (context.StateMachine.CurrentState == GameStateType.Combat)
+            {
+                context.StateMachine.TryChangeState(GameStateType.Exploration);
+            }
         }
     }
 }

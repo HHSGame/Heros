@@ -247,9 +247,9 @@ namespace HHSGame.Core.Stats
         public int CarryCapacity => DerivedStats.CarryCapacity(Attributes);
         public int Initiative => DerivedStats.Initiative(Attributes, Skills);
 
-        public void ResetTurn()
+        public void ResetTurn(bool includeAp = true)
         {
-            CurrentAp = MaxAp;
+            CurrentAp = includeAp ? MaxAp : 0;
             EvasionBonus = 0;
         }
 

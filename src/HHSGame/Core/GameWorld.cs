@@ -32,9 +32,9 @@ namespace HHSGame.Core
             return player;
         }
 
-        public void Update(Player player)
+        public void Update(Player player, bool useAp)
         {
-            Context.EnemyManager.ExecuteTurn(player);
+            Context.EnemyManager.ExecuteTurn(player, useAp);
         }
 
         public void Draw(IDrawingContext ctx)

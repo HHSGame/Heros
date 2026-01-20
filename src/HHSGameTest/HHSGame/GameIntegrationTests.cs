@@ -13,41 +13,44 @@ namespace HHSGame.Core
     public class GameIntegrationTests
     {
         [TestMethod]
-        public void PerformPlayerActionConsumesApWithoutEndingTurn()
+        public void PerformPlayerActionInExplorationEndsTurnWithoutAp()
         {
             Game game = CreateGame();
             Player player = game.Player!;
-            int startingAp = player.Stats.CurrentAp;
             bool executed = false;
 
             bool result = game.PerformPlayerAction(() => executed = true, 1, false, GameStateType.Exploration);
 
             Assert.IsTrue(result);
             Assert.IsTrue(executed);
-            Assert.AreEqual(startingAp - 1, player.Stats.CurrentAp);
+            if (game.Context.StateMachine.CurrentState == GameStateType.Combat)
+            {
+                Assert.AreEqual(player.Stats.MaxAp, player.Stats.CurrentAp);
+            }
+            else
+            {
+                Assert.AreEqual(0, player.Stats.CurrentAp);
+            }
             Assert.IsTrue(game.Context.TurnManager.IsPlayerTurn());
-            Assert.AreEqual(0, game.Context.TurnManager.TurnCount);
+            Assert.AreEqual(1, game.Context.TurnManager.TurnCount);
         }
 
         [TestMethod]
-        public void PerformPlayerActionEndsTurnAndAdvancesEnemyTurn()
+        public void PerformPlayerActionInCombatConsumesApWithoutEndingTurn()
         {
             Game game = CreateGame();
             Player player = game.Player!;
-            int maxAp = player.Stats.MaxAp;
-            Enemy? sampleEnemy = game.Context.EnemyManager.Enemies.FirstOrDefault();
+            EnsureVisibleEnemy(game);
+            game.Context.StateMachine.TryChangeState(GameStateType.Combat);
+            player.ResetTurn(true);
+            int startingAp = player.Stats.CurrentAp;
 
-            Assert.IsNotNull(sampleEnemy);
-            int enemyStartingAp = sampleEnemy.Stats.CurrentAp;
-
-            bool result = game.PerformPlayerAction(() => { }, maxAp, false, GameStateType.Exploration);
+            bool result = game.PerformPlayerAction(() => { }, 1, false, GameStateType.Combat);
 
             Assert.IsTrue(result);
-            Assert.AreEqual(maxAp, player.Stats.CurrentAp);
+            Assert.AreEqual(startingAp - 1, player.Stats.CurrentAp);
             Assert.IsTrue(game.Context.TurnManager.IsPlayerTurn());
-            Assert.AreEqual(1, game.Context.TurnManager.TurnCount);
-            Assert.AreEqual(enemyStartingAp, sampleEnemy.Stats.MaxAp);
-            Assert.AreEqual(0, sampleEnemy.Stats.CurrentAp);
+            Assert.AreEqual(0, game.Context.TurnManager.TurnCount);
         }
 
         private static Game CreateGame()
@@ -99,6 +102,16 @@ namespace HHSGame.Core
             Game game = new(NullLogger<Game>.Instance, context, world);
             game.Start();
             return game;
+        }
+
+        private static void EnsureVisibleEnemy(Game game)
+        {
+            Enemy? enemy = game.Context.EnemyManager.Enemies.FirstOrDefault();
+            Assert.IsNotNull(enemy);
+
+            Player player = game.Player!;
+            enemy.X = player.X + 1;
+            enemy.Y = player.Y;
         }
 
         private static string CreateTempMapFile(int width, int height)

@@ -24,7 +24,7 @@ namespace HHSGame.Core.Enemies
         }
 
 
-        public void ExecuteTurn(Player player)
+        public void ExecuteTurn(Player player, bool useAp)
         {
             foreach (Enemy enemy in enemies.ToArray())
             {
@@ -36,8 +36,8 @@ namespace HHSGame.Core.Enemies
                     continue;
                 }
 
-                enemy.ResetTurn();
-                enemy.TakeTurn(player);
+                enemy.ResetTurn(useAp);
+                enemy.TakeTurn(player, useAp);
                 enemy.EndTurn();
             }
         }

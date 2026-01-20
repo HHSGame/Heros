@@ -83,9 +83,9 @@ namespace HHSGame.Core.Enemies
             lootSystem = new EnemyLootSystem(type, random);
         }
 
-        public void ResetTurn()
+        public void ResetTurn(bool includeAp = true)
         {
-            Stats.ResetTurn();
+            Stats.ResetTurn(includeAp);
         }
 
         public void EndTurn()
@@ -93,31 +93,22 @@ namespace HHSGame.Core.Enemies
             Stats.EndTurn();
         }
 
-        public void TakeTurn(Player player)
+        public void TakeTurn(Player player, bool useAp)
         {
             if (IsDead)
             {
                 return;
             }
 
+            if (!useAp)
+            {
+                ExecuteSingleAction(player);
+                return;
+            }
+
             while (Stats.CurrentAp > 0)
             {
-                int dx = player.X - X;
-                int dy = player.Y - Y;
-                int sqDistance = dx * dx + dy * dy;
-
-                if (sqDistance <= 1)
-                {
-                    State = EnemyState.Attacking;
-                }
-                else if (sqDistance <= 64)
-                {
-                    State = EnemyState.Chasing;
-                }
-                else
-                {
-                    State = EnemyState.Idle;
-                }
+                State = DetermineState(player);
 
                 switch (State)
                 {
@@ -139,6 +130,45 @@ namespace HHSGame.Core.Enemies
                         return;
                 }
             }
+        }
+
+        private void ExecuteSingleAction(Player player)
+        {
+            State = DetermineState(player);
+
+            switch (State)
+            {
+                case EnemyState.Attacking:
+                    Attack(player);
+                    break;
+                case EnemyState.Chasing:
+                    MoveTowards(player);
+                    break;
+            }
+        }
+
+        private static EnemyState DetermineState(Player player, int enemyX, int enemyY)
+        {
+            int dx = player.X - enemyX;
+            int dy = player.Y - enemyY;
+            int sqDistance = dx * dx + dy * dy;
+
+            if (sqDistance <= 1)
+            {
+                return EnemyState.Attacking;
+            }
+
+            if (sqDistance <= 64)
+            {
+                return EnemyState.Chasing;
+            }
+
+            return EnemyState.Idle;
+        }
+
+        private EnemyState DetermineState(Player player)
+        {
+            return DetermineState(player, X, Y);
         }
 
         private void MoveTowards(Player player)

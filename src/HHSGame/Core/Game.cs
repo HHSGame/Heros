@@ -1,6 +1,7 @@
 using HHSGame.Core.Combat;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
+using HHSGame.UI;
 using Microsoft.Extensions.Logging;
 
 namespace HHSGame.Core
@@ -11,6 +12,7 @@ namespace HHSGame.Core
         private bool isRunning;
         private readonly List<Player> controlledPlayers = [];
         private int activePlayerIndex;
+        private readonly List<(Coordinate Position, Cell Cell)> overlayCells = [];
 
         public GameContext Context => context;
         public int ControlledPlayerCount => controlledPlayers.Count;
@@ -140,6 +142,24 @@ namespace HHSGame.Core
             EndPlayerTurn();
         }
 
+        public void SetOverlayCells(IEnumerable<(Coordinate Position, Cell Cell)> cells)
+        {
+            overlayCells.Clear();
+            overlayCells.AddRange(cells);
+            RenderFrame();
+        }
+
+        public void ClearOverlayCells()
+        {
+            if (overlayCells.Count == 0)
+            {
+                return;
+            }
+
+            overlayCells.Clear();
+            RenderFrame();
+        }
+
         public bool SwitchControlledPlayer(int direction)
         {
             if (Player == null || controlledPlayers.Count <= 1)
@@ -261,6 +281,10 @@ namespace HHSGame.Core
             drawingContext.Viewport.UpdateViewport(Player.X, Player.Y, context.MapState.Width, context.MapState.Height);
 
             world.Draw(drawingContext);
+            foreach ((Coordinate position, Cell cell) in overlayCells)
+            {
+                drawingContext.DrawAt((position.X, position.Y), cell);
+            }
             foreach (Player player in controlledPlayers)
             {
                 if (player != Player)

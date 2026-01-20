@@ -18,5 +18,8 @@ namespace HHSGame.UI
 
         public static Scheme CommonWindowColorScheme => SchemeManager.GetScheme(Schemes.Toplevel);
 
+        public static char PathPreviewGlyph => '*';
+        public static char TargetPreviewGlyph => 'X';
+
     }
 }

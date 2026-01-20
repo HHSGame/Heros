@@ -303,6 +303,7 @@ namespace HHSGame.UI
         private void CancelMoveSelection()
         {
             isMoveSelection = false;
+            game.ClearOverlayCells();
             Events.RaiseGameMessage("Move mode cancelled.");
         }
 
@@ -331,6 +332,7 @@ namespace HHSGame.UI
             }
 
             List<Coordinate> path = GetMovePath(moveTarget);
+            UpdateMoveOverlay(path);
             if (path.Count == 0)
             {
                 Events.RaiseGameMessage($"No path to {moveTarget}.");
@@ -355,6 +357,7 @@ namespace HHSGame.UI
             {
                 Events.RaiseGameMessage("No movement queued.");
                 isMoveSelection = false;
+                game.ClearOverlayCells();
                 return;
             }
 
@@ -366,6 +369,7 @@ namespace HHSGame.UI
                 int turns = CalculateTurnsNeeded(steps, game.Player.Stats.MaxAp);
                 Events.RaiseGameMessage($"Not enough AP. Steps {steps}, turns {turns}.");
                 isMoveSelection = false;
+                game.ClearOverlayCells();
                 return;
             }
 
@@ -396,6 +400,35 @@ namespace HHSGame.UI
             }
 
             isMoveSelection = false;
+            game.ClearOverlayCells();
+        }
+
+        private void UpdateMoveOverlay(List<Coordinate> path)
+        {
+            if (path.Count <= 1)
+            {
+                game.ClearOverlayCells();
+                return;
+            }
+
+            List<(Coordinate Position, Cell Cell)> overlay = [];
+            for (int i = 1; i < path.Count - 1; i++)
+            {
+                overlay.Add((path[i], new Cell
+                {
+                    Character = GUISettings.PathPreviewGlyph,
+                    Attribute = ColorPresets.PathPreview
+                }));
+            }
+
+            Coordinate target = path[^1];
+            overlay.Add((target, new Cell
+            {
+                Character = GUISettings.TargetPreviewGlyph,
+                Attribute = ColorPresets.TargetPreview
+            }));
+
+            game.SetOverlayCells(overlay);
         }
 
         private List<Coordinate> GetMovePath(Coordinate destination)

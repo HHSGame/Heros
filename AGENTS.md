@@ -4,11 +4,12 @@
 - HHSGame is a terminal-based roguelike (NetHack-like).
 - C#/.NET 9 solution: `Heros.sln` with the main game project in `src/HHSGame`.
 - UI is built with Terminal.Gui; logging uses Serilog; DI uses Microsoft.Extensions.*.
+- Combat uses AP-driven action planning with queued sequences (`ActionSequence`) that execute on turn commit; AP only applies in combat.
 - Tests live in `src/HHSGameTest` (MSTest).
 
 ## Structure overview
-- `src/HHSGame/Core`: game loop, world, player, stats, map generation, combat, items, enemies.
-- `src/HHSGame/UI`: Terminal.Gui views, windows, rendering.
+- `src/HHSGame/Core`: game loop, world, player, stats, map generation, combat (including action sequences), items, enemies.
+- `src/HHSGame/UI`: Terminal.Gui views, windows, rendering, combat planning input handling.
 - `src/HHSGame/Resources`: localization assets.
 - `src/HHSGame/Utils`: shared utilities (e.g., i18n).
 - `src/HHSGameTest`: unit tests for core functionality.

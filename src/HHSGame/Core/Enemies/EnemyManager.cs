@@ -37,7 +37,8 @@ namespace HHSGame.Core.Enemies
                 }
 
                 enemy.ResetTurn(useAp);
-                enemy.TakeTurn(player, useAp);
+                enemy.PlanTurn(player, useAp);
+                enemy.ExecutePlannedActions(useAp);
                 enemy.EndTurn();
             }
         }

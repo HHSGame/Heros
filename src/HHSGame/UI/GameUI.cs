@@ -1,5 +1,6 @@
 using HHSGame.Core;
 using HHSGame.Core.Combat;
+using HHSGame.Core.Enemies;
 using HHSGame.Core.Map;
 using Terminal.Gui.App;
 using Terminal.Gui.Drivers;
@@ -19,6 +20,8 @@ namespace HHSGame.UI
             Game game) : IDisposable
     {
         private GameStateType lastNonInventoryState = GameStateType.Exploration;
+        private bool isMoveSelection;
+        private Coordinate moveTarget = new(0, 0);
         public Toplevel Start()
         {
             // Create main window
@@ -72,6 +75,15 @@ namespace HHSGame.UI
                 return;
             }
 
+            if (isMoveSelection)
+            {
+                if (HandleMoveSelectionKey(key))
+                {
+                    key.Handled = true;
+                }
+                return;
+            }
+
             if (key.Handled)
             {
                 return;
@@ -88,6 +100,15 @@ namespace HHSGame.UI
                     key.Handled = true;
                     return;
                 }
+            }
+
+            if (game.IsCombatActive())
+            {
+                if (HandleCombatPlanningKey(key))
+                {
+                    key.Handled = true;
+                }
+                return;
             }
             bool handled = false;
             // Process movement keys
@@ -162,6 +183,28 @@ namespace HHSGame.UI
                     SyncStateWithUtilityWindow();
                     handled = true;
                     break;
+                case KeyCode.Space:
+                    if (!game.SwitchControlledPlayer(1))
+                    {
+                        Events.RaiseGameMessage("No other controllable characters.");
+                    }
+                    else
+                    {
+                        Events.RaiseGameMessage($"Switched control to {game.Player?.Name}.");
+                    }
+                    handled = true;
+                    break;
+                case KeyCode.Tab:
+                    if (!game.SwitchControlledPlayer(-1))
+                    {
+                        Events.RaiseGameMessage("No other controllable characters.");
+                    }
+                    else
+                    {
+                        Events.RaiseGameMessage($"Switched control to {game.Player?.Name}.");
+                    }
+                    handled = true;
+                    break;
                 default:
                     return;
             }
@@ -170,6 +213,255 @@ namespace HHSGame.UI
                 key.Handled = true;
             }
             return;
+        }
+
+        private bool HandleCombatPlanningKey(Key key)
+        {
+            switch (key.KeyCode)
+            {
+                case KeyCode.M:
+                    BeginMoveSelection();
+                    return true;
+                case KeyCode.A:
+                    QueueAttack();
+                    return true;
+                case KeyCode.U:
+                    utilityWindow.ToggleUtilityWindow();
+                    SyncStateWithUtilityWindow();
+                    return true;
+                case KeyCode.S:
+                    Events.RaiseGameMessage("Skills are not available yet.");
+                    return true;
+                case KeyCode.Enter:
+                    game.CommitPlayerActions();
+                    return true;
+                case KeyCode.Space:
+                    if (!game.SwitchControlledPlayer(1))
+                    {
+                        Events.RaiseGameMessage("No other controllable characters.");
+                    }
+                    else
+                    {
+                        Events.RaiseGameMessage($"Switched control to {game.Player?.Name}.");
+                    }
+                    return true;
+                case KeyCode.Tab:
+                    if (!game.SwitchControlledPlayer(-1))
+                    {
+                        Events.RaiseGameMessage("No other controllable characters.");
+                    }
+                    else
+                    {
+                        Events.RaiseGameMessage($"Switched control to {game.Player?.Name}.");
+                    }
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private bool HandleMoveSelectionKey(Key key)
+        {
+            switch (key.KeyCode)
+            {
+                case KeyCode.CursorUp:
+                    MoveSelectionBy(0, -1);
+                    return true;
+                case KeyCode.CursorDown:
+                    MoveSelectionBy(0, 1);
+                    return true;
+                case KeyCode.CursorLeft:
+                    MoveSelectionBy(-1, 0);
+                    return true;
+                case KeyCode.CursorRight:
+                    MoveSelectionBy(1, 0);
+                    return true;
+                case KeyCode.Enter:
+                    ConfirmMoveSelection();
+                    return true;
+                case KeyCode.Esc:
+                    CancelMoveSelection();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private void BeginMoveSelection()
+        {
+            if (game.Player == null)
+            {
+                return;
+            }
+
+            moveTarget = game.Player.Position;
+            isMoveSelection = true;
+            Events.RaiseGameMessage("Move mode: use arrow keys, Enter to confirm, Esc to cancel.");
+            UpdateMovePreview();
+        }
+
+        private void CancelMoveSelection()
+        {
+            isMoveSelection = false;
+            Events.RaiseGameMessage("Move mode cancelled.");
+        }
+
+        private void MoveSelectionBy(int dx, int dy)
+        {
+            if (game.Player == null)
+            {
+                return;
+            }
+
+            Coordinate next = moveTarget.Target(dx, dy);
+            if (!game.Context.MapState.IsInBounds(next))
+            {
+                return;
+            }
+
+            moveTarget = next;
+            UpdateMovePreview();
+        }
+
+        private void UpdateMovePreview()
+        {
+            if (game.Player == null)
+            {
+                return;
+            }
+
+            List<Coordinate> path = GetMovePath(moveTarget);
+            if (path.Count == 0)
+            {
+                Events.RaiseGameMessage($"No path to {moveTarget}.");
+                return;
+            }
+
+            int steps = Math.Max(0, path.Count - 1);
+            int turns = CalculateTurnsNeeded(steps, game.Player.Stats.MaxAp);
+            int remainingAp = game.GetRemainingPlannedAp();
+            Events.RaiseGameMessage($"Move target {moveTarget}, steps {steps}, turns {turns}, remaining AP {remainingAp}.");
+        }
+
+        private void ConfirmMoveSelection()
+        {
+            if (game.Player == null)
+            {
+                return;
+            }
+
+            List<Coordinate> path = GetMovePath(moveTarget);
+            if (path.Count <= 1)
+            {
+                Events.RaiseGameMessage("No movement queued.");
+                isMoveSelection = false;
+                return;
+            }
+
+            int steps = path.Count - 1;
+            int remainingAp = game.GetRemainingPlannedAp();
+            int stepsToQueue = Math.Min(steps, remainingAp);
+            if (stepsToQueue <= 0)
+            {
+                int turns = CalculateTurnsNeeded(steps, game.Player.Stats.MaxAp);
+                Events.RaiseGameMessage($"Not enough AP. Steps {steps}, turns {turns}.");
+                isMoveSelection = false;
+                return;
+            }
+
+            for (int i = 1; i <= stepsToQueue; i++)
+            {
+                Coordinate from = path[i - 1];
+                Coordinate to = path[i];
+                Move move = ToMove(from, to);
+                if (move is Move.None)
+                {
+                    break;
+                }
+
+                if (!game.TryQueuePlayerAction("Move", ActionCosts.Movement, () => game.Player.Move(move)))
+                {
+                    break;
+                }
+            }
+
+            int turnsNeeded = CalculateTurnsNeeded(steps, game.Player.Stats.MaxAp);
+            if (stepsToQueue < steps)
+            {
+                Events.RaiseGameMessage($"Queued {stepsToQueue}/{steps} steps towards {moveTarget} (turns needed {turnsNeeded}).");
+            }
+            else
+            {
+                Events.RaiseGameMessage($"Queued move to {moveTarget} (turns needed {turnsNeeded}).");
+            }
+
+            isMoveSelection = false;
+        }
+
+        private List<Coordinate> GetMovePath(Coordinate destination)
+        {
+            if (game.Player == null)
+            {
+                return [];
+            }
+
+            if (!game.Context.MapState.IsWalkable(destination))
+            {
+                return [];
+            }
+
+            Pathfinder pathfinder = new(game.Context.MapState);
+            return pathfinder.FindPath(game.Player.Position, destination);
+        }
+
+        private static int CalculateTurnsNeeded(int steps, int maxAp)
+        {
+            if (steps <= 0 || maxAp <= 0)
+            {
+                return 0;
+            }
+
+            return (int)Math.Ceiling(steps / (double)maxAp);
+        }
+
+        private static Move ToMove(Coordinate from, Coordinate to)
+        {
+            int dx = to.X - from.X;
+            int dy = to.Y - from.Y;
+            return (dx, dy) switch
+            {
+                (1, 0) => new Move.Forward(Direction.Right),
+                (-1, 0) => new Move.Forward(Direction.Left),
+                (0, 1) => new Move.Forward(Direction.Down),
+                (0, -1) => new Move.Forward(Direction.Up),
+                _ => new Move.None()
+            };
+        }
+
+        private void QueueAttack()
+        {
+            if (game.Player == null)
+            {
+                return;
+            }
+
+            Player player = game.Player;
+            Enemy? enemy = game.Context.EnemyManager.Enemies.FirstOrDefault(target =>
+                Math.Abs(target.X - player.X) + Math.Abs(target.Y - player.Y) == 1);
+
+            if (enemy == null)
+            {
+                Events.RaiseGameMessage("No adjacent enemy to attack.");
+                return;
+            }
+
+            if (!game.TryQueuePlayerAction($"Attack {enemy.Name}", player.EquippedWeapon.ApCost, () => player.Attack(enemy)))
+            {
+                Events.RaiseGameMessage("Not enough AP to queue attack.");
+                return;
+            }
+
+            Events.RaiseGameMessage($"Queued attack on {enemy.Name}.");
         }
 
         private void SyncStateWithUtilityWindow()

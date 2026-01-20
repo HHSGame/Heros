@@ -50,9 +50,29 @@ namespace HHSGame.UI.Views
         private void HandleOpenSelectedItem(object? sender, ListViewItemEventArgs args)
         {
             int index = args.Item;
+            Item item = inventoryManager.ObservableItems.ElementAt(index);
+
+            if (game.IsCombatActive())
+            {
+                bool queued = game.TryQueuePlayerAction(
+                    $"Use {item.Name}",
+                    ActionCosts.Inventory,
+                    () =>
+                    {
+                        item.Use(playerHolder.Value);
+                        inventoryManager.RemoveItem(item);
+                    });
+
+                if (!queued)
+                {
+                    Events.RaiseGameMessage("Not enough AP to queue item use.");
+                }
+
+                return;
+            }
+
             game.PerformPlayerAction(() =>
             {
-                Item item = inventoryManager.ObservableItems.ElementAt(index);
                 item.Use(playerHolder.Value);
                 inventoryManager.RemoveItem(item);
             }, ActionCosts.Inventory, false, GameStateType.Inventory);

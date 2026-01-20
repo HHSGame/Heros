@@ -38,6 +38,7 @@ namespace HHSGame.Core.Enemies
         public int ExperienceValue { get; }
 
         public CharacterStats Stats { get; }
+        public ActionSequence ActionSequence { get; } = new();
         public int ArmorValue => equippedArmor?.ArmorValue ?? 0;
         public Weapon EquippedWeapon => equippedWeapon ?? Classes.Weapons.UnknownWeapon;
         public int EvasionBonus => Stats.EvasionBonus;
@@ -93,38 +94,49 @@ namespace HHSGame.Core.Enemies
             Stats.EndTurn();
         }
 
-        public void TakeTurn(Player player, bool useAp)
+        public void PlanTurn(Player player, bool useAp)
         {
             if (IsDead)
             {
                 return;
             }
 
+            ActionSequence.Clear();
+
             if (!useAp)
             {
-                ExecuteSingleAction(player);
+                QueueSingleAction(player);
                 return;
             }
 
-            while (Stats.CurrentAp > 0)
+            int remainingAp = Stats.MaxAp;
+            while (remainingAp > 0)
             {
                 State = DetermineState(player);
 
                 switch (State)
                 {
                     case EnemyState.Attacking:
-                        if (!Stats.TrySpendAp(EquippedWeapon.ApCost))
+                        if (EquippedWeapon.ApCost > remainingAp)
                         {
                             return;
                         }
-                        Attack(player);
+                        ActionSequence.Enqueue(new QueuedAction(
+                            $"Attack {player.Name}",
+                            EquippedWeapon.ApCost,
+                            () => Attack(player)));
+                        remainingAp -= EquippedWeapon.ApCost;
                         break;
                     case EnemyState.Chasing:
-                        if (!Stats.TrySpendAp(ActionCosts.Movement))
+                        if (ActionCosts.Movement > remainingAp)
                         {
                             return;
                         }
-                        MoveTowards(player);
+                        ActionSequence.Enqueue(new QueuedAction(
+                            "Move towards player",
+                            ActionCosts.Movement,
+                            () => MoveTowards(player)));
+                        remainingAp -= ActionCosts.Movement;
                         break;
                     default:
                         return;
@@ -132,17 +144,29 @@ namespace HHSGame.Core.Enemies
             }
         }
 
-        private void ExecuteSingleAction(Player player)
+        public void ExecutePlannedActions(bool useAp)
+        {
+            ActionSequence.Execute(Stats, !useAp);
+            ActionSequence.Clear();
+        }
+
+        private void QueueSingleAction(Player player)
         {
             State = DetermineState(player);
 
             switch (State)
             {
                 case EnemyState.Attacking:
-                    Attack(player);
+                    ActionSequence.Enqueue(new QueuedAction(
+                        $"Attack {player.Name}",
+                        EquippedWeapon.ApCost,
+                        () => Attack(player)));
                     break;
                 case EnemyState.Chasing:
-                    MoveTowards(player);
+                    ActionSequence.Enqueue(new QueuedAction(
+                        "Move towards player",
+                        ActionCosts.Movement,
+                        () => MoveTowards(player)));
                     break;
             }
         }

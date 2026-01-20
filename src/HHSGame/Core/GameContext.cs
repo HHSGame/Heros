@@ -61,5 +61,10 @@ namespace HHSGame.Core
             enemyManager.SetEnemies(enemyFactory.SpawnEnemies());
             this.player = player;
         }
+
+        public void SetActivePlayer(Player player)
+        {
+            this.player = player;
+        }
     }
 }

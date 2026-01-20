@@ -50,6 +50,7 @@ namespace HHSGame.Core
         public int Y { get; set; }
 
         public CharacterStats Stats { get; private set; }
+        public ActionSequence ActionSequence { get; } = new();
         public InventoryManager Inventory => inventoryManager;
 
         public int Health => Stats.CurrentHp;
@@ -77,11 +78,14 @@ namespace HHSGame.Core
             Stats = new CharacterStats(clonedAttributes, clonedSkills, Stats.Progression);
         }
 
-        public void ResetTurn(bool includeAp = true)
+        public void ResetTurn(bool includeAp = true, bool updateFov = true)
         {
             Stats.ResetTurn(includeAp);
             TickEffects();
-            UpdateFOV();
+            if (updateFov)
+            {
+                UpdateFOV();
+            }
         }
 
         public void EndTurn()

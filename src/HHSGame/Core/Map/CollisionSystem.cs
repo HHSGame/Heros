@@ -5,6 +5,13 @@ namespace HHSGame.Core.Map
 {
     public class CollisionSystem(EnemyManager enemyManager, MapState mapState)
     {
+        private Player? player;
+
+        public void SetPlayer(Player player)
+        {
+            this.player = player;
+        }
+
         public bool CanMoveTo(int x, int y, IGameActor actor)
         {
             // Check map boundaries
@@ -19,14 +26,15 @@ namespace HHSGame.Core.Map
                 return false;
             }
 
-            // Check for other enemies (except self)
-            if (actor is Enemy)
+            Enemy? enemyAtTarget = enemyManager.GetEnemyAt(x, y);
+            if (enemyAtTarget != null && enemyAtTarget != actor)
             {
-                Enemy? enemyAtTarget = enemyManager.GetEnemyAt(x, y);
-                if (enemyAtTarget != null && enemyAtTarget != actor)
-                {
-                    return false;
-                }
+                return false;
+            }
+
+            if (player != null && actor != player && player.X == x && player.Y == y)
+            {
+                return false;
             }
 
             return true;
@@ -39,6 +47,11 @@ namespace HHSGame.Core.Map
             if (enemy != null)
             {
                 return enemy;
+            }
+
+            if (player != null && player.X == x && player.Y == y)
+            {
+                return player;
             }
 
             // Could add other collision types here (items, etc)

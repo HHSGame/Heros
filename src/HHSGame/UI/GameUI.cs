@@ -24,6 +24,7 @@ namespace HHSGame.UI
         private bool isMoveSelection;
         private Coordinate moveTarget = new(0, 0);
         private bool isKeyHandlerRegistered;
+        private bool isGameStarted;
         public Toplevel Start()
         {
             // Create main window
@@ -34,6 +35,11 @@ namespace HHSGame.UI
             // Show player setup wizard before starting the game
             playerSetupWizard.Finished += (sender, args) =>
             {
+                if (isGameStarted)
+                {
+                    return;
+                }
+                isGameStarted = true;
                 GameParameters parameters = game.Context.Parameters;
                 // Apply map selection from wizard
                 if (playerSetupWizard.UseCustomMap && !string.IsNullOrEmpty(playerSetupWizard.SelectedMap))
@@ -61,6 +67,8 @@ namespace HHSGame.UI
                 // }
 
                 game.Start();
+                playerSetupWizard.Visible = false;
+                top.Remove(playerSetupWizard);
                 if (!isKeyHandlerRegistered)
                 {
                     Application.KeyDown -= HandleKeyEvent;

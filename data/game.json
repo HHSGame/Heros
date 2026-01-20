@@ -1,0 +1,26 @@
+{
+  "game": {
+    "name": "HHSGame",
+    "version": 1
+  },
+  "map": {
+    "style": "Cave",
+    "width": 50,
+    "height": 30,
+    "useCustomMap": false
+  },
+  "player": {
+    "class": "Warrior",
+    "startingItems": [
+      "HealthPotion"
+    ]
+  },
+  "enemies": [],
+  "items": [],
+  "conditions": {
+    "win": [],
+    "lose": [
+      "PlayerDeath"
+    ]
+  }
+}

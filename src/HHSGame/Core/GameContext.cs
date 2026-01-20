@@ -59,6 +59,7 @@ namespace HHSGame.Core
         public void InitializeContext(Player player)
         {
             enemyManager.SetEnemies(enemyFactory.SpawnEnemies());
+            collisionSystem.SetPlayer(player);
             this.player = player;
         }
 

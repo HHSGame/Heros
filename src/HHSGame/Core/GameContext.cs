@@ -4,6 +4,7 @@ using HHSGame.Core.Combat;
 using HHSGame.Core.Map;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
+using HHSGame.Core.Classes;
 
 namespace HHSGame.Core
 {
@@ -17,6 +18,7 @@ namespace HHSGame.Core
         public bool UseCustomMap { get; set; }
         public Stats.Attributes? PlayerAttributes { get; set; }
         public Stats.Skills? PlayerSkills { get; set; }
+        public ClassConfig? PlayerClass { get; set; }
     }
 
     public class GameContext(

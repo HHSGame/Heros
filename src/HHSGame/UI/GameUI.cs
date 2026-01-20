@@ -1,6 +1,5 @@
 using HHSGame.Core;
 using HHSGame.Core.Combat;
-using HHSGame.Core.Stats;
 using HHSGame.Core.Map;
 using Terminal.Gui.App;
 using Terminal.Gui.Drivers;
@@ -30,16 +29,25 @@ namespace HHSGame.UI
             // Show player setup wizard before starting the game
             playerSetupWizard.Finished += (sender, args) =>
             {
+                GameParameters parameters = game.Context.Parameters;
                 // Apply map selection from wizard
                 if (playerSetupWizard.UseCustomMap && !string.IsNullOrEmpty(playerSetupWizard.SelectedMap))
                 {
-                    GameParameters parameters = game.Context.Parameters;
-
                     parameters.UseCustomMap = true;
                     parameters.CustomMapPath = Path.Combine("data/maps", playerSetupWizard.SelectedMap + ".txt");
                 }
-                game.Context.Parameters.PlayerAttributes = playerSetupWizard.SelectedAttributes;
-                game.Context.Parameters.PlayerSkills = new Skills();
+                parameters.PlayerClass = playerSetupWizard.SelectedClass;
+
+                if (playerSetupWizard.UseCustomCharacter)
+                {
+                    parameters.PlayerAttributes = playerSetupWizard.SelectedAttributes;
+                    parameters.PlayerSkills = playerSetupWizard.SelectedSkills;
+                }
+                else
+                {
+                    parameters.PlayerAttributes = null;
+                    parameters.PlayerSkills = null;
+                }
                 // else if (!string.IsNullOrEmpty(playerSetupWizard.SelectedMap) && Enum.TryParse<MapStyle>(playerSetupWizard.SelectedMap, out var mapStyle))
                 // {
                 //     GameParameters parameters = game.Context.Parameters;
@@ -143,7 +151,7 @@ namespace HHSGame.UI
                     return;
                 case KeyCode.G:
                     handled = game.PerformPlayerAction(
-                        () => game.Player.PickupItems(),
+                        () => game.Player?.PickupItems(),
                         ActionCosts.Pickup,
                         false,
                         GameStateType.Exploration,

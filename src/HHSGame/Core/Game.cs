@@ -14,7 +14,8 @@ namespace HHSGame.Core
 
         public void Start()
         {
-            Player = world.NewPlayer(Classes.Classes.Warrior.ToClass());
+            Classes.ClassConfig classConfig = context.Parameters.PlayerClass ?? Classes.Classes.Warrior;
+            Player = world.NewPlayer(classConfig.ToClass());
             LogStartup(logger, "Intializing Context");
             context.InitializeContext(Player);
             isRunning = true;

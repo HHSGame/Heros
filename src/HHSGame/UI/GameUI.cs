@@ -23,6 +23,7 @@ namespace HHSGame.UI
         private GameStateType lastNonInventoryState = GameStateType.Exploration;
         private bool isMoveSelection;
         private Coordinate moveTarget = new(0, 0);
+        private bool isKeyHandlerRegistered;
         public Toplevel Start()
         {
             // Create main window
@@ -60,7 +61,12 @@ namespace HHSGame.UI
                 // }
 
                 game.Start();
-                Application.KeyDown += HandleKeyEvent;
+                if (!isKeyHandlerRegistered)
+                {
+                    Application.KeyDown -= HandleKeyEvent;
+                    Application.KeyDown += HandleKeyEvent;
+                    isKeyHandlerRegistered = true;
+                }
             };
             playerSetupWizard.Visible = true;
 
@@ -69,8 +75,6 @@ namespace HHSGame.UI
 
         private void HandleKeyEvent(object? sender, Key key)
         {
-            Events.RaiseGameMessage($"Key pressed: {key}");
-
             if (playerSetupWizard.Visible)
             {
                 return;
@@ -545,6 +549,11 @@ namespace HHSGame.UI
 
         public void Dispose()
         {
+            if (isKeyHandlerRegistered)
+            {
+                Application.KeyDown -= HandleKeyEvent;
+                isKeyHandlerRegistered = false;
+            }
             Application.Shutdown();
             GC.SuppressFinalize(this);
         }

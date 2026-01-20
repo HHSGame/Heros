@@ -18,6 +18,11 @@ namespace HHSGame.Core.Combat
         public int Count => actions.Count;
         public bool HasActions => actions.Count > 0;
 
+        public IReadOnlyList<QueuedAction> Snapshot()
+        {
+            return actions.ToList();
+        }
+
         public void Enqueue(QueuedAction action)
         {
             actions.Enqueue(action);
@@ -45,7 +50,7 @@ namespace HHSGame.Core.Combat
             return (int)Math.Ceiling(totalCost / (double)maxAp);
         }
 
-        public void Execute(CharacterStats stats, bool ignoreAp = false)
+        public void Execute(CharacterStats stats, bool ignoreAp = false, Action<QueuedAction>? onExecuted = null)
         {
             int remainingAp = ignoreAp ? int.MaxValue : stats.CurrentAp;
 
@@ -67,6 +72,7 @@ namespace HHSGame.Core.Combat
                 }
 
                 action.Execute();
+                onExecuted?.Invoke(action);
                 actions.Dequeue();
                 totalCost -= action.ApCost;
             }

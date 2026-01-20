@@ -19,6 +19,7 @@ namespace HHSGame.UI
             // Setup Windows
             serviceCollection.AddSingleton<MapFrame>();
             serviceCollection.AddSingleton<MessageFrame>();
+            serviceCollection.AddSingleton<ActionSequenceFrame>();
             serviceCollection.AddSingleton<InventoryFrame>();
             serviceCollection.AddSingleton<SurroundingsFrame>();
             serviceCollection.AddSingleton<UtilityWindow>();

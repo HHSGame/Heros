@@ -48,6 +48,13 @@ namespace HHSGame.UI.Views
                 $"Pos {player.X},{player.Y} " +
                 $"Time {turnCount}";
 
+            bool showCombatHints = context.StateMachine.CurrentState == GameStateType.Combat
+                || context.EnemyManager.Enemies.Any(enemy => context.MapState.IsVisible(enemy.X, enemy.Y));
+            if (showCombatHints)
+            {
+                status += " | M Move A Attack C Exit(no enemies) Enter End S Skills";
+            }
+
             return PadToWidth(status);
         }
 

@@ -59,6 +59,7 @@ namespace HHSGame.Core
         public static event EventHandler<TurnEventArgs>? OnTurnChanged;
         public static event EventHandler<InventoryChangeEventArgs>? OnInventoryChange;
         public static event EventHandler<SurroundingsChangeEventArgs>? OnSurroundingsChange;
+        public static event EventHandler? OnActionSequenceChanged;
 
         public static void RaiseGameMessage(string message)
         {
@@ -78,6 +79,11 @@ namespace HHSGame.Core
         public static void RaiseSurroundingsChange((int X, int Y) position, int fovRadius, SurroundingsChangeType type)
         {
             OnSurroundingsChange?.Invoke(null, new SurroundingsChangeEventArgs(position, fovRadius, type));
+        }
+
+        public static void RaiseActionSequenceChanged()
+        {
+            OnActionSequenceChanged?.Invoke(null, EventArgs.Empty);
         }
     }
 }

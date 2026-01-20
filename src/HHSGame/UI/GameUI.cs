@@ -13,6 +13,7 @@ namespace HHSGame.UI
     public class GameUI(MapFrame mapFrame,
             StatusBarView statusBarView,
             MessageFrame messageFrame,
+            ActionSequenceFrame actionSequenceFrame,
             InventoryFrame inventoryFrame,
             SurroundingsFrame surroundingsFrame,
             UtilityWindow utilityWindow,
@@ -26,7 +27,7 @@ namespace HHSGame.UI
         {
             // Create main window
             Toplevel top = new();
-            top.Add(mapFrame, inventoryFrame, surroundingsFrame, statusBarView, messageFrame, utilityWindow);
+            top.Add(mapFrame, inventoryFrame, surroundingsFrame, statusBarView, messageFrame, actionSequenceFrame, utilityWindow);
 
             top.Add(playerSetupWizard);
             // Show player setup wizard before starting the game
@@ -183,6 +184,9 @@ namespace HHSGame.UI
                     SyncStateWithUtilityWindow();
                     handled = true;
                     break;
+                case KeyCode.C:
+                    handled = HandleCombatToggle();
+                    break;
                 case KeyCode.Space:
                     if (!game.SwitchControlledPlayer(1))
                     {
@@ -231,6 +235,9 @@ namespace HHSGame.UI
                     return true;
                 case KeyCode.S:
                     Events.RaiseGameMessage("Skills are not available yet.");
+                    return true;
+                case KeyCode.C:
+                    HandleCombatToggle();
                     return true;
                 case KeyCode.Enter:
                     game.CommitPlayerActions();
@@ -352,6 +359,7 @@ namespace HHSGame.UI
                 return;
             }
 
+            Player player = game.Player;
             List<Coordinate> path = GetMovePath(moveTarget);
             if (path.Count <= 1)
             {
@@ -383,7 +391,7 @@ namespace HHSGame.UI
                     break;
                 }
 
-                if (!game.TryQueuePlayerAction("Move", ActionCosts.Movement, () => game.Player.Move(move)))
+                if (!game.TryQueuePlayerAction("Move", ActionCosts.Movement, () => player.Move(move)))
                 {
                     break;
                 }
@@ -495,6 +503,28 @@ namespace HHSGame.UI
             }
 
             Events.RaiseGameMessage($"Queued attack on {enemy.Name}.");
+        }
+
+        private bool HandleCombatToggle()
+        {
+            bool wasCombat = game.IsCombatActive();
+            bool toggled = game.ToggleCombatMode();
+            if (!toggled)
+            {
+                Events.RaiseGameMessage("Cannot exit combat while enemies are alert.");
+                return true;
+            }
+
+            if (wasCombat)
+            {
+                Events.RaiseGameMessage("Exited combat mode.");
+            }
+            else
+            {
+                Events.RaiseGameMessage("Entered combat mode.");
+            }
+
+            return true;
         }
 
         private void SyncStateWithUtilityWindow()

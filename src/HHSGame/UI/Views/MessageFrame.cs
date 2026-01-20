@@ -10,7 +10,7 @@ namespace HHSGame.UI.Views
             Title = GUISettings.MessageWindowTitle;
             X = 0;
             Y = Pos.Bottom(statusBarView);
-            Width = Dim.Fill();
+            Width = Dim.Fill()! - GUISettings.ActionSequenceWidth;
             Height = GUISettings.MessageWindowHeight;
 
 

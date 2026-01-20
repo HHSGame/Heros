@@ -53,6 +53,41 @@ namespace HHSGame.Core
             Assert.AreEqual(0, game.Context.TurnManager.TurnCount);
         }
 
+        [TestMethod]
+        public void QueuedMoveExecutesOnce()
+        {
+            Game game = CreateGame();
+            Player player = game.Player!;
+            MovePlayerToClearPosition(game);
+            game.Context.StateMachine.TryChangeState(GameStateType.Combat);
+            player.ResetTurn(true);
+            int startX = player.X;
+
+            bool queued = game.TryQueuePlayerAction("Move", ActionCosts.Movement, () => player.Move(new Move.Forward(Direction.Right)));
+            Assert.IsTrue(queued);
+
+            game.CommitPlayerActions();
+
+            Assert.AreEqual(startX + 1, player.X);
+        }
+
+        [TestMethod]
+        public void QueuedActionExecutesOnce()
+        {
+            Game game = CreateGame();
+            Player player = game.Player!;
+            game.Context.StateMachine.TryChangeState(GameStateType.Combat);
+            player.ResetTurn(true);
+            int executions = 0;
+
+            bool queued = game.TryQueuePlayerAction("Test", 1, () => executions++);
+            Assert.IsTrue(queued);
+
+            game.CommitPlayerActions();
+
+            Assert.AreEqual(1, executions);
+        }
+
         private static Game CreateGame()
         {
             const int mapSize = 30;
@@ -112,6 +147,36 @@ namespace HHSGame.Core
             Player player = game.Player!;
             enemy.X = player.X + 1;
             enemy.Y = player.Y;
+        }
+
+        private static void MovePlayerToClearPosition(Game game)
+        {
+            Player player = game.Player!;
+            MapState map = game.Context.MapState;
+            EnemyManager enemies = game.Context.EnemyManager;
+
+            for (int y = 1; y < map.Height - 1; y++)
+            {
+                for (int x = 1; x < map.Width - 1; x++)
+                {
+                    if (!map.IsWalkable(x, y) || !map.IsWalkable(x + 1, y))
+                    {
+                        continue;
+                    }
+
+                    if (enemies.GetEnemyAt(x, y) != null || enemies.GetEnemyAt(x + 1, y) != null)
+                    {
+                        continue;
+                    }
+
+                    player.X = x;
+                    player.Y = y;
+                    player.UpdateFOV();
+                    return;
+                }
+            }
+
+            Assert.Fail("No clear position found for movement test.");
         }
 
         private static string CreateTempMapFile(int width, int height)

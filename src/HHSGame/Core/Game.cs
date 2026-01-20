@@ -13,6 +13,7 @@ namespace HHSGame.Core
         private readonly List<Player> controlledPlayers = [];
         private int activePlayerIndex;
         private readonly List<(Coordinate Position, Cell Cell)> overlayCells = [];
+        private bool manualCombatMode;
 
         public GameContext Context => context;
         public int ControlledPlayerCount => controlledPlayers.Count;
@@ -106,6 +107,7 @@ namespace HHSGame.Core
             }
 
             Player.ActionSequence.Enqueue(new QueuedAction(description, apCost, action));
+            Events.RaiseActionSequenceChanged();
             return true;
         }
 
@@ -115,6 +117,7 @@ namespace HHSGame.Core
             {
                 player.ActionSequence.Clear();
             }
+            Events.RaiseActionSequenceChanged();
         }
 
         public int GetRemainingPlannedAp()
@@ -140,6 +143,62 @@ namespace HHSGame.Core
             }
 
             EndPlayerTurn();
+        }
+
+        public IReadOnlyList<string> GetPlannedActionDescriptions()
+        {
+            if (!IsCombatActive())
+            {
+                return Array.Empty<string>();
+            }
+
+            List<string> descriptions = [];
+            foreach (Player player in controlledPlayers)
+            {
+                foreach (QueuedAction action in player.ActionSequence.Snapshot())
+                {
+                    descriptions.Add($"{player.Name} - {action.Description}");
+                }
+            }
+
+            return descriptions;
+        }
+
+        public bool ToggleCombatMode()
+        {
+            if (!isRunning || Player == null)
+            {
+                return false;
+            }
+
+            bool hasVisibleEnemies = HasVisibleEnemies();
+            if (manualCombatMode || context.StateMachine.CurrentState == GameStateType.Combat)
+            {
+                if (hasVisibleEnemies)
+                {
+                    return false;
+                }
+
+                manualCombatMode = false;
+                context.StateMachine.TryChangeState(GameStateType.Exploration);
+                ClearPlayerActions();
+                foreach (Player player in controlledPlayers)
+                {
+                    player.ResetTurn(false, player == Player);
+                }
+                RenderFrame();
+                return true;
+            }
+
+            manualCombatMode = true;
+            context.StateMachine.TryChangeState(GameStateType.Combat);
+            ClearPlayerActions();
+            foreach (Player player in controlledPlayers)
+            {
+                player.ResetTurn(true, player == Player);
+            }
+            RenderFrame();
+            return true;
         }
 
         public void SetOverlayCells(IEnumerable<(Coordinate Position, Cell Cell)> cells)
@@ -192,12 +251,17 @@ namespace HHSGame.Core
 
         public bool IsCombatActive()
         {
+            if (manualCombatMode)
+            {
+                return true;
+            }
+
             if (context.StateMachine.CurrentState == GameStateType.Combat)
             {
                 return true;
             }
 
-            return context.EnemyManager.Enemies.Any(enemy => context.MapState.IsVisible(enemy.X, enemy.Y));
+            return HasVisibleEnemies();
         }
 
         public bool TryMovePlayer(Move move, params GameStateType[] allowedStates)
@@ -244,10 +308,11 @@ namespace HHSGame.Core
             {
                 foreach (Player player in controlledPlayers)
                 {
-                    player.ActionSequence.Execute(player.Stats);
+                    player.ActionSequence.Execute(player.Stats, false, _ => Events.RaiseActionSequenceChanged());
                     player.ActionSequence.Clear();
                     player.EndTurn();
                 }
+                Events.RaiseActionSequenceChanged();
             }
             else
             {
@@ -255,6 +320,7 @@ namespace HHSGame.Core
                 {
                     player.ActionSequence.Clear();
                 }
+                Events.RaiseActionSequenceChanged();
             }
             context.TurnManager.EndPlayerTurn();
             world.Update(Player, useAp);
@@ -323,15 +389,20 @@ namespace HHSGame.Core
                 return;
             }
 
-            bool hasVisibleEnemies = context.EnemyManager.Enemies.Any(enemy => context.MapState.IsVisible(enemy.X, enemy.Y));
+            bool hasVisibleEnemies = HasVisibleEnemies();
             if (hasVisibleEnemies)
             {
                 context.StateMachine.TryChangeState(GameStateType.Combat);
             }
-            else if (context.StateMachine.CurrentState == GameStateType.Combat)
+            else if (!manualCombatMode && context.StateMachine.CurrentState == GameStateType.Combat)
             {
                 context.StateMachine.TryChangeState(GameStateType.Exploration);
             }
+        }
+
+        private bool HasVisibleEnemies()
+        {
+            return context.EnemyManager.Enemies.Any(enemy => context.MapState.IsVisible(enemy.X, enemy.Y));
         }
 
     }

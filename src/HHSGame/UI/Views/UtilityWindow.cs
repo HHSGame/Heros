@@ -54,12 +54,13 @@ namespace HHSGame.UI.Views
 
             if (game.IsCombatActive())
             {
+                Player player = playerHolder.Value;
                 bool queued = game.TryQueuePlayerAction(
                     $"Use {item.Name}",
                     ActionCosts.Inventory,
                     () =>
                     {
-                        item.Use(playerHolder.Value);
+                        item.Use(player);
                         inventoryManager.RemoveItem(item);
                     });
 

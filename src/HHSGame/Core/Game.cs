@@ -1,3 +1,4 @@
+using System.IO;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
@@ -34,6 +35,7 @@ namespace HHSGame.Core
 
             LogStartup(logger, "Player setup");
             AddStartingItems(Player, context.Parameters.StartingItems);
+            AddMapItems(context, context.Parameters.MapItems);
 
             Events.OnGameMessageEvent += (sender, e) =>
             {
@@ -370,6 +372,34 @@ namespace HHSGame.Core
                 if (Items.ItemCatalog.TryCreate(itemId, out Items.Item item))
                 {
                     player.AddItem(item);
+                }
+            }
+        }
+
+        private static void AddMapItems(GameContext context, IEnumerable<MapItemSpawn> items)
+        {
+            foreach (MapItemSpawn spawn in items)
+            {
+                if (spawn.Quantity <= 0)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < spawn.Quantity; i++)
+                {
+                    if (!Items.ItemCatalog.TryCreate(spawn.ItemId, out Items.Item item))
+                    {
+                        continue;
+                    }
+
+                    if (!context.MapState.IsWalkable(spawn.Position))
+                    {
+                        throw new InvalidDataException($"Item spawn {spawn.ItemId} is not walkable at {spawn.Position}.");
+                    }
+
+                    item.X = spawn.Position.X;
+                    item.Y = spawn.Position.Y;
+                    context.ItemManager.AddItem(item);
                 }
             }
         }

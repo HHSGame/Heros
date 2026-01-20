@@ -7,7 +7,8 @@
     "style": "Cave",
     "width": 50,
     "height": 30,
-    "useCustomMap": false
+    "useCustomMap": true,
+    "customMapPath": "data/maps/cave-01.txt"
   },
   "player": {
     "class": "Warrior",

@@ -30,6 +30,32 @@ namespace HHSGame.Core.Engine
             {
                 throw new InvalidDataException($"CustomMapPath is required when UseCustomMap is true in {path}.");
             }
+
+            foreach (EnemySpawnConfig enemy in config.Enemies)
+            {
+                if (string.IsNullOrWhiteSpace(enemy.Id))
+                {
+                    throw new InvalidDataException($"Enemy id is required in {path}.");
+                }
+
+                if (enemy.Position == null)
+                {
+                    throw new InvalidDataException($"Enemy position is required for {enemy.Id} in {path}.");
+                }
+            }
+
+            foreach (ItemConfig item in config.Items)
+            {
+                if (string.IsNullOrWhiteSpace(item.Id))
+                {
+                    throw new InvalidDataException($"Item id is required in {path}.");
+                }
+
+                if (item.Position == null)
+                {
+                    throw new InvalidDataException($"Item position is required for {item.Id} in {path}.");
+                }
+            }
         }
     }
 }

@@ -21,10 +21,7 @@ namespace HHSGame.Core
             serviceCollection.AddSingleton((_) => new Random());
             serviceCollection.AddSingleton(parameters);
 
-            // Setup Generators
-            serviceCollection.AddSingleton<MapGenerator>();
             serviceCollection.AddSingleton<EnemyFactory>();
-            serviceCollection.AddSingleton<ItemFactory>();
 
             // Setup Core System
             serviceCollection.AddSingleton<CollisionSystem>();

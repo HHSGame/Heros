@@ -52,6 +52,7 @@ namespace HHSGame.Core.Engine.Config
     public sealed class ItemConfig
     {
         public string Id { get; init; } = string.Empty;
+        public CoordinateConfig? Position { get; init; }
         public int Quantity { get; init; } = 1;
     }
 

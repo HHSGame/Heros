@@ -66,13 +66,11 @@ namespace HHSGame.Core.Engine.Scripting
             };
 
             ItemManager itemManager = new();
-            ItemFactory itemFactory = new(random);
-            MapGenerator mapGenerator = new(parameters, random, itemManager, itemFactory);
             MapState mapState = new();
             EnemyManager enemyManager = new(itemManager);
             CollisionSystem collisionSystem = new(enemyManager, mapState);
             Pathfinder pathfinder = new(mapState);
-            EnemyFactory enemyFactory = new(random, collisionSystem, mapState, pathfinder);
+            EnemyFactory enemyFactory = new(collisionSystem, mapState, pathfinder);
             SurroundingsManager surroundingsManager = new(itemManager, enemyManager, mapState);
             InventoryManager inventoryManager = new();
             TurnManager turnManager = new();
@@ -82,13 +80,11 @@ namespace HHSGame.Core.Engine.Scripting
             GameContext context = new(
                 parameters,
                 random,
-                mapGenerator,
                 enemyFactory,
                 collisionSystem,
                 mapState,
                 enemyManager,
                 itemManager,
-                itemFactory,
                 surroundingsManager,
                 inventoryManager,
                 turnManager,

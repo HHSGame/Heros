@@ -1,5 +1,6 @@
 using HHSGame.UI;
 using HHSGame.Core.Classes;
+using HHSGame.Core.Map;
 
 namespace HHSGame.Core
 {
@@ -9,16 +10,12 @@ namespace HHSGame.Core
 
         public Player NewPlayer(AbstractClass playerClass)
         {
-            context.MapState.Init(context.MapGenerator.GenerateDungeon());
+            MapData mapData = LoadMapData();
+            context.MapState.Init(mapData);
             // create a player at the center of the map but avoid any obstacles
-            int x = context.MapState.Width / 2;
-            int y = context.MapState.Height / 2;
-            Coordinate? startPosition = context.Parameters.PlayerStartPosition;
-            if (startPosition != null)
-            {
-                x = startPosition.X;
-                y = startPosition.Y;
-            }
+            Coordinate? startPosition = context.Parameters.PlayerStartPosition ?? GetSpecialPosition(mapData, '@');
+            int x = startPosition?.X ?? context.MapState.Width / 2;
+            int y = startPosition?.Y ?? context.MapState.Height / 2;
 
             int round = 1;
             while (!Context.MapState.IsWalkable(x, y))
@@ -38,6 +35,29 @@ namespace HHSGame.Core
             }
             player.UpdateFOV();
             return player;
+        }
+
+        private MapData LoadMapData()
+        {
+            if (context.Parameters.UseCustomMap && !string.IsNullOrWhiteSpace(context.Parameters.CustomMapPath))
+            {
+                return MapLoader.LoadFromFile(context.Parameters.CustomMapPath);
+            }
+
+            return MapLoader.CreateEmptyMap(context.Parameters.MapWidth, context.Parameters.MapHeight);
+        }
+
+        private static Coordinate? GetSpecialPosition(MapData mapData, char symbol)
+        {
+            foreach ((Coordinate position, char marker) in mapData.SpecialPositions)
+            {
+                if (marker == symbol)
+                {
+                    return position;
+                }
+            }
+
+            return null;
         }
 
         public void Update(Player player, bool useAp)

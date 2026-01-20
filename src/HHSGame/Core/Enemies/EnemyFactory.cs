@@ -1,42 +1,46 @@
+using System.IO;
+using HHSGame.Core;
 using HHSGame.Core.Map;
 
 
 namespace HHSGame.Core.Enemies
 {
-    public class EnemyFactory(Random random, CollisionSystem collisionSystem, MapState mapState, Pathfinder pathfinder)
+    public class EnemyFactory(CollisionSystem collisionSystem, MapState mapState, Pathfinder pathfinder)
     {
-        public List<Enemy> SpawnEnemies()
+        public List<Enemy> SpawnEnemies(IEnumerable<EnemySpawn> spawns)
         {
-            Events.RaiseGameMessage("Spawning enemies...");
-
             List<Enemy> enemies = [];
+            foreach (EnemySpawn spawn in spawns)
+            {
+                if (spawn.Count <= 0)
+                {
+                    continue;
+                }
 
-            // Spawn different enemy types
-            SpawnEnemyType(enemies, EnemyType.Gangster, 50);
-            SpawnEnemyType(enemies, EnemyType.Bandit, 30);
-            SpawnEnemyType(enemies, EnemyType.BanditLeader, 5);
-            SpawnEnemyType(enemies, EnemyType.Thug, 100);
-            SpawnEnemyType(enemies, EnemyType.Soldier, 60);
-            SpawnEnemyType(enemies, EnemyType.Sniper, 5);
+                for (int i = 0; i < spawn.Count; i++)
+                {
+                    Coordinate position = spawn.Position;
+                    if (!mapState.IsWalkable(position))
+                    {
+                        throw new InvalidDataException($"Enemy spawn is not walkable at {position}.");
+                    }
 
-            Events.RaiseGameMessage("Enemies spawned: 50 Gangsters, 30 Bandits, 5 Bandit Leaders, 100 Thugs, 60 Soldiers, 5 Snipers");
+                    if (GetEnemyAt(enemies, position.X, position.Y) != null)
+                    {
+                        throw new InvalidDataException($"Duplicate enemy spawn at {position}.");
+                    }
+
+                    enemies.Add(CreateEnemy(spawn.Type, position.X, position.Y));
+                }
+            }
+
             return enemies;
         }
 
-        private void SpawnEnemyType(List<Enemy> enemies, EnemyType type, int count)
+        public Enemy CreateEnemy(EnemyType type, int x, int y)
         {
-            for (int i = 0; i < count; i++)
-            {
-                int x, y;
-                do
-                {
-                    x = random.Next(1, mapState.Width - 1);
-                    y = random.Next(1, mapState.Height - 1);
-                } while (!mapState.IsWalkable(x, y) || GetEnemyAt(enemies, x, y) != null);
-
-                EnemyRegistry.EnemyConfig config = EnemyRegistry.GetConfig(type);
-                enemies.Add(new Enemy(type, x, y, collisionSystem, pathfinder, config));
-            }
+            EnemyRegistry.EnemyConfig config = EnemyRegistry.GetConfig(type);
+            return new Enemy(type, x, y, collisionSystem, pathfinder, config);
         }
 
         private static Enemy? GetEnemyAt(List<Enemy> enemies, int x, int y)

@@ -26,12 +26,12 @@ Split HHSGame into a data-driven engine that loads a game configuration file to 
 
 ## Config Schema (Draft)
 - `game`: name, version.
-- `map`: style, width, height, or custom map path.
+- `map`: custom map path or empty-map dimensions.
 - `player`: attributes, skills, starting items, start position.
 - `classes`: class definitions and bonuses.
-- `items`: item definitions (type, stats, effects).
+- `items`: item definitions with positions.
 - `weapons`: damage, ap cost, type, penetration.
-- `enemies`: enemy definitions, spawns.
+- `enemies`: enemy definitions with spawn positions.
 - `effects`: active effects and durations.
 - `conditions`: win/lose rules (player death, goal reached, turn limit, etc).
 
@@ -67,6 +67,7 @@ Decision: keep both a minimal linear script format (for quick smoke flows) and a
 - 2025-01-20: Added scripted input schema + loader + runner, plus input adapter for headless/UI execution.
 - 2025-01-20: Added `--test-script` (optional `--test-step-ms`) to auto-run scripts with UI and skip the wizard.
 - 2025-01-20: Added sample script `data/scripts/combat_toggle_smoke.json` and runner tests.
+- 2025-01-20: Removed runtime map/enemy/item generators in favor of config-driven spawns and map loading (custom map or empty map).
 
 ## Next Actions
 - Continue Milestone 2: finish engine bootstrap so `GameEngine` builds the full `GameContext` and owns startup/shutdown.

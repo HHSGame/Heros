@@ -21,18 +21,18 @@ namespace HHSGame.Core
         public ClassConfig? PlayerClass { get; set; }
         public List<string> StartingItems { get; set; } = new() { "HealthPotion" };
         public Coordinate? PlayerStartPosition { get; set; }
+        public List<EnemySpawn> EnemySpawns { get; set; } = [];
+        public List<MapItemSpawn> MapItems { get; set; } = [];
     }
 
     public class GameContext(
         GameParameters parameters,
         Random random,
-        MapGenerator mapGenerator,
         EnemyFactory enemyFactory,
         CollisionSystem collisionSystem,
         MapState mapState,
         EnemyManager enemyManager,
         ItemManager itemManager,
-        ItemFactory itemFactory,
         SurroundingsManager surroundingsManager,
         InventoryManager inventoryManager,
         TurnManager turnManager,
@@ -43,13 +43,11 @@ namespace HHSGame.Core
         private Player? player;
         public GameParameters Parameters => parameters;
         public Random Random => random;
-        public MapGenerator MapGenerator => mapGenerator;
         public EnemyFactory EnemyFactory => enemyFactory;
         public CollisionSystem CollisionSystem => collisionSystem;
         public MapState MapState => mapState;
         public EnemyManager EnemyManager => enemyManager;
         public ItemManager ItemManager => itemManager;
-        public ItemFactory ItemFactory => itemFactory;
         public SurroundingsManager SurroundingsManager => surroundingsManager;
         public InventoryManager InventoryManager => inventoryManager;
         public TurnManager TurnManager => turnManager;
@@ -60,7 +58,7 @@ namespace HHSGame.Core
 
         public void InitializeContext(Player player)
         {
-            enemyManager.SetEnemies(enemyFactory.SpawnEnemies());
+            enemyManager.SetEnemies(enemyFactory.SpawnEnemies(parameters.EnemySpawns));
             collisionSystem.SetPlayer(player);
             this.player = player;
         }

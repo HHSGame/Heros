@@ -1,4 +1,7 @@
+using System.IO;
+using HHSGame.Core;
 using HHSGame.Core.Classes;
+using HHSGame.Core.Enemies;
 using HHSGame.Core.Engine.Config;
 using HHSGame.Core.Map;
 using HHSGame.Core.Stats;
@@ -26,7 +29,9 @@ namespace HHSGame.Core.Engine
                 PlayerClass = ResolveClass(config.Player.Class),
                 PlayerAttributes = config.Player.Attributes,
                 PlayerSkills = BuildSkills(config.Player.Skills),
-                StartingItems = config.Player.StartingItems.ToList()
+                StartingItems = config.Player.StartingItems.ToList(),
+                EnemySpawns = BuildEnemySpawns(config.Enemies),
+                MapItems = BuildMapItems(config.Items)
             };
 
             if (config.Player.StartPosition != null)
@@ -37,6 +42,49 @@ namespace HHSGame.Core.Engine
             }
 
             return parameters;
+        }
+
+        private static List<EnemySpawn> BuildEnemySpawns(List<EnemySpawnConfig> spawns)
+        {
+            List<EnemySpawn> result = [];
+            foreach (EnemySpawnConfig spawn in spawns)
+            {
+                if (!Enum.TryParse(spawn.Id, true, out EnemyType enemyType))
+                {
+                    throw new InvalidDataException($"Unknown enemy id '{spawn.Id}'.");
+                }
+
+                if (spawn.Position == null)
+                {
+                    throw new InvalidDataException($"Enemy position is required for {spawn.Id}.");
+                }
+
+                result.Add(new EnemySpawn(
+                    enemyType,
+                    new Coordinate(spawn.Position.X, spawn.Position.Y),
+                    spawn.Count));
+            }
+
+            return result;
+        }
+
+        private static List<MapItemSpawn> BuildMapItems(List<ItemConfig> items)
+        {
+            List<MapItemSpawn> result = [];
+            foreach (ItemConfig item in items)
+            {
+                if (item.Position == null)
+                {
+                    throw new InvalidDataException($"Item position is required for {item.Id}.");
+                }
+
+                result.Add(new MapItemSpawn(
+                    item.Id,
+                    new Coordinate(item.Position.X, item.Position.Y),
+                    item.Quantity));
+            }
+
+            return result;
         }
 
         private static Skills? BuildSkills(Dictionary<string, int> skillRanks)

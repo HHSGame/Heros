@@ -22,6 +22,27 @@ namespace HHSGame.Core.Map
             return ParseMapData(lines);
         }
 
+        public static MapData CreateEmptyMap(int width, int height)
+        {
+            if (width <= 0 || height <= 0)
+            {
+                throw new ArgumentException("Map dimensions must be positive.");
+            }
+
+            Cell[,] map = new Cell[height, width];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    bool isBorder = x == 0 || y == 0 || x == width - 1 || y == height - 1;
+                    char glyph = isBorder ? '#' : '.';
+                    map[y, x] = new Cell { Character = glyph, Attribute = TilePresets.GetTerrainColor(glyph) };
+                }
+            }
+
+            return new MapData(map, []);
+        }
+
         private static MapData ParseMapData(string[] lines)
         {
             if (lines.Length == 0)

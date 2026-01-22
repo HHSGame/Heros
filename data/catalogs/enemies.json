@@ -1,0 +1,157 @@
+{
+  "enemies": [
+    {
+      "id": "Gangster",
+      "name": "Gangster",
+      "attributes": {
+        "strength": 4,
+        "perception": 5,
+        "agility": 5,
+        "charisma": 4,
+        "intelligence": 4
+      },
+      "skills": {},
+      "weaponId": "Dagger",
+      "armorId": "Cloak",
+      "experienceValue": 50,
+      "glyph": "g",
+      "colorKey": "Gangster",
+      "abilities": [
+        {
+          "kind": "Poison",
+          "chance": 20,
+          "duration": 3,
+          "amount": 2
+        }
+      ],
+      "loot": [
+        {
+          "itemId": "HealthPotion",
+          "chance": 100,
+          "amount": 10,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "id": "Bandit",
+      "name": "Bandit",
+      "attributes": {
+        "strength": 6,
+        "perception": 5,
+        "agility": 5,
+        "charisma": 4,
+        "intelligence": 4
+      },
+      "skills": {},
+      "weaponId": "Axe",
+      "armorId": "LeatherArmor",
+      "experienceValue": 100,
+      "glyph": "b",
+      "colorKey": "Bandit",
+      "abilities": [
+        {
+          "kind": "Stun",
+          "chance": 10,
+          "duration": 1,
+          "amount": 0
+        }
+      ],
+      "loot": [
+        {
+          "itemId": "HealthPotion",
+          "chance": 50,
+          "amount": 20,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "id": "BanditLeader",
+      "name": "Bandit Leader",
+      "attributes": {
+        "strength": 8,
+        "perception": 6,
+        "agility": 5,
+        "charisma": 5,
+        "intelligence": 5
+      },
+      "skills": {},
+      "weaponId": "Hammer",
+      "armorId": "Shield",
+      "experienceValue": 200,
+      "glyph": "L",
+      "colorKey": "BanditLeader",
+      "abilities": [
+        {
+          "kind": "HealSelf",
+          "chance": 30,
+          "duration": 0,
+          "amount": 10
+        }
+      ],
+      "loot": [
+        {
+          "itemId": "HealthPotion",
+          "chance": 70,
+          "amount": 30,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "id": "Thug",
+      "name": "Thug",
+      "attributes": {
+        "strength": 4,
+        "perception": 4,
+        "agility": 4,
+        "charisma": 4,
+        "intelligence": 4
+      },
+      "skills": {},
+      "weaponId": "Dagger",
+      "armorId": "Cloak",
+      "experienceValue": 30,
+      "glyph": "t",
+      "colorKey": "Thug",
+      "loot": []
+    },
+    {
+      "id": "Soldier",
+      "name": "Soldier",
+      "attributes": {
+        "strength": 6,
+        "perception": 6,
+        "agility": 5,
+        "charisma": 4,
+        "intelligence": 4
+      },
+      "skills": {},
+      "weaponId": "Sword",
+      "armorId": "Shield",
+      "experienceValue": 60,
+      "glyph": "s",
+      "colorKey": "Soldier",
+      "loot": []
+    },
+    {
+      "id": "Sniper",
+      "name": "Sniper",
+      "attributes": {
+        "strength": 4,
+        "perception": 8,
+        "agility": 6,
+        "charisma": 4,
+        "intelligence": 5
+      },
+      "skills": {},
+      "weaponId": "Bow",
+      "armorId": "Robe",
+      "experienceValue": 150,
+      "glyph": "s",
+      "colorKey": "Sniper",
+      "loot": []
+    }
+  ]
+}

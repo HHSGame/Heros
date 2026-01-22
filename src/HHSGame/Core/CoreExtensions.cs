@@ -10,16 +10,15 @@ namespace HHSGame.Core
     public static class CoreExtensions
     {
 
-        public static IServiceCollection AddHHSGameCore(this IServiceCollection serviceCollection)
-        {
-            return AddHHSGameCore(serviceCollection, new GameParameters { MapStyle = MapStyle.Cave, MapHeight = 500, MapWidth = 500 });
-        }
-
-        public static IServiceCollection AddHHSGameCore(this IServiceCollection serviceCollection, GameParameters parameters)
+        public static IServiceCollection AddHHSGameCore(this IServiceCollection serviceCollection, GameParameters parameters, Engine.GameCatalog catalogs)
         {
             // Setup Initial Parameters;
             serviceCollection.AddSingleton((_) => new Random());
             serviceCollection.AddSingleton(parameters);
+            serviceCollection.AddSingleton(catalogs);
+            serviceCollection.AddSingleton(catalogs.ItemCatalog);
+            serviceCollection.AddSingleton(catalogs.ClassCatalog);
+            serviceCollection.AddSingleton(catalogs.EnemyCatalog);
 
             serviceCollection.AddSingleton<EnemyFactory>();
 

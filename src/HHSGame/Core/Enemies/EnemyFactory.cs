@@ -1,11 +1,13 @@
 using System.IO;
 using HHSGame.Core;
+using HHSGame.Core.Engine.Catalogs;
+using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 
 
 namespace HHSGame.Core.Enemies
 {
-    public class EnemyFactory(CollisionSystem collisionSystem, MapState mapState, Pathfinder pathfinder)
+    public class EnemyFactory(EnemyCatalog enemyCatalog, ItemCatalog itemCatalog, CollisionSystem collisionSystem, MapState mapState, Pathfinder pathfinder)
     {
         public List<Enemy> SpawnEnemies(IEnumerable<EnemySpawn> spawns)
         {
@@ -30,17 +32,17 @@ namespace HHSGame.Core.Enemies
                         throw new InvalidDataException($"Duplicate enemy spawn at {position}.");
                     }
 
-                    enemies.Add(CreateEnemy(spawn.Type, position.X, position.Y));
+                    enemies.Add(CreateEnemy(spawn.EnemyId, position.X, position.Y));
                 }
             }
 
             return enemies;
         }
 
-        public Enemy CreateEnemy(EnemyType type, int x, int y)
+        public Enemy CreateEnemy(string enemyId, int x, int y)
         {
-            EnemyRegistry.EnemyConfig config = EnemyRegistry.GetConfig(type);
-            return new Enemy(type, x, y, collisionSystem, pathfinder, config);
+            EnemyDefinition definition = enemyCatalog.GetDefinition(enemyId);
+            return new Enemy(x, y, collisionSystem, pathfinder, definition, itemCatalog);
         }
 
         private static Enemy? GetEnemyAt(List<Enemy> enemies, int x, int y)

@@ -1,4 +1,3 @@
-using HHSGame.Core.Classes;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Items;
 using HHSGame.Core.Stats;
@@ -8,10 +7,11 @@ namespace HHSGame.Core
 {
     public class Npc : IGameActor, ICombatant, ITrader
     {
+        private readonly ItemCatalog itemCatalog;
         private Weapon? equippedWeapon;
         private Armor? equippedArmor;
 
-        public Npc(string name, char glyph, Terminal.Gui.Drawing.Attribute attribute, int x, int y, Attributes attributes, Skills skills)
+        public Npc(string name, char glyph, Terminal.Gui.Drawing.Attribute attribute, int x, int y, Attributes attributes, Skills skills, ItemCatalog itemCatalog)
         {
             Name = name;
             Glyph = glyph;
@@ -20,6 +20,7 @@ namespace HHSGame.Core
             Y = y;
             Stats = new CharacterStats(attributes with { }, skills.Clone());
             Inventory = new InventoryManager();
+            this.itemCatalog = itemCatalog;
         }
 
         public int X { get; set; }
@@ -31,7 +32,7 @@ namespace HHSGame.Core
         public CharacterStats Stats { get; }
         public InventoryManager Inventory { get; }
         public int ArmorValue => equippedArmor?.ArmorValue ?? 0;
-        public Weapon EquippedWeapon => equippedWeapon ?? Classes.Weapons.UnknownWeapon;
+        public Weapon EquippedWeapon => equippedWeapon ?? itemCatalog.CreateWeapon(itemCatalog.UnknownWeaponId);
         public int EvasionBonus => Stats.EvasionBonus;
 
         public void EquipWeapon(Weapon weapon)

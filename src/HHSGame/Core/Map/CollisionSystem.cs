@@ -5,11 +5,17 @@ namespace HHSGame.Core.Map
 {
     public class CollisionSystem(EnemyManager enemyManager, MapState mapState)
     {
-        private Player? player;
+        private readonly List<Player> players = [];
 
         public void SetPlayer(Player player)
         {
-            this.player = player;
+            SetPlayers([player]);
+        }
+
+        public void SetPlayers(IEnumerable<Player> players)
+        {
+            this.players.Clear();
+            this.players.AddRange(players);
         }
 
         public bool CanMoveTo(int x, int y, IGameActor actor)
@@ -32,9 +38,12 @@ namespace HHSGame.Core.Map
                 return false;
             }
 
-            if (player != null && actor != player && player.X == x && player.Y == y)
+            foreach (Player player in players)
             {
-                return false;
+                if (actor != player && player.X == x && player.Y == y)
+                {
+                    return false;
+                }
             }
 
             return true;
@@ -49,9 +58,12 @@ namespace HHSGame.Core.Map
                 return enemy;
             }
 
-            if (player != null && player.X == x && player.Y == y)
+            foreach (Player player in players)
             {
-                return player;
+                if (player.X == x && player.Y == y)
+                {
+                    return player;
+                }
             }
 
             // Could add other collision types here (items, etc)

@@ -1,27 +1,38 @@
+using HHSGame.Core.Engine.Catalogs;
 using HHSGame.Core.Items;
 
 namespace HHSGame.Core.Enemies
 {
-    public class EnemyLootSystem(EnemyType enemyType, Random random)
+    public class EnemyLootSystem(IReadOnlyList<EnemyLootEntry> lootEntries, ItemCatalog itemCatalog, Random random)
     {
         private readonly Random random = random;
-        private readonly EnemyType enemyType = enemyType;
-
-        private static readonly Dictionary<EnemyType, (int Chance, int Amount)> lootTable = new()
-        {
-            { EnemyType.Gangster, (100, 10) },
-            { EnemyType.Bandit, (50, 20) },
-            { EnemyType.BanditLeader, (70, 30) }
-        };
+        private readonly IReadOnlyList<EnemyLootEntry> lootEntries = lootEntries;
+        private readonly ItemCatalog itemCatalog = itemCatalog;
 
         public List<Item> GenerateLoot()
         {
             List<Item> loot = [];
-            int roll = random.Next(100);
-
-            if (lootTable.TryGetValue(enemyType, out (int Chance, int Amount) lootData) && roll < lootData.Chance)
+            foreach (EnemyLootEntry entry in lootEntries)
             {
-                loot.Add(new HealthPotion(lootData.Amount));
+                if (entry.Chance <= 0)
+                {
+                    continue;
+                }
+
+                int roll = random.Next(100);
+                if (roll >= entry.Chance)
+                {
+                    continue;
+                }
+
+                int quantity = Math.Max(1, entry.Quantity);
+                for (int i = 0; i < quantity; i++)
+                {
+                    if (itemCatalog.TryCreateItem(entry.ItemId, entry.Amount, out Item item))
+                    {
+                        loot.Add(item);
+                    }
+                }
             }
 
             return loot;

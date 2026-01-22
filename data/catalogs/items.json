@@ -1,0 +1,13 @@
+{
+  "items": [
+    {
+      "id": "HealthPotion",
+      "kind": "HealthPotion",
+      "name": "Health Potion",
+      "rarity": "Common",
+      "value": 50,
+      "weight": 0.5,
+      "healAmount": 10
+    }
+  ]
+}

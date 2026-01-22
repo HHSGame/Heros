@@ -14,6 +14,7 @@ namespace HHSGame.UI.Views
         private const int MaxAttributeValue = 10;
         private const int DefaultAttributeValue = 5;
         private const int DefaultAttributePointPool = 25;
+        private static readonly string[] NoMapsFoundEntries = ["No maps found"];
 
         private readonly Label _pointsLabel;
         private readonly Dictionary<AttributeType, (Label valueLabel, Button plusBtn, Button minusBtn)> _attributeControls = [];
@@ -26,11 +27,11 @@ namespace HHSGame.UI.Views
         private readonly Label _classPreviewLabel;
         private readonly Label _skillPointsLabel;
         private readonly Dictionary<SkillType, (Label valueLabel, Button plusBtn, Button minusBtn)> _skillControls = [];
-        private int _availablePoints = 0;
+        private int _availablePoints;
         private int _customAvailablePoints = DefaultAttributePointPool;
-        private int _availableSkillPoints = 0;
-        private int _customSkillPointsRemaining = 0;
-        private int _customSkillPointsTotal = 0;
+        private int _availableSkillPoints;
+        private int _customSkillPointsRemaining;
+        private int _customSkillPointsTotal;
         private bool _useCustomCharacter;
         private readonly Attributes _customAttributes = new()
         {
@@ -57,7 +58,7 @@ namespace HHSGame.UI.Views
         public string? SelectedMap { get; private set; }
         public bool UseCustomMap { get; private set; }
 
-        public PlayerSetupWizard()
+        public PlayerSetupWizard(Core.Engine.Catalogs.ClassCatalog classCatalog)
         {
             Title = "Player Setup Wizard";
             X = Pos.Percent(25);
@@ -78,15 +79,15 @@ namespace HHSGame.UI.Views
                 Title = "Map Options",
                 X = 1,
                 Y = 1,
-                Width = Dim.Fill() - 2,
-                Height = Dim.Fill() - 2
+                Width = FillMinus(2),
+                Height = FillMinus(2)
             };
 
             RadioGroup mapTypeRadio = new()
             {
                 X = 1,
                 Y = 1,
-                Width = Dim.Fill() - 2,
+                Width = FillMinus(2),
                 Height = 3,
                 RadioLabels = new[] { "Generated Map", "Custom Map" },
                 SelectedItem = 0
@@ -97,7 +98,7 @@ namespace HHSGame.UI.Views
             {
                 X = 1,
                 Y = 5,
-                Width = Dim.Fill() - 2,
+                Width = FillMinus(2),
                 Height = 1,
                 ReadOnly = true,
                 Text = "Cave"
@@ -118,8 +119,8 @@ namespace HHSGame.UI.Views
             {
                 X = 1,
                 Y = 9,
-                Width = Dim.Fill() - 2,
-                Height = Dim.Fill() - 10
+                Width = FillMinus(2),
+                Height = FillMinus(10)
             };
 
             _availableMaps = MapLoader.GetAvailableMaps("data/maps");
@@ -135,7 +136,7 @@ namespace HHSGame.UI.Views
             }
             else
             {
-                customMapList.SetSource<string>(new ObservableCollection<string>(new[] { "No maps found" }));
+                customMapList.SetSource<string>(new ObservableCollection<string>(NoMapsFoundEntries));
                 customMapList.Enabled = false;
             }
 
@@ -169,15 +170,15 @@ namespace HHSGame.UI.Views
                 Title = "Character Options",
                 X = 1,
                 Y = 1,
-                Width = Dim.Fill() - 2,
-                Height = Dim.Fill() - 2
+                Width = FillMinus(2),
+                Height = FillMinus(2)
             };
 
             RadioGroup classModeRadio = new()
             {
                 X = 1,
                 Y = 1,
-                Width = Dim.Fill() - 2,
+                Width = FillMinus(2),
                 Height = 3,
                 RadioLabels = new[] { "Use Class", "Custom Character" },
                 SelectedItem = 0
@@ -189,7 +190,7 @@ namespace HHSGame.UI.Views
                 Text = "Available Classes:",
                 X = 1,
                 Y = 5,
-                Width = Dim.Percent(50) - 2
+                Width = PercentMinus(50, 2)
             };
             classContainer.Add(classListLabel);
 
@@ -197,19 +198,16 @@ namespace HHSGame.UI.Views
             {
                 X = 1,
                 Y = 7,
-                Width = Dim.Percent(50) - 2,
-                Height = Dim.Fill() - 8
+                Width = PercentMinus(50, 2),
+                Height = FillMinus(8)
             };
 
-            _availableClasses =
-            [
-                Classes.Unemployed,
-                Classes.Warrior,
-                Classes.Thief,
-                Classes.Alchemist
-            ];
+            _availableClasses = classCatalog.GetAll().ToList();
             classList.SetSource<string>(new ObservableCollection<string>(_availableClasses.Select(c => c.Name).ToList()));
-            classList.SelectedItem = 0;
+            if (_availableClasses.Count > 0)
+            {
+                classList.SelectedItem = 0;
+            }
 
             classContainer.Add(classList);
 
@@ -218,16 +216,16 @@ namespace HHSGame.UI.Views
                 Title = "Class Preview",
                 X = Pos.Right(classList) + 1,
                 Y = 5,
-                Width = Dim.Fill() - 2,
-                Height = Dim.Fill() - 6
+                Width = FillMinus(2),
+                Height = FillMinus(6)
             };
 
             Label classPreviewLabel = new()
             {
                 X = 1,
                 Y = 1,
-                Width = Dim.Fill() - 2,
-                Height = Dim.Fill() - 2
+                Width = FillMinus(2),
+                Height = FillMinus(2)
             };
             classPreview.Add(classPreviewLabel);
             classContainer.Add(classPreview);
@@ -237,7 +235,7 @@ namespace HHSGame.UI.Views
 
             _classList = classList;
             _classPreviewLabel = classPreviewLabel;
-            SelectedClass = _availableClasses[0];
+            SelectedClass = _availableClasses.Count > 0 ? _availableClasses[0] : null;
 
             // Attributes step
             WizardStep attributesStep = new()
@@ -252,8 +250,8 @@ namespace HHSGame.UI.Views
                 Title = "Character Attributes",
                 X = 1,
                 Y = 1,
-                Width = Dim.Fill() - 2,
-                Height = Dim.Fill() - 2
+                Width = FillMinus(2),
+                Height = FillMinus(2)
             };
 
             // Points remaining
@@ -289,8 +287,8 @@ namespace HHSGame.UI.Views
                 Title = "Character Skills",
                 X = 1,
                 Y = 1,
-                Width = Dim.Fill() - 2,
-                Height = Dim.Fill() - 2
+                Width = FillMinus(2),
+                Height = FillMinus(2)
             };
 
             _skillPointsLabel = new Label
@@ -306,15 +304,15 @@ namespace HHSGame.UI.Views
             {
                 X = 1,
                 Y = 3,
-                Width = Dim.Percent(50) - 2,
-                Height = Dim.Fill() - 4
+                Width = PercentMinus(50, 2),
+                Height = FillMinus(4)
             };
             View rightSkillsColumn = new()
             {
                 X = Pos.Right(leftSkillsColumn) + 1,
                 Y = 3,
-                Width = Dim.Fill() - 2,
-                Height = Dim.Fill() - 4
+                Width = FillMinus(2),
+                Height = FillMinus(4)
             };
             skillsContainer.Add(leftSkillsColumn);
             skillsContainer.Add(rightSkillsColumn);
@@ -366,6 +364,16 @@ namespace HHSGame.UI.Views
 
                 this.Visible = false;
             };
+        }
+
+        private static Dim FillMinus(int value)
+        {
+            return Dim.Fill()! - value;
+        }
+
+        private static Dim PercentMinus(int percent, int value)
+        {
+            return Dim.Percent(percent)! - value;
         }
 
         private void CreateAttributeRow(FrameView container, AttributeType attrType, ref int yPos)
@@ -679,7 +687,7 @@ namespace HHSGame.UI.Views
                 _useCustomCharacter = true;
                 _classList.Enabled = false;
                 _availablePoints = _customAvailablePoints;
-                SelectedClass = Classes.Unemployed;
+                SelectedClass = _availableClasses.FirstOrDefault();
                 ApplyAttributes(_customAttributes);
                 SelectedSkills = _customSkills.Clone();
                 RecalculateSkillPoints();
@@ -715,7 +723,16 @@ namespace HHSGame.UI.Views
             {
                 SelectedClass = _availableClasses[index];
             }
-            SelectedClass ??= Classes.Unemployed;
+            SelectedClass ??= _availableClasses.FirstOrDefault();
+
+            if (SelectedClass == null)
+            {
+                ApplyAttributes(new Attributes());
+                SelectedSkills = new Skills();
+                UpdateSkillLabels();
+                UpdateClassPreview();
+                return;
+            }
 
             ApplyAttributes(SelectedClass.Attributes);
             SelectedSkills = SelectedClass.Skills.Clone();

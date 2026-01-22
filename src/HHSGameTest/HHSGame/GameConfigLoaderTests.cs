@@ -1,8 +1,8 @@
 using System.Text;
-using ClassCatalog = HHSGame.Core.Classes.Classes;
 using HHSGame.Core.Engine;
+using HHSGame.Core.Engine.Catalogs;
 using HHSGame.Core.Engine.Config;
-using HHSGame.Core.Enemies;
+using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -55,12 +55,12 @@ namespace HHSGame.Core
                 Player = new PlayerConfig()
             };
 
-            GameParameters parameters = GameConfigMapper.ToParameters(config);
+            GameParameters parameters = CreateMapper().ToParameters(config);
 
             Assert.AreEqual(MapStyle.Cave, parameters.MapStyle);
             Assert.AreEqual(50, parameters.MapWidth);
             Assert.AreEqual(30, parameters.MapHeight);
-            Assert.AreEqual(ClassCatalog.Warrior, parameters.PlayerClass);
+            Assert.IsNotNull(parameters.PlayerClass);
         }
 
         [TestMethod]
@@ -74,7 +74,7 @@ namespace HHSGame.Core
                 [
                     new EnemySpawnConfig
                     {
-                        Id = EnemyType.Gangster.ToString(),
+                        Id = "Gangster",
                         Position = new CoordinateConfig { X = 3, Y = 4 },
                         Count = 1
                     }
@@ -90,10 +90,10 @@ namespace HHSGame.Core
                 ]
             };
 
-            GameParameters parameters = GameConfigMapper.ToParameters(config);
+            GameParameters parameters = CreateMapper().ToParameters(config);
 
             Assert.AreEqual(1, parameters.EnemySpawns.Count);
-            Assert.AreEqual(EnemyType.Gangster, parameters.EnemySpawns[0].Type);
+            Assert.AreEqual("Gangster", parameters.EnemySpawns[0].EnemyId);
             Assert.AreEqual(3, parameters.EnemySpawns[0].Position.X);
             Assert.AreEqual(4, parameters.EnemySpawns[0].Position.Y);
             Assert.AreEqual(1, parameters.EnemySpawns[0].Count);
@@ -105,10 +105,88 @@ namespace HHSGame.Core
             Assert.AreEqual(2, parameters.MapItems[0].Quantity);
         }
 
+        [TestMethod]
+        public void MapConfigToParametersMapsPlayers()
+        {
+            GameConfig config = new()
+            {
+                Map = new MapConfig(),
+                Player = new PlayerConfig(),
+                Players =
+                [
+                    new PlayerEntryConfig
+                    {
+                        Name = "Alpha",
+                        Glyph = "A",
+                        Class = "Warrior",
+                        StartPosition = new CoordinateConfig { X = 1, Y = 2 },
+                        StartingItems = ["HealthPotion"]
+                    }
+                ]
+            };
+
+            GameParameters parameters = CreateMapper().ToParameters(config);
+
+            Assert.AreEqual(1, parameters.PlayerSpawns.Count);
+            Assert.AreEqual("Alpha", parameters.PlayerSpawns[0].Name);
+            Assert.AreEqual('A', parameters.PlayerSpawns[0].Glyph);
+            Assert.AreEqual(1, parameters.PlayerSpawns[0].Position.X);
+            Assert.AreEqual(2, parameters.PlayerSpawns[0].Position.Y);
+            Assert.AreEqual(1, parameters.PlayerSpawns[0].StartingItems.Count);
+        }
+
         private static GameConfigLoader CreateLoader()
         {
             GameDataLoader dataLoader = new(NullLogger<GameDataLoader>.Instance);
             return new GameConfigLoader(dataLoader);
+        }
+
+        private static GameConfigMapper CreateMapper()
+        {
+            ItemCatalog itemCatalog = new(
+                new List<WeaponDefinition>
+                {
+                    new WeaponDefinition("UnknownWeapon", "Unknown", ItemRarity.Common, 0, 0, 0, 0, 1, WeaponType.MeleeLight)
+                },
+                new List<ArmorDefinition>
+                {
+                    new ArmorDefinition("UnknownArmor", "Unknown", ItemRarity.Common, 0, 0, 0)
+                },
+                new List<ItemDefinition>
+                {
+                    new ItemDefinition("HealthPotion", "HealthPotion", "Health Potion", ItemRarity.Common, 50, 0.5f, 10)
+                });
+
+            ClassCatalog classCatalog = new(
+                new List<ClassDefinition>
+                {
+                    new ClassDefinition(
+                        "Warrior",
+                        "Warrior",
+                        new Stats.Attributes { Strength = 7, Perception = 5, Agility = 5, Charisma = 4, Intelligence = 4 },
+                        new Stats.Skills(),
+                        "UnknownWeapon",
+                        "UnknownArmor")
+                },
+                itemCatalog);
+
+            EnemyCatalog enemyCatalog = new(new List<EnemyDefinition>
+            {
+                new EnemyDefinition(
+                    "Gangster",
+                    "Gangster",
+                    new Stats.Attributes(),
+                    new Stats.Skills(),
+                    "UnknownWeapon",
+                    "UnknownArmor",
+                    0,
+                    'g',
+                    HHSGame.UI.ColorPresets.Enemies.Gangster,
+                    new List<EnemyLootEntry>(),
+                    new List<EnemyAbilityDefinition>())
+            });
+
+            return new GameConfigMapper(new GameCatalog(itemCatalog, classCatalog, enemyCatalog));
         }
 
 

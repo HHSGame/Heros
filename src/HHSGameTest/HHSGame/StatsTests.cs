@@ -70,7 +70,7 @@ namespace HHSGame.Core
         [TestMethod]
         public void TradeServiceUsesBarterSkill()
         {
-            Item item = new HealthPotion(10);
+            Item item = new HealthPotion("HealthPotion", "Health Potion", ItemRarity.Common, 50, 0.5f, 10);
             int buyPrice = TradeService.GetBuyPrice(item, 0);
             int sellPrice = TradeService.GetSellPrice(item, 0);
 
@@ -264,7 +264,7 @@ namespace HHSGame.Core
         [TestMethod]
         public void TradeServiceClampsBuyPriceAndScalesSellPrice()
         {
-            Item item = new HealthPotion(10);
+            Item item = new HealthPotion("HealthPotion", "Health Potion", ItemRarity.Common, 50, 0.5f, 10);
             int buyPrice = TradeService.GetBuyPrice(item, 100);
             int sellPrice = TradeService.GetSellPrice(item, 100);
 

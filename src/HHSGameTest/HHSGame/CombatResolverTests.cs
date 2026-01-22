@@ -57,7 +57,7 @@ namespace HHSGame.Core.Combat
         {
             CharacterStats attackerStats = BuildStats(8, 5, 5, 5, 5, SkillType.Melee, 4);
             CharacterStats defenderStats = BuildStats(5, 5, 5, 5, 5);
-            Weapon weapon = new("Knife", ItemRarity.Common, 10, 1f, 4, 1, 1, WeaponType.MeleeLight);
+            Weapon weapon = new("Knife", "Knife", ItemRarity.Common, 10, 1f, 4, 1, 1, WeaponType.MeleeLight);
             TestCombatant attacker = new("Attacker", attackerStats, 0, 0, weapon);
             TestCombatant defender = new("Defender", defenderStats, 5, 0, weapon);
 
@@ -73,7 +73,7 @@ namespace HHSGame.Core.Combat
         {
             CharacterStats attackerStats = BuildStats(12, 6, 5, 5, 5, SkillType.Firearms, 4);
             CharacterStats defenderStats = BuildStats(5, 5, 5, 5, 5);
-            Weapon weapon = new("Pistol", ItemRarity.Common, 10, 1f, 5, 0, 5, WeaponType.RangedSnap);
+            Weapon weapon = new("Pistol", "Pistol", ItemRarity.Common, 10, 1f, 5, 0, 5, WeaponType.RangedSnap);
             TestCombatant attacker = new("Attacker", attackerStats, 0, 0, weapon);
             TestCombatant defender = new("Defender", defenderStats, 0, 0, weapon);
 
@@ -88,7 +88,7 @@ namespace HHSGame.Core.Combat
         {
             CharacterStats attackerStats = BuildStats(10, 5, 5, 5, 5, SkillType.Melee, 20);
             CharacterStats defenderStats = BuildStats(5, 5, 5, 5, 5);
-            Weapon weapon = new("Sword", ItemRarity.Common, 10, 1f, 6, 0, 1, WeaponType.MeleeHeavy);
+            Weapon weapon = new("Sword", "Sword", ItemRarity.Common, 10, 1f, 6, 0, 1, WeaponType.MeleeHeavy);
             TestCombatant attacker = new("Attacker", attackerStats, 0, 0, weapon);
             TestCombatant defender = new("Defender", defenderStats, 0, 0, weapon);
 
@@ -103,7 +103,7 @@ namespace HHSGame.Core.Combat
         {
             CharacterStats attackerStats = BuildStats(1, 5, 5, 5, 5, SkillType.Melee, 0);
             CharacterStats defenderStats = BuildStats(5, 5, 5, 5, 5);
-            Weapon weapon = new("Dagger", ItemRarity.Common, 10, 1f, 2, 0, 1, WeaponType.MeleeLight);
+            Weapon weapon = new("Dagger", "Dagger", ItemRarity.Common, 10, 1f, 2, 0, 1, WeaponType.MeleeLight);
             TestCombatant attacker = new("Attacker", attackerStats, 0, 0, weapon);
             TestCombatant defender = new("Defender", defenderStats, 0, 10, weapon);
 
@@ -117,7 +117,7 @@ namespace HHSGame.Core.Combat
         public void EvasionReducesHitChance()
         {
             CharacterStats attackerStats = BuildStats(5, 5, 5, 5, 5, SkillType.Melee, 0);
-            Weapon weapon = new("Club", ItemRarity.Common, 10, 1f, 3, 0, 1, WeaponType.MeleeLight);
+            Weapon weapon = new("Club", "Club", ItemRarity.Common, 10, 1f, 3, 0, 1, WeaponType.MeleeLight);
             TestCombatant attacker = new("Attacker", attackerStats, 0, 0, weapon);
             TestCombatant defenderLow = new("DefenderLow", BuildStats(5, 5, 5, 5, 5), 0, 0, weapon);
             TestCombatant defenderHigh = new("DefenderHigh", BuildStats(5, 5, 5, 5, 5), 0, 5, weapon);

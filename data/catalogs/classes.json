@@ -1,0 +1,60 @@
+{
+  "classes": [
+    {
+      "id": "Unemployed",
+      "name": "Unemployed",
+      "attributes": {
+        "strength": 5,
+        "perception": 5,
+        "agility": 5,
+        "charisma": 5,
+        "intelligence": 5
+      },
+      "skills": {},
+      "weaponId": "UnknownWeapon",
+      "armorId": "UnknownArmor"
+    },
+    {
+      "id": "Warrior",
+      "name": "Warrior",
+      "attributes": {
+        "strength": 7,
+        "perception": 5,
+        "agility": 5,
+        "charisma": 4,
+        "intelligence": 4
+      },
+      "skills": {},
+      "weaponId": "Sword",
+      "armorId": "Shield"
+    },
+    {
+      "id": "Thief",
+      "name": "Thief",
+      "attributes": {
+        "strength": 4,
+        "perception": 5,
+        "agility": 7,
+        "charisma": 5,
+        "intelligence": 4
+      },
+      "skills": {},
+      "weaponId": "Dagger",
+      "armorId": "Cloak"
+    },
+    {
+      "id": "Alchemist",
+      "name": "Alchemist",
+      "attributes": {
+        "strength": 4,
+        "perception": 5,
+        "agility": 5,
+        "charisma": 5,
+        "intelligence": 7
+      },
+      "skills": {},
+      "weaponId": "Potion",
+      "armorId": "Robe"
+    }
+  ]
+}

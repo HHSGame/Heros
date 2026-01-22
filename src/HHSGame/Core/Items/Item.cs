@@ -12,10 +12,11 @@ namespace HHSGame.Core.Items
         Legendary
     }
 
-    public abstract class Item(string name, ItemRarity rarity, int value, float weight)
+    public abstract class Item(string id, string name, ItemRarity rarity, int value, float weight)
     {
         public int X { get; set; }
         public int Y { get; set; }
+        public string Id { get; } = id;
         public string Name { get; } = name;
         public ItemRarity Rarity { get; } = rarity;
         public int Value { get; } = value;
@@ -94,21 +95,23 @@ namespace HHSGame.Core.Items
 
     public class HealthPotion : Item
     {
-        private int healAmount;
+        private readonly int healAmount;
 
-        public HealthPotion(int healAmount) : base("Health Potion", ItemRarity.Common, 50, 0.5f)
+        public HealthPotion(string id, string name, ItemRarity rarity, int value, float weight, int healAmount)
+            : base(id, name, rarity, value, weight)
         {
             Consumable = true;
             this.healAmount = healAmount;
         }
+
         public override void Use(Player player)
         {
             player.Heal(healAmount);
         }
     }
 
-    public class Weapon(string name, ItemRarity rarity, int value, float weight,
-        int damage, int penetration, int range, WeaponType weaponType) : Item(name, rarity, value, weight)
+    public class Weapon(string id, string name, ItemRarity rarity, int value, float weight,
+        int damage, int penetration, int range, WeaponType weaponType) : Item(id, name, rarity, value, weight)
     {
         public int Damage { get; } = damage;
         public int Penetration { get; } = penetration;
@@ -123,8 +126,8 @@ namespace HHSGame.Core.Items
         }
     }
 
-    public class Armor(string name, ItemRarity rarity, int value, float weight,
-        int armorValue) : Item(name, rarity, value, weight)
+    public class Armor(string id, string name, ItemRarity rarity, int value, float weight,
+        int armorValue) : Item(id, name, rarity, value, weight)
     {
         public int ArmorValue { get; } = armorValue;
 

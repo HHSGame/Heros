@@ -6,25 +6,17 @@ namespace HHSGame.Core
 {
     public class GameWorld(GameContext context) : IDrawable
     {
+        private bool mapInitialized;
+        private MapData? mapData;
+
         public GameContext Context => context;
 
         public Player NewPlayer(AbstractClass playerClass)
         {
-            MapData mapData = LoadMapData();
-            context.MapState.Init(mapData);
-            // create a player at the center of the map but avoid any obstacles
+            EnsureMapInitialized();
             Coordinate? startPosition = context.Parameters.PlayerStartPosition ?? GetSpecialPosition(mapData, '@');
-            int x = startPosition?.X ?? context.MapState.Width / 2;
-            int y = startPosition?.Y ?? context.MapState.Height / 2;
-
-            int round = 1;
-            while (!Context.MapState.IsWalkable(x, y))
-            {
-                x = Context.Random.Next(x - round, x + round);
-                y = Context.Random.Next(y - round, y + round);
-                round++;
-            }
-            Player player = new(x, y, Context);
+            Coordinate resolved = ResolveStartPosition(startPosition);
+            Player player = new(resolved.X, resolved.Y, Context);
             playerClass.ApplyClassBonuses(player);
             playerClass.ApplyStartupEquipment(player);
             if (Context.Parameters.PlayerAttributes != null)
@@ -33,7 +25,25 @@ namespace HHSGame.Core
                     Context.Parameters.PlayerAttributes,
                     Context.Parameters.PlayerSkills ?? new Stats.Skills());
             }
-            player.UpdateFOV();
+            return player;
+        }
+
+        public void InitializeMap()
+        {
+            EnsureMapInitialized();
+        }
+
+        public Player CreatePlayer(Classes.ClassConfig classConfig, Coordinate position, Stats.Attributes? attributes, Stats.Skills? skills, string? name, char? glyph)
+        {
+            EnsureMapInitialized();
+            Player player = new(position.X, position.Y, Context, name, glyph);
+            AbstractClass chosenClass = classConfig.ToClass();
+            chosenClass.ApplyClassBonuses(player);
+            chosenClass.ApplyStartupEquipment(player);
+            if (attributes != null)
+            {
+                player.ApplyBaseStats(attributes, skills ?? new Stats.Skills());
+            }
             return player;
         }
 
@@ -47,8 +57,42 @@ namespace HHSGame.Core
             return MapLoader.CreateEmptyMap(context.Parameters.MapWidth, context.Parameters.MapHeight);
         }
 
-        private static Coordinate? GetSpecialPosition(MapData mapData, char symbol)
+        private void EnsureMapInitialized()
         {
+            if (mapInitialized)
+            {
+                return;
+            }
+
+            mapData = LoadMapData();
+            context.MapState.Init(mapData);
+            mapInitialized = true;
+        }
+
+        private Coordinate ResolveStartPosition(Coordinate? startPosition)
+        {
+            Coordinate? position = startPosition ?? GetSpecialPosition(mapData, '@');
+            int x = position?.X ?? context.MapState.Width / 2;
+            int y = position?.Y ?? context.MapState.Height / 2;
+
+            int round = 1;
+            while (!Context.MapState.IsWalkable(x, y))
+            {
+                x = Context.Random.Next(x - round, x + round);
+                y = Context.Random.Next(y - round, y + round);
+                round++;
+            }
+
+            return new Coordinate(x, y);
+        }
+
+        private static Coordinate? GetSpecialPosition(MapData? mapData, char symbol)
+        {
+            if (mapData == null)
+            {
+                return null;
+            }
+
             foreach ((Coordinate position, char marker) in mapData.SpecialPositions)
             {
                 if (marker == symbol)

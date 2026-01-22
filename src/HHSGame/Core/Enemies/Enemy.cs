@@ -1,5 +1,5 @@
-using HHSGame.Core.Classes;
 using HHSGame.Core.Combat;
+using HHSGame.Core.Engine.Catalogs;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using HHSGame.Core.Stats;
@@ -7,16 +7,6 @@ using HHSGame.Utils;
 
 namespace HHSGame.Core.Enemies
 {
-    public enum EnemyType
-    {
-        Gangster,
-        Bandit,
-        BanditLeader,
-        Thug,
-        Soldier,
-        Sniper
-    }
-
     public enum EnemyState
     {
         Idle,
@@ -32,15 +22,16 @@ namespace HHSGame.Core.Enemies
         private readonly EnemyLootSystem lootSystem;
         private readonly Pathfinder pathfinder;
         private readonly Random random;
+        private readonly ItemCatalog itemCatalog;
 
-        public EnemyType Type { get; }
+        public string Id { get; }
         public EnemyState State { get; private set; }
         public int ExperienceValue { get; }
 
         public CharacterStats Stats { get; }
         public ActionSequence ActionSequence { get; } = new();
         public int ArmorValue => equippedArmor?.ArmorValue ?? 0;
-        public Weapon EquippedWeapon => equippedWeapon ?? Classes.Weapons.UnknownWeapon;
+        public Weapon EquippedWeapon => equippedWeapon ?? itemCatalog.CreateWeapon(itemCatalog.UnknownWeaponId);
         public int EvasionBonus => Stats.EvasionBonus;
         public bool IsDead => Stats.CurrentHp <= 0;
 
@@ -56,32 +47,33 @@ namespace HHSGame.Core.Enemies
         public Coordinate Position => new(X, Y);
 
         public Enemy(
-            EnemyType type,
             int x,
             int y,
             CollisionSystem collisionSystem,
             Pathfinder pathfinder,
-            EnemyRegistry.EnemyConfig config)
+            EnemyDefinition definition,
+            ItemCatalog itemCatalog)
         {
             random = new Random();
-            Type = type;
+            Id = definition.Id;
             X = x;
             Y = y;
             this.collisionSystem = collisionSystem;
             this.pathfinder = pathfinder;
+            this.itemCatalog = itemCatalog;
             State = EnemyState.Chasing;
 
-            Name = config.Name;
-            ExperienceValue = config.ExperienceValue;
-            Glyph = config.Glyph;
-            Attribute = config.Attribute;
-            equippedWeapon = config.Weapon;
-            equippedArmor = config.Armor;
+            Name = definition.Name;
+            ExperienceValue = definition.ExperienceValue;
+            Glyph = definition.Glyph;
+            Attribute = definition.Attribute;
+            equippedWeapon = itemCatalog.CreateWeapon(definition.WeaponId);
+            equippedArmor = itemCatalog.CreateArmor(definition.ArmorId);
 
-            Stats = new CharacterStats(config.Attributes with { }, config.Skills.Clone());
+            Stats = new CharacterStats(definition.Attributes with { }, definition.Skills.Clone());
 
-            abilitySystem = new EnemyAbilitySystem(this, random);
-            lootSystem = new EnemyLootSystem(type, random);
+            abilitySystem = new EnemyAbilitySystem(this, definition.Abilities, random);
+            lootSystem = new EnemyLootSystem(definition.Loot, itemCatalog, random);
         }
 
         public void ResetTurn(bool includeAp = true)

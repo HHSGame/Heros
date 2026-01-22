@@ -18,21 +18,27 @@ namespace HHSGame.Core
         private readonly CollisionSystem collisionSystem;
         private readonly InventoryManager inventoryManager;
         private readonly ItemManager itemManager;
+        private readonly ItemCatalog itemCatalog;
         private readonly MapState mapState;
         private readonly Random random;
+        private readonly string name;
+        private readonly char glyph;
 
         private Weapon? equippedWeapon;
         private Armor? equippedArmor;
 
-        public Player(int x, int y, GameContext context, Attributes? attributes = null, Skills? skills = null)
+        public Player(int x, int y, GameContext context, string? name = null, char? glyph = null, Attributes? attributes = null, Skills? skills = null)
         {
             X = x;
             Y = y;
             collisionSystem = context.CollisionSystem;
             inventoryManager = context.InventoryManager;
             itemManager = context.ItemManager;
+            itemCatalog = context.ItemCatalog;
             mapState = context.MapState;
             random = context.Random;
+            this.name = string.IsNullOrWhiteSpace(name) ? I18n.T("HHS.Core.Player.Name") : name;
+            this.glyph = glyph ?? '☭';
 
             Attributes baseAttributes = attributes ?? new Attributes
             {
@@ -64,11 +70,11 @@ namespace HHSGame.Core
         public int EvasionBonus => Stats.EvasionBonus;
 
         public int ArmorValue => equippedArmor?.ArmorValue ?? 0;
-        public Weapon EquippedWeapon => equippedWeapon ?? Classes.Weapons.UnknownWeapon;
+        public Weapon EquippedWeapon => equippedWeapon ?? itemCatalog.CreateWeapon(itemCatalog.UnknownWeaponId);
 
         public Coordinate Position => new(X, Y);
-        public char Glyph => '☭';
-        public string Name => I18n.T("HHS.Core.Player.Name");
+        public char Glyph => glyph;
+        public string Name => name;
         public Terminal.Gui.Drawing.Attribute Attribute => new(Color.BrightYellow, Color.Red);
 
         public void ApplyBaseStats(Attributes attributes, Skills skills)

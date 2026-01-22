@@ -9,6 +9,8 @@ namespace HHSGame.Core.Map
         public int Width { get; private set; } = Constant.WIDTH;
         public int Height { get; private set; } = Constant.HEIGHT;
 
+        private readonly List<(Coordinate Position, char Symbol)> specialPositions = [];
+        public IReadOnlyList<(Coordinate Position, char Symbol)> SpecialPositions => specialPositions;
 
         private readonly HashSet<Coordinate> visitedTileSet = [];
         private readonly HashSet<Coordinate> currentVisibleTiles = [];
@@ -28,6 +30,11 @@ namespace HHSGame.Core.Map
             Width = mapData.Width;
             Height = mapData.Height;
             map = mapData.Map;
+            specialPositions.Clear();
+            foreach ((Coordinate position, char symbol) in mapData.SpecialPositions)
+            {
+                specialPositions.Add((position, symbol));
+            }
             Init(mapData.Map);
         }
 

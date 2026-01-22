@@ -1,4 +1,7 @@
 using System.Text;
+using HHSGame.Core.Engine;
+using HHSGame.Core.Engine.Catalogs;
+using HHSGame.Core.Engine.Config;
 using HHSGame.Core.Engine.Scripting;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Enemies;
@@ -65,12 +68,13 @@ namespace HHSGame.Core.Engine.Scripting
                 PlayerStartPosition = new Coordinate(2, 2)
             };
 
+            GameCatalog catalogs = CreateCatalogs();
             ItemManager itemManager = new();
             MapState mapState = new();
             EnemyManager enemyManager = new(itemManager);
             CollisionSystem collisionSystem = new(enemyManager, mapState);
             Pathfinder pathfinder = new(mapState);
-            EnemyFactory enemyFactory = new(collisionSystem, mapState, pathfinder);
+            EnemyFactory enemyFactory = new(catalogs.EnemyCatalog, catalogs.ItemCatalog, collisionSystem, mapState, pathfinder);
             SurroundingsManager surroundingsManager = new(itemManager, enemyManager, mapState);
             InventoryManager inventoryManager = new();
             TurnManager turnManager = new();
@@ -85,6 +89,7 @@ namespace HHSGame.Core.Engine.Scripting
                 mapState,
                 enemyManager,
                 itemManager,
+                catalogs.ItemCatalog,
                 surroundingsManager,
                 inventoryManager,
                 turnManager,
@@ -92,9 +97,49 @@ namespace HHSGame.Core.Engine.Scripting
                 drawingContext);
 
             GameWorld world = new(context);
-            Game game = new(NullLogger<Game>.Instance, context, world);
+            GameConfig config = new();
+            Game game = new(NullLogger<Game>.Instance, context, world, catalogs.ClassCatalog, config);
             game.Start();
             return game;
+        }
+
+        private static GameCatalog CreateCatalogs()
+        {
+            List<WeaponDefinition> weapons =
+            [
+                new WeaponDefinition("UnknownWeapon", "Unknown", ItemRarity.Common, 0, 0, 0, 0, 1, WeaponType.MeleeLight),
+                new WeaponDefinition("Sword", "Sword", ItemRarity.Common, 100, 2.0f, 10, 1, 1, WeaponType.MeleeLight)
+            ];
+
+            List<ArmorDefinition> armors =
+            [
+                new ArmorDefinition("UnknownArmor", "Unknown", ItemRarity.Common, 0, 0, 0),
+                new ArmorDefinition("Shield", "Shield", ItemRarity.Common, 150, 3.0f, 5)
+            ];
+
+            List<ItemDefinition> items =
+            [
+                new ItemDefinition("HealthPotion", "HealthPotion", "Health Potion", ItemRarity.Common, 50, 0.5f, 10)
+            ];
+
+            ItemCatalog itemCatalog = new(weapons, armors, items);
+
+            List<ClassDefinition> classes =
+            [
+                new ClassDefinition(
+                    "Warrior",
+                    "Warrior",
+                    new Stats.Attributes { Strength = 7, Perception = 5, Agility = 5, Charisma = 4, Intelligence = 4 },
+                    new Stats.Skills(),
+                    "Sword",
+                    "Shield")
+            ];
+
+            ClassCatalog classCatalog = new(classes, itemCatalog);
+
+            EnemyCatalog enemyCatalog = new(new List<EnemyDefinition>());
+
+            return new GameCatalog(itemCatalog, classCatalog, enemyCatalog);
         }
 
         private static string CreateTempMapFile(int width, int height)

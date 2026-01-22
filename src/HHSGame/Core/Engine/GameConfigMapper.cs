@@ -1,16 +1,20 @@
 using System.IO;
 using HHSGame.Core;
 using HHSGame.Core.Classes;
-using HHSGame.Core.Enemies;
+using HHSGame.Core.Engine.Catalogs;
 using HHSGame.Core.Engine.Config;
 using HHSGame.Core.Map;
 using HHSGame.Core.Stats;
 
 namespace HHSGame.Core.Engine
 {
-    public static class GameConfigMapper
+    public sealed class GameConfigMapper(GameCatalog catalogs)
     {
-        public static GameParameters ToParameters(GameConfig config)
+        private readonly ClassCatalog classCatalog = catalogs.ClassCatalog;
+        private readonly EnemyCatalog enemyCatalog = catalogs.EnemyCatalog;
+        private readonly Items.ItemCatalog itemCatalog = catalogs.ItemCatalog;
+
+        public GameParameters ToParameters(GameConfig config)
         {
             MapStyle style = MapStyle.Cave;
             if (!string.IsNullOrWhiteSpace(config.Map.Style)
@@ -26,10 +30,11 @@ namespace HHSGame.Core.Engine
                 MapHeight = config.Map.Height,
                 UseCustomMap = config.Map.UseCustomMap,
                 CustomMapPath = config.Map.CustomMapPath,
-                PlayerClass = ResolveClass(config.Player.Class),
+                PlayerClass = classCatalog.Resolve(config.Player.Class),
                 PlayerAttributes = config.Player.Attributes,
-                PlayerSkills = BuildSkills(config.Player.Skills),
-                StartingItems = config.Player.StartingItems.ToList(),
+                PlayerSkills = config.Player.Skills.Count == 0 ? null : SkillMapper.BuildSkills(config.Player.Skills),
+                StartingItems = ValidateStartingItems(config.Player.StartingItems),
+                PlayerSpawns = BuildPlayerSpawns(config.Players),
                 EnemySpawns = BuildEnemySpawns(config.Enemies),
                 MapItems = BuildMapItems(config.Items)
             };
@@ -44,23 +49,29 @@ namespace HHSGame.Core.Engine
             return parameters;
         }
 
-        private static List<EnemySpawn> BuildEnemySpawns(List<EnemySpawnConfig> spawns)
+        private List<EnemySpawn> BuildEnemySpawns(List<EnemySpawnConfig>? spawns)
         {
             List<EnemySpawn> result = [];
+            if (spawns == null || spawns.Count == 0)
+            {
+                return result;
+            }
+
             foreach (EnemySpawnConfig spawn in spawns)
             {
-                if (!Enum.TryParse(spawn.Id, true, out EnemyType enemyType))
+                string id = RequireId(spawn.Id, "enemy");
+                if (!enemyCatalog.TryGetDefinition(id, out _))
                 {
-                    throw new InvalidDataException($"Unknown enemy id '{spawn.Id}'.");
+                    throw new InvalidDataException($"Unknown enemy id '{id}'.");
                 }
 
                 if (spawn.Position == null)
                 {
-                    throw new InvalidDataException($"Enemy position is required for {spawn.Id}.");
+                    throw new InvalidDataException($"Enemy position is required for {id}.");
                 }
 
                 result.Add(new EnemySpawn(
-                    enemyType,
+                    id,
                     new Coordinate(spawn.Position.X, spawn.Position.Y),
                     spawn.Count));
             }
@@ -68,18 +79,29 @@ namespace HHSGame.Core.Engine
             return result;
         }
 
-        private static List<MapItemSpawn> BuildMapItems(List<ItemConfig> items)
+        private List<MapItemSpawn> BuildMapItems(List<ItemConfig>? items)
         {
             List<MapItemSpawn> result = [];
+            if (items == null || items.Count == 0)
+            {
+                return result;
+            }
+
             foreach (ItemConfig item in items)
             {
+                string id = RequireId(item.Id, "item");
                 if (item.Position == null)
                 {
-                    throw new InvalidDataException($"Item position is required for {item.Id}.");
+                    throw new InvalidDataException($"Item position is required for {id}.");
+                }
+
+                if (!itemCatalog.TryCreateItem(id, out _))
+                {
+                    throw new InvalidDataException($"Unknown item id '{id}'.");
                 }
 
                 result.Add(new MapItemSpawn(
-                    item.Id,
+                    id,
                     new Coordinate(item.Position.X, item.Position.Y),
                     item.Quantity));
             }
@@ -87,47 +109,92 @@ namespace HHSGame.Core.Engine
             return result;
         }
 
-        private static Skills? BuildSkills(Dictionary<string, int> skillRanks)
+        private List<PlayerSpawn> BuildPlayerSpawns(List<PlayerEntryConfig>? players)
         {
-            if (skillRanks.Count == 0)
+            List<PlayerSpawn> result = [];
+            if (players == null || players.Count == 0)
             {
-                return null;
+                return result;
             }
 
-            Skills skills = new();
-            foreach (KeyValuePair<string, int> entry in skillRanks)
+            for (int i = 0; i < players.Count; i++)
             {
-                if (Enum.TryParse(entry.Key, true, out SkillType skillType))
+                PlayerEntryConfig entry = players[i];
+                if (entry.StartPosition == null)
                 {
-                    skills.SetRank(skillType, entry.Value);
+                    throw new InvalidDataException("Player start position is required.");
                 }
+
+                string name = string.IsNullOrWhiteSpace(entry.Name)
+                    ? $"Player {i + 1}"
+                    : entry.Name.Trim();
+
+                char glyph = string.IsNullOrWhiteSpace(entry.Glyph) ? '\0' : entry.Glyph.Trim()[0];
+
+                ClassConfig classConfig = ResolvePlayerClass(entry.Class, name);
+
+                List<string> startingItems = ValidateStartingItems(entry.StartingItems);
+                Skills? skills = entry.Skills.Count == 0 ? null : SkillMapper.BuildSkills(entry.Skills);
+
+                result.Add(new PlayerSpawn(
+                    name,
+                    glyph,
+                    classConfig,
+                    entry.Attributes,
+                    skills,
+                    new Coordinate(entry.StartPosition.X, entry.StartPosition.Y),
+                    startingItems));
             }
 
-            return skills;
+            return result;
         }
 
-        private static ClassConfig ResolveClass(string? className)
+        private List<string> ValidateStartingItems(List<string>? items)
         {
-            ClassConfig[] classes =
-            [
-                Classes.Classes.Warrior,
-                Classes.Classes.Thief,
-                Classes.Classes.Alchemist,
-                Classes.Classes.Unemployed
-            ];
-
-            if (!string.IsNullOrWhiteSpace(className))
+            List<string> result = [];
+            if (items == null || items.Count == 0)
             {
-                foreach (ClassConfig config in classes)
-                {
-                    if (string.Equals(config.Name, className, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return config;
-                    }
-                }
+                return result;
             }
 
-            return Classes.Classes.Warrior;
+            foreach (string itemId in items)
+            {
+                string id = RequireId(itemId, "starting item");
+                if (!itemCatalog.TryCreateItem(id, out _))
+                {
+                    throw new InvalidDataException($"Unknown starting item id '{id}'.");
+                }
+
+                result.Add(id);
+            }
+
+            return result;
         }
+
+        private ClassConfig ResolvePlayerClass(string? classId, string playerName)
+        {
+            if (string.IsNullOrWhiteSpace(classId))
+            {
+                return classCatalog.GetDefault();
+            }
+
+            if (!classCatalog.TryResolve(classId, out ClassConfig config))
+            {
+                throw new InvalidDataException($"Unknown class id '{classId}' for {playerName}.");
+            }
+
+            return config;
+        }
+
+        private static string RequireId(string value, string context)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new InvalidDataException($"Missing {context} id.");
+            }
+
+            return value.Trim();
+        }
+
     }
 }

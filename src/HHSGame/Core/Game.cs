@@ -1,5 +1,7 @@
 using System.IO;
 using HHSGame.Core.Combat;
+using HHSGame.Core.Engine.Catalogs;
+using HHSGame.Core.Engine.Config;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
 using HHSGame.UI;
@@ -7,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HHSGame.Core
 {
-    public partial class Game(ILogger<Game> logger, GameContext context, GameWorld world)
+    public partial class Game(ILogger<Game> logger, GameContext context, GameWorld world, ClassCatalog classCatalog, GameConfig config)
     {
         public Player? Player { get; private set; }
         private bool isRunning;
@@ -15,26 +17,49 @@ namespace HHSGame.Core
         private int activePlayerIndex;
         private readonly List<(Coordinate Position, Cell Cell)> overlayCells = [];
         private bool manualCombatMode;
+        private readonly ClassCatalog classCatalog = classCatalog;
+        private readonly IReadOnlyList<ConditionSpec> winConditions = BuildConditions(config.Conditions, isWin: true);
+        private readonly IReadOnlyList<ConditionSpec> loseConditions = BuildConditions(config.Conditions, isWin: false);
 
         public GameContext Context => context;
         public int ControlledPlayerCount => controlledPlayers.Count;
 
         public void Start()
         {
-            Classes.ClassConfig classConfig = context.Parameters.PlayerClass ?? Classes.Classes.Warrior;
-            Player = world.NewPlayer(classConfig.ToClass());
             controlledPlayers.Clear();
-            controlledPlayers.Add(Player);
-            activePlayerIndex = 0;
+            if (context.Parameters.PlayerSpawns.Count > 0)
+            {
+                world.InitializeMap();
+                CreatePlayersFromSpawns();
+            }
+            else
+            {
+                Classes.ClassConfig classConfig = context.Parameters.PlayerClass ?? classCatalog.GetDefault();
+                Player = world.NewPlayer(classConfig.ToClass());
+                controlledPlayers.Add(Player);
+                activePlayerIndex = 0;
+            }
+
+            if (Player == null)
+            {
+                throw new InvalidDataException("No player was created.");
+            }
+
             LogStartup(logger, "Intializing Context");
-            context.InitializeContext(Player);
+            context.InitializeContext(controlledPlayers, Player);
             isRunning = true;
             context.StateMachine.TryChangeState(GameStateType.Exploration);
-            Player.ResetTurn(false);
+            foreach (Player player in controlledPlayers)
+            {
+                player.ResetTurn(false, player == Player);
+            }
             context.TurnManager.BeginPlayerTurn();
 
             LogStartup(logger, "Player setup");
-            AddStartingItems(Player, context.Parameters.StartingItems);
+            if (context.Parameters.PlayerSpawns.Count == 0)
+            {
+                AddStartingItems(context.ItemCatalog, Player, context.Parameters.StartingItems);
+            }
             AddMapItems(context, context.Parameters.MapItems);
 
             Events.OnGameMessageEvent += (sender, e) =>
@@ -43,6 +68,41 @@ namespace HHSGame.Core
             };
 
             RenderFrame();
+        }
+
+        private void CreatePlayersFromSpawns()
+        {
+            HashSet<Coordinate> occupied = [];
+            foreach (PlayerSpawn spawn in context.Parameters.PlayerSpawns)
+            {
+                Coordinate position = spawn.Position;
+                if (!context.MapState.IsWalkable(position))
+                {
+                    throw new InvalidDataException($"Player spawn is not walkable at {position}.");
+                }
+
+                if (occupied.Contains(position))
+                {
+                    throw new InvalidDataException($"Duplicate player spawn at {position}.");
+                }
+
+                Player player = world.CreatePlayer(
+                    spawn.ClassConfig,
+                    position,
+                    spawn.Attributes,
+                    spawn.Skills,
+                    spawn.Name,
+                    spawn.Glyph == '\0' ? null : spawn.Glyph);
+                AddStartingItems(context.ItemCatalog, player, spawn.StartingItems);
+                controlledPlayers.Add(player);
+                occupied.Add(position);
+            }
+
+            if (controlledPlayers.Count > 0)
+            {
+                activePlayerIndex = 0;
+                Player = controlledPlayers[0];
+            }
         }
 
         [LoggerMessage(LogLevel.Information, "{message}")]
@@ -327,6 +387,11 @@ namespace HHSGame.Core
             context.TurnManager.EndPlayerTurn();
             world.Update(Player, useAp);
             context.TurnManager.EndEnemyTurn();
+            if (CheckGameConditions())
+            {
+                RenderFrame();
+                return;
+            }
             UpdateCombatState();
             bool nextUseAp = context.StateMachine.CurrentState == GameStateType.Combat;
             foreach (Player player in controlledPlayers)
@@ -335,6 +400,218 @@ namespace HHSGame.Core
             }
             context.TurnManager.BeginPlayerTurn();
             RenderFrame();
+        }
+
+        private bool CheckGameConditions()
+        {
+            if (Player == null)
+            {
+                return false;
+            }
+
+            if (IsConditionMet(loseConditions))
+            {
+                Stop();
+                return true;
+            }
+
+            if (IsConditionMet(winConditions))
+            {
+                Stop();
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool IsConditionMet(IReadOnlyList<ConditionSpec> conditions)
+        {
+            if (conditions == null || conditions.Count == 0)
+            {
+                return false;
+            }
+
+            foreach (ConditionSpec condition in conditions)
+            {
+                if (IsConditionMet(condition))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool IsConditionMet(ConditionSpec condition)
+        {
+            return condition.Kind switch
+            {
+                ConditionKind.PlayerDeath => AnyPlayerDead(),
+                ConditionKind.AllEnemiesDefeated => context.EnemyManager.Enemies.Count == 0,
+                ConditionKind.TurnLimit => context.TurnManager.TurnCount >= condition.Value,
+                ConditionKind.EnemyCountAtMost => context.EnemyManager.Enemies.Count <= condition.Value,
+                ConditionKind.EnemyCountAtLeast => context.EnemyManager.Enemies.Count >= condition.Value,
+                ConditionKind.HasItem => HasItem(condition.Param, condition.Value),
+                ConditionKind.ReachMarker => IsAtMarker(condition.Param),
+                _ => false
+            };
+        }
+
+        private static List<ConditionSpec> BuildConditions(ConditionConfig config, bool isWin)
+        {
+            List<ConditionSpec> result = [];
+            IReadOnlyList<string> conditionIds = isWin ? config.Win : config.Lose;
+            IReadOnlyList<ConditionEntryConfig> entries = isWin ? config.WinEntries : config.LoseEntries;
+
+            if (conditionIds != null)
+            {
+                foreach (string conditionId in conditionIds)
+                {
+                    if (string.IsNullOrWhiteSpace(conditionId))
+                    {
+                        continue;
+                    }
+
+                    result.Add(ParseCondition(conditionId, null, null));
+                }
+            }
+
+            if (entries != null)
+            {
+                foreach (ConditionEntryConfig entry in entries)
+                {
+                    result.Add(ParseCondition(entry.Id, entry.Value, entry.Param));
+                }
+            }
+
+            return result;
+        }
+
+        private static ConditionSpec ParseCondition(string? id, int? value, string? param)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new InvalidDataException("Condition id cannot be empty.");
+            }
+
+            if (!Enum.TryParse(id.Trim(), true, out ConditionKind kind))
+            {
+                throw new InvalidDataException($"Unknown condition '{id}'.");
+            }
+
+            return kind switch
+            {
+                ConditionKind.TurnLimit => value.GetValueOrDefault() > 0
+                    ? new ConditionSpec(kind, value.GetValueOrDefault(), string.Empty)
+                    : throw new InvalidDataException("TurnLimit condition requires a positive value."),
+                ConditionKind.EnemyCountAtMost => value.GetValueOrDefault() >= 0
+                    ? new ConditionSpec(kind, value.GetValueOrDefault(), string.Empty)
+                    : throw new InvalidDataException("EnemyCountAtMost requires a non-negative value."),
+                ConditionKind.EnemyCountAtLeast => value.GetValueOrDefault() >= 0
+                    ? new ConditionSpec(kind, value.GetValueOrDefault(), string.Empty)
+                    : throw new InvalidDataException("EnemyCountAtLeast requires a non-negative value."),
+                ConditionKind.HasItem => BuildItemCondition(kind, value, param),
+                ConditionKind.ReachMarker => value.GetValueOrDefault() == 0
+                    ? BuildMarkerCondition(kind, param)
+                    : throw new InvalidDataException("ReachMarker does not accept a value."),
+                _ => (value.HasValue && value.Value != 0) || !string.IsNullOrWhiteSpace(param)
+                    ? throw new InvalidDataException($"Condition '{kind}' does not accept a value or param.")
+                    : new ConditionSpec(kind, 0, string.Empty)
+            };
+        }
+
+        private enum ConditionKind
+        {
+            PlayerDeath,
+            AllEnemiesDefeated,
+            TurnLimit,
+            EnemyCountAtMost,
+            EnemyCountAtLeast,
+            HasItem,
+            ReachMarker
+        }
+
+        private sealed record ConditionSpec(ConditionKind Kind, int Value, string Param);
+
+        private static ConditionSpec BuildMarkerCondition(ConditionKind kind, string? param)
+        {
+            if (string.IsNullOrWhiteSpace(param))
+            {
+                throw new InvalidDataException("ReachMarker requires a marker param.");
+            }
+
+            return new ConditionSpec(kind, 0, param.Trim());
+        }
+
+        private static ConditionSpec BuildItemCondition(ConditionKind kind, int? value, string? param)
+        {
+            if (string.IsNullOrWhiteSpace(param))
+            {
+                throw new InvalidDataException("HasItem requires an item id param.");
+            }
+
+            int minCount = value.GetValueOrDefault();
+            if (minCount <= 0)
+            {
+                minCount = 1;
+            }
+
+            return new ConditionSpec(kind, minCount, param.Trim());
+        }
+
+        private bool HasItem(string itemId, int minCount)
+        {
+            if (Player == null)
+            {
+                return false;
+            }
+
+            int count = 0;
+            foreach (Items.Item item in context.InventoryManager.GetItems())
+            {
+                if (string.Equals(item.Id, itemId, StringComparison.OrdinalIgnoreCase))
+                {
+                    count++;
+                    if (count >= minCount)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool AnyPlayerDead()
+        {
+            foreach (Player player in controlledPlayers)
+            {
+                if (player.Stats.CurrentHp <= 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool IsAtMarker(string marker)
+        {
+            if (Player == null || string.IsNullOrWhiteSpace(marker))
+            {
+                return false;
+            }
+
+            char symbol = marker.Trim()[0];
+            foreach ((Coordinate Position, char Symbol) entry in context.MapState.SpecialPositions)
+            {
+                if (entry.Symbol == symbol && entry.Position.Equals(Player.Position))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void RenderFrame()
@@ -365,11 +642,11 @@ namespace HHSGame.Core
             drawingContext.Render();
         }
 
-        private static void AddStartingItems(Player player, IEnumerable<string> itemIds)
+        private static void AddStartingItems(Items.ItemCatalog itemCatalog, Player player, IEnumerable<string> itemIds)
         {
             foreach (string itemId in itemIds)
             {
-                if (Items.ItemCatalog.TryCreate(itemId, out Items.Item item))
+                if (itemCatalog.TryCreateItem(itemId, out Items.Item item))
                 {
                     player.AddItem(item);
                 }
@@ -387,7 +664,7 @@ namespace HHSGame.Core
 
                 for (int i = 0; i < spawn.Quantity; i++)
                 {
-                    if (!Items.ItemCatalog.TryCreate(spawn.ItemId, out Items.Item item))
+                    if (!context.ItemCatalog.TryCreateItem(spawn.ItemId, out Items.Item item))
                     {
                         continue;
                     }

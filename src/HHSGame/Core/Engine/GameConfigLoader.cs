@@ -56,6 +56,15 @@ namespace HHSGame.Core.Engine
                     throw new InvalidDataException($"Item position is required for {item.Id} in {path}.");
                 }
             }
+
+            foreach (PlayerEntryConfig player in config.Players)
+            {
+                if (player.StartPosition == null)
+                {
+                    string name = string.IsNullOrWhiteSpace(player.Name) ? "player" : player.Name;
+                    throw new InvalidDataException($"StartPosition is required for {name} in {path}.");
+                }
+            }
         }
     }
 }

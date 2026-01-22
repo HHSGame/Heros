@@ -5,23 +5,101 @@
   },
   "map": {
     "style": "Cave",
-    "width": 50,
-    "height": 30,
+    "width": 14,
+    "height": 10,
     "useCustomMap": true,
-    "customMapPath": "data/maps/cave-01.txt"
+    "customMapPath": "data/maps/tactics-01.txt"
   },
   "player": {
     "class": "Warrior",
-    "startingItems": [
-      "HealthPotion"
-    ]
+    "startingItems": []
   },
-  "enemies": [],
-  "items": [],
+  "players": [
+    {
+      "name": "Alpha",
+      "glyph": "A",
+      "class": "Warrior",
+      "startPosition": {
+        "x": 1,
+        "y": 1
+      },
+      "startingItems": [
+        "HealthPotion"
+      ]
+    },
+    {
+      "name": "Bravo",
+      "glyph": "B",
+      "class": "Thief",
+      "startPosition": {
+        "x": 2,
+        "y": 1
+      },
+      "startingItems": []
+    },
+    {
+      "name": "Charlie",
+      "glyph": "C",
+      "class": "Alchemist",
+      "startPosition": {
+        "x": 1,
+        "y": 2
+      },
+      "startingItems": [
+        "HealthPotion"
+      ]
+    }
+  ],
+  "catalogs": {
+    "weapons": "data/catalogs/weapons.json",
+    "armors": "data/catalogs/armors.json",
+    "items": "data/catalogs/items.json",
+    "classes": "data/catalogs/classes.json",
+    "enemies": "data/catalogs/enemies.json"
+  },
+  "enemies": [
+    {
+      "id": "Gangster",
+      "position": {
+        "x": 11,
+        "y": 8
+      },
+      "count": 1
+    },
+    {
+      "id": "Bandit",
+      "position": {
+        "x": 10,
+        "y": 6
+      },
+      "count": 1
+    }
+  ],
+  "items": [
+    {
+      "id": "HealthPotion",
+      "position": {
+        "x": 5,
+        "y": 1
+      },
+      "quantity": 1
+    }
+  ],
   "conditions": {
-    "win": [],
+    "winEntries": [
+      {
+        "id": "EnemyCountAtMost",
+        "value": 0
+      }
+    ],
     "lose": [
       "PlayerDeath"
+    ],
+    "loseEntries": [
+      {
+        "id": "TurnLimit",
+        "value": 30
+      }
     ]
   }
 }

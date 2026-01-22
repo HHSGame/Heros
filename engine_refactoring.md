@@ -28,6 +28,7 @@ Split HHSGame into a data-driven engine that loads a game configuration file to 
 - `game`: name, version.
 - `map`: custom map path or empty-map dimensions.
 - `player`: attributes, skills, starting items, start position.
+- `catalogs`: external definitions for classes, enemies, weapons, armors, items.
 - `classes`: class definitions and bonuses.
 - `items`: item definitions with positions.
 - `weapons`: damage, ap cost, type, penetration.
@@ -68,7 +69,19 @@ Decision: keep both a minimal linear script format (for quick smoke flows) and a
 - 2025-01-20: Added `--test-script` (optional `--test-step-ms`) to auto-run scripts with UI and skip the wizard.
 - 2025-01-20: Added sample script `data/scripts/combat_toggle_smoke.json` and runner tests.
 - 2025-01-20: Removed runtime map/enemy/item generators in favor of config-driven spawns and map loading (custom map or empty map).
+- 2025-01-20: Externalized weapons/armors/items/classes/enemies into `data/catalogs/*.json` with catalog loader + runtime catalogs.
+- 2025-01-20: Moved core service wiring into `GameEngine` and added a `BuildServiceProvider` helper for bootstrap.
+- 2025-01-20: Removed enemy enum dependency; enemy IDs and abilities are now fully config-driven in `data/catalogs/enemies.json`.
+- 2025-01-20: Added catalog loader coverage for enemy ability parsing.
+- 2025-01-20: Introduced `GameEngineHost` to own Terminal UI startup and scripted runs.
+- 2025-01-20: Added config-driven win/lose evaluation hooks for `PlayerDeath` and `AllEnemiesDefeated`.
+- 2025-01-20: Added config-driven `TurnLimit` condition support plus validation for unknown or malformed condition entries.
+- 2025-01-20: Consolidated CLI argument parsing and engine startup into `GameEngineLauncher`.
+- 2025-01-20: Added parameterized conditions for `EnemyCountAtMost`, `EnemyCountAtLeast`, `HasItem`, and `ReachMarker` plus inventory item ids.
+- 2025-01-20: Updated default `data/game.json` to use entry-based conditions with explicit map, item, and enemy spawns.
+- 2025-01-20: Added a multi-character tactics scenario (`data/maps/tactics-01.txt`) and switched `data/game.json` to use `players` spawns.
+- 2025-01-20: Added multi-player spawns, collision checks, and player-specific glyph/name support.
 
 ## Next Actions
-- Continue Milestone 2: finish engine bootstrap so `GameEngine` builds the full `GameContext` and owns startup/shutdown.
-- Expand config-driven win/lose conditions and move `Program` boot logic into engine services.
+- Add more condition types (currency, quest flags) and expose end-state messaging.
+- Consider moving Serilog setup into the launcher for a fully self-contained engine entrypoint.

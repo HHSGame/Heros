@@ -7,6 +7,8 @@ namespace HHSGame.Core.Engine.Config
         public GameMetaConfig Game { get; init; } = new();
         public MapConfig Map { get; init; } = new();
         public PlayerConfig Player { get; init; } = new();
+        public List<PlayerEntryConfig> Players { get; init; } = [];
+        public CatalogPathsConfig Catalogs { get; init; } = new();
         public List<EnemySpawnConfig> Enemies { get; init; } = [];
         public List<ItemConfig> Items { get; init; } = [];
         public ConditionConfig Conditions { get; init; } = new();
@@ -29,6 +31,17 @@ namespace HHSGame.Core.Engine.Config
 
     public sealed class PlayerConfig
     {
+        public string? Class { get; init; }
+        public Attributes? Attributes { get; init; }
+        public Dictionary<string, int> Skills { get; init; } = new(StringComparer.OrdinalIgnoreCase);
+        public CoordinateConfig? StartPosition { get; init; }
+        public List<string> StartingItems { get; init; } = [];
+    }
+
+    public sealed class PlayerEntryConfig
+    {
+        public string Name { get; init; } = string.Empty;
+        public string Glyph { get; init; } = string.Empty;
         public string? Class { get; init; }
         public Attributes? Attributes { get; init; }
         public Dictionary<string, int> Skills { get; init; } = new(StringComparer.OrdinalIgnoreCase);
@@ -60,5 +73,14 @@ namespace HHSGame.Core.Engine.Config
     {
         public List<string> Win { get; init; } = [];
         public List<string> Lose { get; init; } = new() { "PlayerDeath" };
+        public List<ConditionEntryConfig> WinEntries { get; init; } = [];
+        public List<ConditionEntryConfig> LoseEntries { get; init; } = [];
+    }
+
+    public sealed class ConditionEntryConfig
+    {
+        public string Id { get; init; } = string.Empty;
+        public int Value { get; init; }
+        public string Param { get; init; } = string.Empty;
     }
 }

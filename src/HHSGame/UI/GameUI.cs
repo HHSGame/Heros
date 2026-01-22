@@ -264,6 +264,9 @@ namespace HHSGame.UI
                 case KeyCode.A:
                     QueueAttack();
                     return true;
+                case KeyCode.G:
+                    QueuePickup();
+                    return true;
                 case KeyCode.U:
                     utilityWindow.ToggleUtilityWindow();
                     SyncStateWithUtilityWindow();
@@ -336,7 +339,7 @@ namespace HHSGame.UI
                 return;
             }
 
-            moveTarget = game.Player.Position;
+            moveTarget = game.Player.PlannedPosition;
             isMoveSelection = true;
             Events.RaiseGameMessage("Move mode: use arrow keys, Enter to confirm, Esc to cancel.");
             UpdateMovePreview();
@@ -432,6 +435,8 @@ namespace HHSGame.UI
                 }
             }
 
+            player.SetPlannedPosition(path[stepsToQueue]);
+
             int turnsNeeded = CalculateTurnsNeeded(steps, game.Player.Stats.MaxAp);
             if (stepsToQueue < steps)
             {
@@ -487,7 +492,7 @@ namespace HHSGame.UI
             }
 
             Pathfinder pathfinder = new(game.Context.MapState);
-            return pathfinder.FindPath(game.Player.Position, destination);
+            return pathfinder.FindPath(game.Player.PlannedPosition, destination);
         }
 
         private static int CalculateTurnsNeeded(int steps, int maxAp)
@@ -522,8 +527,9 @@ namespace HHSGame.UI
             }
 
             Player player = game.Player;
+            Coordinate origin = player.PlannedPosition;
             Enemy? enemy = game.Context.EnemyManager.Enemies.FirstOrDefault(target =>
-                Math.Abs(target.X - player.X) + Math.Abs(target.Y - player.Y) == 1);
+                Math.Abs(target.X - origin.X) + Math.Abs(target.Y - origin.Y) == 1);
 
             if (enemy == null)
             {
@@ -538,6 +544,22 @@ namespace HHSGame.UI
             }
 
             Events.RaiseGameMessage($"Queued attack on {enemy.Name}.");
+        }
+
+        private void QueuePickup()
+        {
+            if (game.Player == null)
+            {
+                return;
+            }
+
+            if (!game.TryQueuePlayerAction("Pick up", ActionCosts.Pickup, () => game.Player?.PickupItems()))
+            {
+                Events.RaiseGameMessage("Not enough AP to queue pickup.");
+                return;
+            }
+
+            Events.RaiseGameMessage("Queued item pickup.");
         }
 
         private bool HandleCombatToggle()

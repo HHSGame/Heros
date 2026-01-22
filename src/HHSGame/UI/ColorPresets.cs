@@ -37,9 +37,11 @@ namespace HHSGame.UI
         }
 
         // Player color
-        public static readonly Attribute Player = new(Color.BrightYellow, Color.Black);
+        public static readonly Attribute Player = new(Color.BrightYellow, Color.Red);
+        public static readonly Attribute PlayerActive = new(Color.Black, Color.BrightYellow);
 
         public static readonly Attribute PathPreview = new(Color.BrightCyan, Color.Black);
         public static readonly Attribute TargetPreview = new(Color.BrightMagenta, Color.Black);
+        public static readonly Attribute PlannedDestination = new(Color.BrightGreen, Color.Black);
     }
 }

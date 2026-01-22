@@ -72,9 +72,9 @@ namespace HHSGame.Core.Combat
                 }
 
                 action.Execute();
-                onExecuted?.Invoke(action);
                 actions.Dequeue();
                 totalCost -= action.ApCost;
+                onExecuted?.Invoke(action);
             }
         }
     }

@@ -1,5 +1,6 @@
 
 using System.Collections.Immutable;
+using HHSGame.Core.Combat;
 using HHSGame.UI;
 using HHSGame.Core.Items;
 
@@ -24,7 +25,7 @@ namespace HHSGame.Core.Enemies
         }
 
 
-        public void ExecuteTurn(Player player, bool useAp)
+        public void ExecuteTurn(Player player, bool useAp, Action<QueuedAction>? onAction = null)
         {
             foreach (Enemy enemy in enemies.ToArray())
             {
@@ -38,7 +39,7 @@ namespace HHSGame.Core.Enemies
 
                 enemy.ResetTurn(useAp);
                 enemy.PlanTurn(player, useAp);
-                enemy.ExecutePlannedActions(useAp);
+                enemy.ExecutePlannedActions(useAp, onAction);
                 enemy.EndTurn();
             }
         }

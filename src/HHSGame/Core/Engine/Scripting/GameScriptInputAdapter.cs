@@ -62,6 +62,10 @@ namespace HHSGame.Core.Engine.Scripting
                 case "ATTACK":
                     QueueAttack();
                     return true;
+                case "G":
+                case "PICKUP":
+                    QueuePickup();
+                    return true;
                 case "U":
                 case "USE":
                     Events.RaiseGameMessage("Inventory actions are not available in script mode.");
@@ -231,7 +235,7 @@ namespace HHSGame.Core.Engine.Scripting
                 return;
             }
 
-            moveTarget = game.Player.Position;
+            moveTarget = game.Player.PlannedPosition;
             isMoveSelection = true;
             Events.RaiseGameMessage("Move mode: use arrow keys, Enter to confirm, Esc to cancel.");
             UpdateMovePreview();
@@ -327,6 +331,8 @@ namespace HHSGame.Core.Engine.Scripting
                 }
             }
 
+            player.SetPlannedPosition(path[stepsToQueue]);
+
             int turnsNeeded = CalculateTurnsNeeded(steps, game.Player.Stats.MaxAp);
             if (stepsToQueue < steps)
             {
@@ -382,7 +388,7 @@ namespace HHSGame.Core.Engine.Scripting
             }
 
             Pathfinder pathfinder = new(game.Context.MapState);
-            return pathfinder.FindPath(game.Player.Position, destination);
+            return pathfinder.FindPath(game.Player.PlannedPosition, destination);
         }
 
         private static int CalculateTurnsNeeded(int steps, int maxAp)
@@ -417,8 +423,9 @@ namespace HHSGame.Core.Engine.Scripting
             }
 
             Player player = game.Player;
+            Coordinate origin = player.PlannedPosition;
             Enemy? enemy = game.Context.EnemyManager.Enemies.FirstOrDefault(target =>
-                Math.Abs(target.X - player.X) + Math.Abs(target.Y - player.Y) == 1);
+                Math.Abs(target.X - origin.X) + Math.Abs(target.Y - origin.Y) == 1);
 
             if (enemy == null)
             {
@@ -433,6 +440,22 @@ namespace HHSGame.Core.Engine.Scripting
             }
 
             Events.RaiseGameMessage($"Queued attack on {enemy.Name}.");
+        }
+
+        private void QueuePickup()
+        {
+            if (game.Player == null)
+            {
+                return;
+            }
+
+            if (!game.TryQueuePlayerAction("Pick up", ActionCosts.Pickup, () => game.Player?.PickupItems()))
+            {
+                Events.RaiseGameMessage("Not enough AP to queue pickup.");
+                return;
+            }
+
+            Events.RaiseGameMessage("Queued item pickup.");
         }
 
         private static string NormalizeToken(string token)

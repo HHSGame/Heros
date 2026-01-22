@@ -1,10 +1,12 @@
 using System.IO;
+using System.Threading;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Engine.Catalogs;
 using HHSGame.Core.Engine.Config;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
 using HHSGame.UI;
+using Terminal.Gui.App;
 using Microsoft.Extensions.Logging;
 
 namespace HHSGame.Core
@@ -47,6 +49,7 @@ namespace HHSGame.Core
 
             LogStartup(logger, "Intializing Context");
             context.InitializeContext(controlledPlayers, Player);
+            UpdateActivePlayer(Player);
             isRunning = true;
             context.StateMachine.TryChangeState(GameStateType.Exploration);
             foreach (Player player in controlledPlayers)
@@ -178,6 +181,7 @@ namespace HHSGame.Core
             foreach (Player player in controlledPlayers)
             {
                 player.ActionSequence.Clear();
+                player.ResetPlannedPosition();
             }
             Events.RaiseActionSequenceChanged();
         }
@@ -306,6 +310,7 @@ namespace HHSGame.Core
             activePlayerIndex = nextIndex;
             Player = controlledPlayers[activePlayerIndex];
             context.SetActivePlayer(Player);
+            UpdateActivePlayer(Player);
             Player.UpdateFOV();
             RenderFrame();
             return true;
@@ -355,6 +360,9 @@ namespace HHSGame.Core
         public void Stop()
         {
             isRunning = false;
+            manualCombatMode = false;
+            ClearPlayerActions();
+            ClearOverlayCells();
             context.StateMachine.TryChangeState(GameStateType.GameOver);
         }
 
@@ -370,9 +378,14 @@ namespace HHSGame.Core
             {
                 foreach (Player player in controlledPlayers)
                 {
-                    player.ActionSequence.Execute(player.Stats, false, _ => Events.RaiseActionSequenceChanged());
+                    player.ActionSequence.Execute(player.Stats, false, _ =>
+                    {
+                        Events.RaiseActionSequenceChanged();
+                        AnimateStep();
+                    });
                     player.ActionSequence.Clear();
                     player.EndTurn();
+                    player.ResetPlannedPosition();
                 }
                 Events.RaiseActionSequenceChanged();
             }
@@ -381,11 +394,12 @@ namespace HHSGame.Core
                 foreach (Player player in controlledPlayers)
                 {
                     player.ActionSequence.Clear();
+                    player.ResetPlannedPosition();
                 }
                 Events.RaiseActionSequenceChanged();
             }
             context.TurnManager.EndPlayerTurn();
-            world.Update(Player, useAp);
+            world.Update(Player, useAp, _ => AnimateStep());
             context.TurnManager.EndEnemyTurn();
             if (CheckGameConditions())
             {
@@ -411,12 +425,14 @@ namespace HHSGame.Core
 
             if (IsConditionMet(loseConditions))
             {
+                Events.RaiseGameMessage("Defeat! Press Q to quit.");
                 Stop();
                 return true;
             }
 
             if (IsConditionMet(winConditions))
             {
+                Events.RaiseGameMessage("Victory! Press Q to quit.");
                 Stop();
                 return true;
             }
@@ -630,6 +646,7 @@ namespace HHSGame.Core
             {
                 drawingContext.DrawAt((position.X, position.Y), cell);
             }
+            DrawPlannedDestinations(drawingContext);
             foreach (Player player in controlledPlayers)
             {
                 if (player != Player)
@@ -640,6 +657,48 @@ namespace HHSGame.Core
             (Player as IGameActor).Draw(drawingContext);
 
             drawingContext.Render();
+        }
+
+        private void DrawPlannedDestinations(UI.IDrawingContext drawingContext)
+        {
+            foreach (Player player in controlledPlayers)
+            {
+                if (player.PlannedPosition.Equals(player.Position))
+                {
+                    continue;
+                }
+
+                Coordinate position = player.PlannedPosition;
+                drawingContext.DrawAt((position.X, position.Y), new Cell
+                {
+                    Character = GUISettings.PlannedDestinationGlyph,
+                    Attribute = ColorPresets.PlannedDestination
+                });
+            }
+        }
+
+        private void AnimateStep()
+        {
+            RenderFrame();
+            if (!Application.Initialized)
+            {
+                return;
+            }
+
+            Application.Driver?.Refresh();
+            int delayMs = GUISettings.ActionStepDelayMs;
+            if (delayMs > 0)
+            {
+                Thread.Sleep(delayMs);
+            }
+        }
+
+        private void UpdateActivePlayer(Player activePlayer)
+        {
+            foreach (Player player in controlledPlayers)
+            {
+                player.SetActive(player == activePlayer);
+            }
         }
 
         private static void AddStartingItems(Items.ItemCatalog itemCatalog, Player player, IEnumerable<string> itemIds)

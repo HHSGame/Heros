@@ -1,4 +1,5 @@
 using HHSGame.UI;
+using HHSGame.Core.Combat;
 using HHSGame.Core.Classes;
 using HHSGame.Core.Map;
 
@@ -104,9 +105,9 @@ namespace HHSGame.Core
             return null;
         }
 
-        public void Update(Player player, bool useAp)
+        public void Update(Player player, bool useAp, Action<QueuedAction>? onEnemyAction = null)
         {
-            Context.EnemyManager.ExecuteTurn(player, useAp);
+            Context.EnemyManager.ExecuteTurn(player, useAp, onEnemyAction);
         }
 
         public void Draw(IDrawingContext ctx)

@@ -4,6 +4,7 @@ using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using HHSGame.Core.Stats;
+using HHSGame.UI;
 using HHSGame.Utils;
 using Terminal.Gui.Drawing;
 
@@ -31,6 +32,7 @@ namespace HHSGame.Core
         {
             X = x;
             Y = y;
+            PlannedPosition = new Coordinate(x, y);
             collisionSystem = context.CollisionSystem;
             inventoryManager = context.InventoryManager;
             itemManager = context.ItemManager;
@@ -54,6 +56,8 @@ namespace HHSGame.Core
 
         public int X { get; set; }
         public int Y { get; set; }
+        public Coordinate PlannedPosition { get; private set; }
+        public bool IsActive { get; private set; }
 
         public CharacterStats Stats { get; private set; }
         public ActionSequence ActionSequence { get; } = new();
@@ -75,7 +79,7 @@ namespace HHSGame.Core
         public Coordinate Position => new(X, Y);
         public char Glyph => glyph;
         public string Name => name;
-        public Terminal.Gui.Drawing.Attribute Attribute => new(Color.BrightYellow, Color.Red);
+        public Terminal.Gui.Drawing.Attribute Attribute => IsActive ? ColorPresets.PlayerActive : ColorPresets.Player;
 
         public void ApplyBaseStats(Attributes attributes, Skills skills)
         {
@@ -87,6 +91,7 @@ namespace HHSGame.Core
         public void ResetTurn(bool includeAp = true, bool updateFov = true)
         {
             Stats.ResetTurn(includeAp);
+            ResetPlannedPosition();
             TickEffects();
             if (updateFov)
             {
@@ -206,6 +211,8 @@ namespace HHSGame.Core
             {
                 Events.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
             }
+
+            ResetPlannedPosition();
         }
 
         public void Attack(Enemy enemy)
@@ -305,6 +312,21 @@ namespace HHSGame.Core
         private void Die()
         {
             Stats.ApplyDamage(Stats.CurrentHp);
+        }
+
+        public void SetActive(bool isActive)
+        {
+            IsActive = isActive;
+        }
+
+        public void SetPlannedPosition(Coordinate position)
+        {
+            PlannedPosition = position;
+        }
+
+        public void ResetPlannedPosition()
+        {
+            PlannedPosition = Position;
         }
     }
 }

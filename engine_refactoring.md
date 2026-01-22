@@ -81,6 +81,10 @@ Decision: keep both a minimal linear script format (for quick smoke flows) and a
 - 2025-01-20: Updated default `data/game.json` to use entry-based conditions with explicit map, item, and enemy spawns.
 - 2025-01-20: Added a multi-character tactics scenario (`data/maps/tactics-01.txt`) and switched `data/game.json` to use `players` spawns.
 - 2025-01-20: Added multi-player spawns, collision checks, and player-specific glyph/name support.
+- 2025-01-20: Added active-player highlighting plus status-bar display for the selected character.
+- 2025-01-20: Added planned-destination markers and planned-position-aware combat planning (move/attack/pickup).
+- 2025-01-20: Added per-action rendering delays for player/enemy action execution to make turns visibly step through.
+- 2025-01-20: Added victory messaging and combat cleanup on win/lose conditions.
 
 ## Next Actions
 - Add more condition types (currency, quest flags) and expose end-state messaging.

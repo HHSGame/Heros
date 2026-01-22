@@ -136,9 +136,9 @@ namespace HHSGame.Core.Enemies
             }
         }
 
-        public void ExecutePlannedActions(bool useAp)
+        public void ExecutePlannedActions(bool useAp, Action<QueuedAction>? onExecuted = null)
         {
-            ActionSequence.Execute(Stats, !useAp);
+            ActionSequence.Execute(Stats, !useAp, onExecuted);
             ActionSequence.Clear();
         }
 

@@ -39,7 +39,15 @@ namespace HHSGame.UI.Views
                 return PadToWidth("HP --/-- SP --/-- AP --/-- XP -- Lv -- Pos --,-- Time --");
             }
 
+            string playerLabel = player.Name;
+            if (context.Players.Count > 1)
+            {
+                int index = context.ActivePlayerIndex >= 0 ? context.ActivePlayerIndex + 1 : 1;
+                playerLabel = $"{playerLabel} ({index}/{context.Players.Count})";
+            }
+
             string status =
+                $"P {playerLabel} " +
                 $"HP {player.Health}/{player.MaxHealth} " +
                 $"SP {player.Sanity}/{player.MaxSanity} " +
                 $"AP {player.CurrentAp}/{player.MaxAp} " +
@@ -52,7 +60,7 @@ namespace HHSGame.UI.Views
                 || context.EnemyManager.Enemies.Any(enemy => context.MapState.IsVisible(enemy.X, enemy.Y));
             if (showCombatHints)
             {
-                status += " | M Move A Attack C Exit(no enemies) Enter End S Skills";
+                status += " | M Move A Attack G Pick C Exit(no enemies) Enter End S Skills";
             }
 
             return PadToWidth(status);

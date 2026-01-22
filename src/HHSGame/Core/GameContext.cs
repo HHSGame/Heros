@@ -43,6 +43,7 @@ namespace HHSGame.Core
     )
     {
         private Player? player;
+        private IReadOnlyList<Player> players = Array.Empty<Player>();
         public GameParameters Parameters => parameters;
         public Random Random => random;
         public EnemyFactory EnemyFactory => enemyFactory;
@@ -58,6 +59,8 @@ namespace HHSGame.Core
         public IDrawingContext DrawingContext => drawingContext;
         public Player Player => player!;
         public Player? PlayerOrNull => player;
+        public IReadOnlyList<Player> Players => players;
+        public int ActivePlayerIndex { get; private set; } = -1;
 
         public void InitializeContext(Player player)
         {
@@ -68,12 +71,27 @@ namespace HHSGame.Core
         {
             enemyManager.SetEnemies(enemyFactory.SpawnEnemies(parameters.EnemySpawns));
             collisionSystem.SetPlayers(players);
-            player = activePlayer;
+            this.players = players;
+            SetActivePlayer(activePlayer);
         }
 
         public void SetActivePlayer(Player player)
         {
             this.player = player;
+            ActivePlayerIndex = FindPlayerIndex(player);
+        }
+
+        private int FindPlayerIndex(Player player)
+        {
+            for (int i = 0; i < players.Count; i++)
+            {
+                if (ReferenceEquals(players[i], player))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
     }
 }

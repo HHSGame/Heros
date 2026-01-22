@@ -10,6 +10,7 @@ namespace HHSGame.UI
         public static int MessageWindowHeight => 10;
         public static int StatusBarHeight => 1;
         public static int ActionSequenceWidth => 24;
+        public static int ActionStepDelayMs => 120;
 
         public static string MapWindowTitle => "Main Map";
         public static string MessageWindowTitle => "Messages";
@@ -22,6 +23,7 @@ namespace HHSGame.UI
 
         public static char PathPreviewGlyph => '*';
         public static char TargetPreviewGlyph => 'X';
+        public static char PlannedDestinationGlyph => 'o';
 
     }
 }

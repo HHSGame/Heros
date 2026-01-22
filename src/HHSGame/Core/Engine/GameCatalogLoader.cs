@@ -78,7 +78,8 @@ namespace HHSGame.Core.Engine
                 config.Damage,
                 config.Penetration,
                 config.Range,
-                ParseEnum<WeaponType>(config.WeaponType, "weapon type"));
+                ParseEnum<WeaponType>(config.WeaponType, "weapon type"),
+                ParseEnum<WeaponTrajectory>(string.IsNullOrWhiteSpace(config.Trajectory) ? "Line" : config.Trajectory, "weapon trajectory"));
         }
 
         private static ArmorDefinition ParseArmor(ArmorDefinitionConfig config)

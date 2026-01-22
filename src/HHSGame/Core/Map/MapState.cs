@@ -81,6 +81,27 @@ namespace HHSGame.Core.Map
             return IsInBounds(x, y) && map[y, x].IsWalkable;
         }
 
+        public bool IsProjectileBlocking(int x, int y)
+        {
+            if (!IsInBounds(x, y))
+            {
+                return true;
+            }
+
+            Cell cell = map[y, x];
+            if (cell.IsWalkable)
+            {
+                return false;
+            }
+
+            return cell.Character != '~';
+        }
+
+        public bool IsProjectileBlocking(Coordinate coordinate)
+        {
+            return IsProjectileBlocking(coordinate.X, coordinate.Y);
+        }
+
         public void MarkVisibleTiles(HashSet<(int x, int y)> visibleTiles)
         {
             currentVisibleTiles.Clear();

@@ -42,7 +42,7 @@ namespace HHSGame.Core.Enemies
         public Enemy CreateEnemy(string enemyId, int x, int y)
         {
             EnemyDefinition definition = enemyCatalog.GetDefinition(enemyId);
-            return new Enemy(x, y, collisionSystem, pathfinder, definition, itemCatalog);
+            return new Enemy(x, y, collisionSystem, pathfinder, definition, itemCatalog, mapState);
         }
 
         private static Enemy? GetEnemyAt(List<Enemy> enemies, int x, int y)

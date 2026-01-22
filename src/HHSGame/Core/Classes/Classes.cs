@@ -18,7 +18,7 @@ namespace HHSGame.Core.Classes
     public class TypedClass : AbstractClass
     {
 
-        public Weapon Weapon { get; set; } = new Weapon("UnknownWeapon", "Unknown", ItemRarity.Common, 0, 0, 0, 0, 1, WeaponType.MeleeLight);
+        public Weapon Weapon { get; set; } = new Weapon("UnknownWeapon", "Unknown", ItemRarity.Common, 0, 0, 0, 0, 1, WeaponType.MeleeLight, WeaponTrajectory.Line);
         public Armor Armor { get; set; } = new Armor("UnknownArmor", "Unknown", ItemRarity.Common, 0, 0, 0);
 
         public override void ApplyClassBonuses(Player player)

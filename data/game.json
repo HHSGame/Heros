@@ -48,6 +48,18 @@
       "startingItems": [
         "HealthPotion"
       ]
+    },
+    {
+      "name": "Delta",
+      "glyph": "D",
+      "class": "Ranger",
+      "startPosition": {
+        "x": 2,
+        "y": 2
+      },
+      "startingItems": [
+        "HealthPotion"
+      ]
     }
   ],
   "catalogs": {

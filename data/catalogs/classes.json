@@ -55,6 +55,23 @@
       "skills": {},
       "weaponId": "Potion",
       "armorId": "Robe"
+    },
+    {
+      "id": "Ranger",
+      "name": "Ranger",
+      "attributes": {
+        "strength": 4,
+        "perception": 7,
+        "agility": 6,
+        "charisma": 4,
+        "intelligence": 4
+      },
+      "skills": {
+        "Firearms": 2,
+        "Awareness": 1
+      },
+      "weaponId": "ShortBow",
+      "armorId": "Cloak"
     }
   ]
 }

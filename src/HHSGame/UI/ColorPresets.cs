@@ -43,5 +43,6 @@ namespace HHSGame.UI
         public static readonly Attribute PathPreview = new(Color.BrightCyan, Color.Black);
         public static readonly Attribute TargetPreview = new(Color.BrightMagenta, Color.Black);
         public static readonly Attribute PlannedDestination = new(Color.BrightGreen, Color.Black);
+        public static readonly Attribute RangePreview = new(Color.BrightBlue, Color.Black);
     }
 }

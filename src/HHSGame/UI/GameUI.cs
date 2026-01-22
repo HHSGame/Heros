@@ -1,6 +1,7 @@
 using HHSGame.Core;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Enemies;
+using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using Terminal.Gui.App;
 using Terminal.Gui.Drivers;
@@ -24,6 +25,9 @@ namespace HHSGame.UI
         private GameStateType lastNonInventoryState = GameStateType.Exploration;
         private bool isMoveSelection;
         private Coordinate moveTarget = new(0, 0);
+        private bool isAttackSelection;
+        private readonly List<Enemy> attackTargets = [];
+        private int attackTargetIndex;
         private bool isKeyHandlerRegistered;
         private bool isGameStarted;
         public Toplevel Start()
@@ -114,6 +118,15 @@ namespace HHSGame.UI
             if (isMoveSelection)
             {
                 if (HandleMoveSelectionKey(key))
+                {
+                    key.Handled = true;
+                }
+                return;
+            }
+
+            if (isAttackSelection)
+            {
+                if (HandleAttackSelectionKey(key))
                 {
                     key.Handled = true;
                 }
@@ -262,7 +275,7 @@ namespace HHSGame.UI
                     BeginMoveSelection();
                     return true;
                 case KeyCode.A:
-                    QueueAttack();
+                    BeginAttackSelection();
                     return true;
                 case KeyCode.G:
                     QueuePickup();
@@ -332,6 +345,30 @@ namespace HHSGame.UI
             }
         }
 
+        private bool HandleAttackSelectionKey(Key key)
+        {
+            switch (key.KeyCode)
+            {
+                case KeyCode.CursorLeft:
+                case KeyCode.CursorUp:
+                    CycleAttackTarget(-1);
+                    return true;
+                case KeyCode.CursorRight:
+                case KeyCode.CursorDown:
+                case KeyCode.Tab:
+                    CycleAttackTarget(1);
+                    return true;
+                case KeyCode.Enter:
+                    ConfirmAttackSelection();
+                    return true;
+                case KeyCode.Esc:
+                    CancelAttackSelection();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         private void BeginMoveSelection()
         {
             if (game.Player == null)
@@ -345,11 +382,47 @@ namespace HHSGame.UI
             UpdateMovePreview();
         }
 
+        private void BeginAttackSelection()
+        {
+            if (game.Player == null)
+            {
+                return;
+            }
+
+            List<Enemy> targets = GetAttackTargets();
+            if (targets.Count == 0)
+            {
+                Events.RaiseGameMessage("No enemies in range.");
+                return;
+            }
+
+            if (targets.Count == 1)
+            {
+                QueueAttack(targets[0]);
+                return;
+            }
+
+            attackTargets.Clear();
+            attackTargets.AddRange(targets);
+            attackTargetIndex = 0;
+            isAttackSelection = true;
+            Events.RaiseGameMessage("Attack mode: arrow keys/Tab to switch target, Enter to confirm, Esc to cancel.");
+            UpdateAttackOverlay();
+        }
+
         private void CancelMoveSelection()
         {
             isMoveSelection = false;
             game.ClearOverlayCells();
             Events.RaiseGameMessage("Move mode cancelled.");
+        }
+
+        private void CancelAttackSelection()
+        {
+            isAttackSelection = false;
+            attackTargets.Clear();
+            game.ClearOverlayCells();
+            Events.RaiseGameMessage("Attack mode cancelled.");
         }
 
         private void MoveSelectionBy(int dx, int dy)
@@ -367,6 +440,22 @@ namespace HHSGame.UI
 
             moveTarget = next;
             UpdateMovePreview();
+        }
+
+        private void CycleAttackTarget(int delta)
+        {
+            if (!isAttackSelection || attackTargets.Count == 0)
+            {
+                return;
+            }
+
+            attackTargetIndex = (attackTargetIndex + delta) % attackTargets.Count;
+            if (attackTargetIndex < 0)
+            {
+                attackTargetIndex += attackTargets.Count;
+            }
+
+            UpdateAttackOverlay();
         }
 
         private void UpdateMovePreview()
@@ -451,6 +540,20 @@ namespace HHSGame.UI
             game.ClearOverlayCells();
         }
 
+        private void ConfirmAttackSelection()
+        {
+            if (!isAttackSelection || attackTargets.Count == 0)
+            {
+                return;
+            }
+
+            Enemy selected = attackTargets[attackTargetIndex];
+            isAttackSelection = false;
+            attackTargets.Clear();
+            game.ClearOverlayCells();
+            QueueAttack(selected);
+        }
+
         private void UpdateMoveOverlay(List<Coordinate> path)
         {
             if (path.Count <= 1)
@@ -475,6 +578,40 @@ namespace HHSGame.UI
                 Character = GUISettings.TargetPreviewGlyph,
                 Attribute = ColorPresets.TargetPreview
             }));
+
+            game.SetOverlayCells(overlay);
+        }
+
+        private void UpdateAttackOverlay()
+        {
+            if (!isAttackSelection || game.Player == null)
+            {
+                game.ClearOverlayCells();
+                return;
+            }
+
+            Player player = game.Player;
+            Coordinate origin = player.PlannedPosition;
+            Weapon weapon = player.EquippedWeapon;
+            List<(Coordinate Position, Cell Cell)> overlay = [];
+            foreach (Coordinate cell in CombatTargeting.GetRangeCells(game.Context.MapState, origin, weapon))
+            {
+                overlay.Add((cell, new Cell
+                {
+                    Character = GUISettings.RangePreviewGlyph,
+                    Attribute = ColorPresets.RangePreview
+                }));
+            }
+
+            if (attackTargets.Count > 0)
+            {
+                Enemy selected = attackTargets[attackTargetIndex];
+                overlay.Add((selected.Position, new Cell
+                {
+                    Character = GUISettings.TargetPreviewGlyph,
+                    Attribute = ColorPresets.TargetPreview
+                }));
+            }
 
             game.SetOverlayCells(overlay);
         }
@@ -519,7 +656,7 @@ namespace HHSGame.UI
             };
         }
 
-        private void QueueAttack()
+        private void QueueAttack(Enemy enemy)
         {
             if (game.Player == null)
             {
@@ -527,15 +664,6 @@ namespace HHSGame.UI
             }
 
             Player player = game.Player;
-            Coordinate origin = player.PlannedPosition;
-            Enemy? enemy = game.Context.EnemyManager.Enemies.FirstOrDefault(target =>
-                Math.Abs(target.X - origin.X) + Math.Abs(target.Y - origin.Y) == 1);
-
-            if (enemy == null)
-            {
-                Events.RaiseGameMessage("No adjacent enemy to attack.");
-                return;
-            }
 
             if (!game.TryQueuePlayerAction($"Attack {enemy.Name}", player.EquippedWeapon.ApCost, () => player.Attack(enemy)))
             {
@@ -544,6 +672,18 @@ namespace HHSGame.UI
             }
 
             Events.RaiseGameMessage($"Queued attack on {enemy.Name}.");
+        }
+
+        private List<Enemy> GetAttackTargets()
+        {
+            if (game.Player == null)
+            {
+                return [];
+            }
+
+            Player player = game.Player;
+            Coordinate origin = player.PlannedPosition;
+            return CombatTargeting.GetTargetsInRange(game.Context.MapState, origin, game.Context.EnemyManager.Enemies, player.EquippedWeapon);
         }
 
         private void QueuePickup()

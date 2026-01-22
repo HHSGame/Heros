@@ -27,6 +27,7 @@ namespace HHSGame.Core.Engine.Config
         public int Penetration { get; init; }
         public int Range { get; init; }
         public string WeaponType { get; init; } = "MeleeLight";
+        public string Trajectory { get; init; } = "Line";
     }
 
     public sealed class ArmorCatalogConfig

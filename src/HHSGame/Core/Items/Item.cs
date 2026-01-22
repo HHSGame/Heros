@@ -46,6 +46,12 @@ namespace HHSGame.Core.Items
         Burst
     }
 
+    public enum WeaponTrajectory
+    {
+        Line,
+        Arc
+    }
+
     public static class WeaponRules
     {
         public static int GetApCost(WeaponType type)
@@ -91,6 +97,11 @@ namespace HHSGame.Core.Items
         {
             return type is WeaponType.RangedSnap or WeaponType.RangedAimed or WeaponType.Burst;
         }
+
+        public static bool RequiresLineOfSight(Weapon weapon)
+        {
+            return weapon.Trajectory == WeaponTrajectory.Line && IsRanged(weapon.WeaponType);
+        }
     }
 
     public class HealthPotion : Item
@@ -111,12 +122,13 @@ namespace HHSGame.Core.Items
     }
 
     public class Weapon(string id, string name, ItemRarity rarity, int value, float weight,
-        int damage, int penetration, int range, WeaponType weaponType) : Item(id, name, rarity, value, weight)
+        int damage, int penetration, int range, WeaponType weaponType, WeaponTrajectory trajectory) : Item(id, name, rarity, value, weight)
     {
         public int Damage { get; } = damage;
         public int Penetration { get; } = penetration;
         public int Range { get; } = range;
         public WeaponType WeaponType { get; } = weaponType;
+        public WeaponTrajectory Trajectory { get; } = trajectory;
 
         public int ApCost => WeaponRules.GetApCost(WeaponType);
 

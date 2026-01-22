@@ -1,6 +1,7 @@
 using HHSGame.Core;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Enemies;
+using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using HHSGame.UI;
 
@@ -424,15 +425,19 @@ namespace HHSGame.Core.Engine.Scripting
 
             Player player = game.Player;
             Coordinate origin = player.PlannedPosition;
-            Enemy? enemy = game.Context.EnemyManager.Enemies.FirstOrDefault(target =>
-                Math.Abs(target.X - origin.X) + Math.Abs(target.Y - origin.Y) == 1);
+            List<Enemy> targets = CombatTargeting.GetTargetsInRange(
+                game.Context.MapState,
+                origin,
+                game.Context.EnemyManager.Enemies,
+                player.EquippedWeapon);
 
-            if (enemy == null)
+            if (targets.Count == 0)
             {
-                Events.RaiseGameMessage("No adjacent enemy to attack.");
+                Events.RaiseGameMessage("No enemies in range.");
                 return;
             }
 
+            Enemy enemy = targets[0];
             if (!game.TryQueuePlayerAction($"Attack {enemy.Name}", player.EquippedWeapon.ApCost, () => player.Attack(enemy)))
             {
                 Events.RaiseGameMessage("Not enough AP to queue attack.");

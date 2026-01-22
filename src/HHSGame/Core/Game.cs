@@ -685,7 +685,7 @@ namespace HHSGame.Core
                 return;
             }
 
-            Application.Driver?.Refresh();
+            Application.LayoutAndDraw(true);
             int delayMs = GUISettings.ActionStepDelayMs;
             if (delayMs > 0)
             {

@@ -107,8 +107,8 @@ namespace HHSGame.Core.Engine.Scripting
         {
             List<WeaponDefinition> weapons =
             [
-                new WeaponDefinition("UnknownWeapon", "Unknown", ItemRarity.Common, 0, 0, 0, 0, 1, WeaponType.MeleeLight),
-                new WeaponDefinition("Sword", "Sword", ItemRarity.Common, 100, 2.0f, 10, 1, 1, WeaponType.MeleeLight)
+                new WeaponDefinition("UnknownWeapon", "Unknown", ItemRarity.Common, 0, 0, 0, 0, 1, WeaponType.MeleeLight, WeaponTrajectory.Line),
+                new WeaponDefinition("Sword", "Sword", ItemRarity.Common, 100, 2.0f, 10, 1, 1, WeaponType.MeleeLight, WeaponTrajectory.Line)
             ];
 
             List<ArmorDefinition> armors =

@@ -222,6 +222,19 @@ namespace HHSGame.Core
                 return;
             }
 
+            if (!CombatTargeting.IsWithinRange(Position, enemy.Position, EquippedWeapon.Range))
+            {
+                Events.RaiseGameMessage("Target is out of range.");
+                return;
+            }
+
+            if (WeaponRules.RequiresLineOfSight(EquippedWeapon)
+                && !CombatTargeting.HasLineOfSight(mapState, Position, enemy.Position))
+            {
+                Events.RaiseGameMessage("Line of sight is blocked.");
+                return;
+            }
+
             CombatResolver.ResolveAttack(this, enemy, EquippedWeapon, random);
 
             if (enemy.IsDead)

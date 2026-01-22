@@ -146,7 +146,7 @@ namespace HHSGame.Core
             ItemCatalog itemCatalog = new(
                 new List<WeaponDefinition>
                 {
-                    new WeaponDefinition("UnknownWeapon", "Unknown", ItemRarity.Common, 0, 0, 0, 0, 1, WeaponType.MeleeLight)
+                    new WeaponDefinition("UnknownWeapon", "Unknown", ItemRarity.Common, 0, 0, 0, 0, 1, WeaponType.MeleeLight, WeaponTrajectory.Line)
                 },
                 new List<ArmorDefinition>
                 {

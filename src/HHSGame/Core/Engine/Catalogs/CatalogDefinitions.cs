@@ -14,7 +14,8 @@ namespace HHSGame.Core.Engine.Catalogs
         int Damage,
         int Penetration,
         int Range,
-        WeaponType WeaponType);
+        WeaponType WeaponType,
+        WeaponTrajectory Trajectory);
 
     public sealed record ArmorDefinition(
         string Id,

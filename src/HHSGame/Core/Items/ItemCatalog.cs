@@ -62,7 +62,7 @@ namespace HHSGame.Core.Items
             {
                 if (!weapons.TryGetValue(UnknownWeaponId, out WeaponDefinition? fallback) || fallback == null)
                 {
-                    fallback = new WeaponDefinition(UnknownWeaponId, "Unknown", ItemRarity.Common, 0, 0, 0, 0, 1, WeaponType.MeleeLight);
+                    fallback = new WeaponDefinition(UnknownWeaponId, "Unknown", ItemRarity.Common, 0, 0, 0, 0, 1, WeaponType.MeleeLight, WeaponTrajectory.Line);
                 }
 
                 definition = fallback;
@@ -121,7 +121,8 @@ namespace HHSGame.Core.Items
                 definition.Damage,
                 definition.Penetration,
                 definition.Range,
-                definition.WeaponType);
+                definition.WeaponType,
+                definition.Trajectory);
         }
 
         private static Armor BuildArmor(ArmorDefinition definition)

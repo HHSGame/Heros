@@ -58,33 +58,37 @@ Decision: keep both a minimal linear script format (for quick smoke flows) and a
 5. Add first scripted test in `HHSGameTest`.
 
 ## Status Log
-- 2025-01-20: Plan created.
-- 2025-01-20: Added test-script flexibility considerations (conditional/guarded steps).
-- 2025-01-20: Confirmed support for both linear and conditional script modes.
-- 2025-01-20: Added config models + loader (`Core/Engine/Config`, `GameConfigLoader`) and default `data/game.json` with unit tests.
-- 2025-01-20: Added config mapper + config-driven bootstrap in `Program`, plus starting item/start position hooks.
-- 2025-01-20: Added `GameEngineFactory` wrapper for config loading and parameter mapping.
-- 2025-01-20: Added `--config` CLI handling to load `data/game.json` or override path.
-- 2025-01-20: Added scripted input schema + loader + runner, plus input adapter for headless/UI execution.
-- 2025-01-20: Added `--test-script` (optional `--test-step-ms`) to auto-run scripts with UI and skip the wizard.
-- 2025-01-20: Added sample script `data/scripts/combat_toggle_smoke.json` and runner tests.
-- 2025-01-20: Removed runtime map/enemy/item generators in favor of config-driven spawns and map loading (custom map or empty map).
-- 2025-01-20: Externalized weapons/armors/items/classes/enemies into `data/catalogs/*.json` with catalog loader + runtime catalogs.
-- 2025-01-20: Moved core service wiring into `GameEngine` and added a `BuildServiceProvider` helper for bootstrap.
-- 2025-01-20: Removed enemy enum dependency; enemy IDs and abilities are now fully config-driven in `data/catalogs/enemies.json`.
-- 2025-01-20: Added catalog loader coverage for enemy ability parsing.
-- 2025-01-20: Introduced `GameEngineHost` to own Terminal UI startup and scripted runs.
-- 2025-01-20: Added config-driven win/lose evaluation hooks for `PlayerDeath` and `AllEnemiesDefeated`.
-- 2025-01-20: Added config-driven `TurnLimit` condition support plus validation for unknown or malformed condition entries.
-- 2025-01-20: Consolidated CLI argument parsing and engine startup into `GameEngineLauncher`.
-- 2025-01-20: Added parameterized conditions for `EnemyCountAtMost`, `EnemyCountAtLeast`, `HasItem`, and `ReachMarker` plus inventory item ids.
-- 2025-01-20: Updated default `data/game.json` to use entry-based conditions with explicit map, item, and enemy spawns.
-- 2025-01-20: Added a multi-character tactics scenario (`data/maps/tactics-01.txt`) and switched `data/game.json` to use `players` spawns.
-- 2025-01-20: Added multi-player spawns, collision checks, and player-specific glyph/name support.
-- 2025-01-20: Added active-player highlighting plus status-bar display for the selected character.
-- 2025-01-20: Added planned-destination markers and planned-position-aware combat planning (move/attack/pickup).
-- 2025-01-20: Added per-action rendering delays for player/enemy action execution to make turns visibly step through.
-- 2025-01-20: Added victory messaging and combat cleanup on win/lose conditions.
+- 2026-01-20: Plan created.
+- 2026-01-20: Added test-script flexibility considerations (conditional/guarded steps).
+- 2026-01-20: Confirmed support for both linear and conditional script modes.
+- 2026-01-20: Added config models + loader (`Core/Engine/Config`, `GameConfigLoader`) and default `data/game.json` with unit tests.
+- 2026-01-20: Added config mapper + config-driven bootstrap in `Program`, plus starting item/start position hooks.
+- 2026-01-20: Added `GameEngineFactory` wrapper for config loading and parameter mapping.
+- 2026-01-20: Added `--config` CLI handling to load `data/game.json` or override path.
+- 2026-01-20: Added scripted input schema + loader + runner, plus input adapter for headless/UI execution.
+- 2026-01-20: Added `--test-script` (optional `--test-step-ms`) to auto-run scripts with UI and skip the wizard.
+- 2026-01-20: Added sample script `data/scripts/combat_toggle_smoke.json` and runner tests.
+- 2026-01-20: Removed runtime map/enemy/item generators in favor of config-driven spawns and map loading (custom map or empty map).
+- 2026-01-20: Externalized weapons/armors/items/classes/enemies into `data/catalogs/*.json` with catalog loader + runtime catalogs.
+- 2026-01-20: Moved core service wiring into `GameEngine` and added a `BuildServiceProvider` helper for bootstrap.
+- 2026-01-20: Removed enemy enum dependency; enemy IDs and abilities are now fully config-driven in `data/catalogs/enemies.json`.
+- 2026-01-20: Added catalog loader coverage for enemy ability parsing.
+- 2026-01-20: Introduced `GameEngineHost` to own Terminal UI startup and scripted runs.
+- 2026-01-20: Added config-driven win/lose evaluation hooks for `PlayerDeath` and `AllEnemiesDefeated`.
+- 2026-01-20: Added config-driven `TurnLimit` condition support plus validation for unknown or malformed condition entries.
+- 2026-01-20: Consolidated CLI argument parsing and engine startup into `GameEngineLauncher`.
+- 2026-01-20: Added parameterized conditions for `EnemyCountAtMost`, `EnemyCountAtLeast`, `HasItem`, and `ReachMarker` plus inventory item ids.
+- 2026-01-22: Updated default `data/game.json` to use entry-based conditions with explicit map, item, and enemy spawns.
+- 2026-01-22: Added a multi-character tactics scenario (`data/maps/tactics-01.txt`) and switched `data/game.json` to use `players` spawns.
+- 2026-01-22: Added multi-player spawns, collision checks, and player-specific glyph/name support.
+- 2026-01-22: Added active-player highlighting plus status-bar display for the selected character.
+- 2026-01-22: Added planned-destination markers and planned-position-aware combat planning (move/attack/pickup).
+- 2026-01-22: Added per-action rendering delays for player/enemy action execution to make turns visibly step through.
+- 2026-01-22: Added victory messaging and combat cleanup on win/lose conditions.
+- 2026-01-22: Added ranged targeting helpers with line/arc trajectories and projectile LOS rules (water no longer blocks).
+- 2026-01-22: Added ranged target selection UI with attack range overlays in combat planning.
+- 2026-01-22: Expanded weapon catalog with ranged/magic examples and trajectory metadata.
+- 2026-01-22: Forced immediate per-action redraws via `Application.LayoutAndDraw` for clearer step-by-step animations.
 
 ## Next Actions
 - Add more condition types (currency, quest flags) and expose end-state messaging.

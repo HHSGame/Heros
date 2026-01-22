@@ -23,6 +23,7 @@ namespace HHSGame.Core.Enemies
         private readonly Pathfinder pathfinder;
         private readonly Random random;
         private readonly ItemCatalog itemCatalog;
+        private readonly MapState mapState;
 
         public string Id { get; }
         public EnemyState State { get; private set; }
@@ -52,7 +53,8 @@ namespace HHSGame.Core.Enemies
             CollisionSystem collisionSystem,
             Pathfinder pathfinder,
             EnemyDefinition definition,
-            ItemCatalog itemCatalog)
+            ItemCatalog itemCatalog,
+            MapState mapState)
         {
             random = new Random();
             Id = definition.Id;
@@ -61,6 +63,7 @@ namespace HHSGame.Core.Enemies
             this.collisionSystem = collisionSystem;
             this.pathfinder = pathfinder;
             this.itemCatalog = itemCatalog;
+            this.mapState = mapState;
             State = EnemyState.Chasing;
 
             Name = definition.Name;
@@ -184,6 +187,11 @@ namespace HHSGame.Core.Enemies
 
         private EnemyState DetermineState(Player player)
         {
+            if (CombatTargeting.CanAttack(mapState, Position, player.Position, EquippedWeapon))
+            {
+                return EnemyState.Attacking;
+            }
+
             return DetermineState(player, X, Y);
         }
 
@@ -201,6 +209,11 @@ namespace HHSGame.Core.Enemies
 
         public void Attack(Player player)
         {
+            if (!CombatTargeting.CanAttack(mapState, Position, player.Position, EquippedWeapon))
+            {
+                return;
+            }
+
             CombatResolver.ResolveAttack(this, player, EquippedWeapon, random);
             abilitySystem.TryApplySpecialEffect(player);
         }

@@ -6,7 +6,7 @@ using HHSGame.Core.Items;
 
 namespace HHSGame.Core.Enemies
 {
-    public class EnemyManager(ItemManager itemManager) : IDrawable
+    public class EnemyManager(ItemManager itemManager, Quests.QuestManager questManager) : IDrawable
     {
         private readonly List<Enemy> enemies = [];
 
@@ -34,6 +34,7 @@ namespace HHSGame.Core.Enemies
                     // Handle enemy death
                     enemies.Remove(enemy);
                     DropLoot(enemy);
+                    questManager.NotifyEnemyDefeated(enemy.Id);
                     continue;
                 }
 

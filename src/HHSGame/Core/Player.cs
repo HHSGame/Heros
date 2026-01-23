@@ -4,6 +4,7 @@ using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using HHSGame.Core.Stats;
+using HHSGame.Core.Quests;
 using HHSGame.UI;
 using HHSGame.Utils;
 using Terminal.Gui.Drawing;
@@ -21,6 +22,7 @@ namespace HHSGame.Core
         private readonly ItemManager itemManager;
         private readonly ItemCatalog itemCatalog;
         private readonly MapState mapState;
+        private readonly QuestManager questManager;
         private readonly Random random;
         private readonly string name;
         private readonly char glyph;
@@ -38,6 +40,7 @@ namespace HHSGame.Core
             itemManager = context.ItemManager;
             itemCatalog = context.ItemCatalog;
             mapState = context.MapState;
+            questManager = context.QuestManager;
             random = context.Random;
             this.name = string.IsNullOrWhiteSpace(name) ? I18n.T("HHS.Core.Player.Name") : name;
             this.glyph = glyph ?? '☭';
@@ -205,6 +208,7 @@ namespace HHSGame.Core
                 X = newX;
                 Y = newY;
                 UpdateFOV();
+                NotifyMarkerReached();
                 Events.RaiseGameMessage(collisionSystem.GetCollisionMessage(newX, newY, this));
             }
             else
@@ -308,6 +312,7 @@ namespace HHSGame.Core
             foreach (Item item in items)
             {
                 AddItem(item);
+                questManager.NotifyItemCollected(item.Id, 1);
             }
             Events.RaiseSurroundingsChange((X, Y), FOVRadius, SurroundingsChangeType.PickUpLoot);
         }
@@ -340,6 +345,18 @@ namespace HHSGame.Core
         public void ResetPlannedPosition()
         {
             PlannedPosition = Position;
+        }
+
+        private void NotifyMarkerReached()
+        {
+            foreach ((Coordinate position, char symbol) in mapState.SpecialPositions)
+            {
+                if (position.Equals(Position))
+                {
+                    questManager.NotifyMarkerReached(symbol.ToString());
+                    return;
+                }
+            }
         }
     }
 }

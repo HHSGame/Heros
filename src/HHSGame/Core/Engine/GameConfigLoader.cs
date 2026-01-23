@@ -65,6 +65,19 @@ namespace HHSGame.Core.Engine
                     throw new InvalidDataException($"StartPosition is required for {name} in {path}.");
                 }
             }
+
+            foreach (NpcConfig npc in config.Npcs)
+            {
+                if (string.IsNullOrWhiteSpace(npc.Id))
+                {
+                    throw new InvalidDataException($"Npc id is required in {path}.");
+                }
+
+                if (npc.Position == null)
+                {
+                    throw new InvalidDataException($"Npc position is required for {npc.Id} in {path}.");
+                }
+            }
         }
     }
 }

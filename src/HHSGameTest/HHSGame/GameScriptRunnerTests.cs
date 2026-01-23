@@ -7,6 +7,9 @@ using HHSGame.Core.Combat;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
+using HHSGame.Core.Npcs;
+using HHSGame.Core.Quests;
+using HHSGame.Core.Dialogue;
 using HHSGame.UI;
 using Microsoft.Extensions.Logging.Abstractions;
 using Terminal.Gui.ViewBase;
@@ -36,7 +39,7 @@ namespace HHSGame.Core.Engine.Scripting
             game.Context.EnemyManager.SetEnemies(new List<Enemy>());
             int startX = game.Player!.X;
 
-            string scriptJson = "{\"inputs\":[\"C\",\"M\",\"Right\",\"Right\",\"Enter\",\"Enter\",\"C\",\"Q\"]}";
+            string scriptJson = "{\"inputs\":[\"C\",\"M\",\"Right\",\"Right\",\"Enter\",\"Enter\",\"C\",\"QUIT\"]}";
             string scriptPath = CreateTempScriptFile(scriptJson);
             GameScriptLoader loader = new(new GameDataLoader(NullLogger<GameDataLoader>.Instance));
             GameScript script = loader.Load(scriptPath);
@@ -71,12 +74,17 @@ namespace HHSGame.Core.Engine.Scripting
             GameCatalog catalogs = CreateCatalogs();
             ItemManager itemManager = new();
             MapState mapState = new();
-            EnemyManager enemyManager = new(itemManager);
-            CollisionSystem collisionSystem = new(enemyManager, mapState);
+            InventoryManager inventoryManager = new();
+            PartyState partyState = new();
+            QuestManager questManager = new(partyState, inventoryManager, catalogs.ItemCatalog);
+            EnemyManager enemyManager = new(itemManager, questManager);
+            NpcManager npcManager = new();
+            CollisionSystem collisionSystem = new(enemyManager, mapState, npcManager);
             Pathfinder pathfinder = new(mapState);
             EnemyFactory enemyFactory = new(catalogs.EnemyCatalog, catalogs.ItemCatalog, collisionSystem, mapState, pathfinder);
-            SurroundingsManager surroundingsManager = new(itemManager, enemyManager, mapState);
-            InventoryManager inventoryManager = new();
+            NpcFactory npcFactory = new(catalogs.ItemCatalog);
+            DialogueManager dialogueManager = new(partyState, questManager);
+            SurroundingsManager surroundingsManager = new(itemManager, enemyManager, mapState, npcManager);
             TurnManager turnManager = new();
             GameStateMachine stateMachine = new();
             IDrawingContext drawingContext = new TestDrawingContext(20, 10);
@@ -90,10 +98,15 @@ namespace HHSGame.Core.Engine.Scripting
                 enemyManager,
                 itemManager,
                 catalogs.ItemCatalog,
+                npcFactory,
+                npcManager,
                 surroundingsManager,
                 inventoryManager,
                 turnManager,
                 stateMachine,
+                questManager,
+                dialogueManager,
+                partyState,
                 drawingContext);
 
             GameWorld world = new(context);

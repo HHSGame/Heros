@@ -10,7 +10,23 @@
         "charisma": 5,
         "intelligence": 5
       },
-      "skills": {},
+      "skills": {
+        "Melee": 2,
+        "Athletics": 2,
+        "Survival": 2,
+        "Firearms": 1,
+        "Awareness": 2,
+        "Resolution": 1,
+        "Stealth": 1,
+        "Dexterity": 1,
+        "Mechanics": 1,
+        "Barter": 2,
+        "Leadership": 1,
+        "Persuasion": 2,
+        "Knowledge": 1,
+        "Medicine": 1,
+        "Religion": 1
+      },
       "weaponId": "UnknownWeapon",
       "armorId": "UnknownArmor"
     },
@@ -24,7 +40,23 @@
         "charisma": 4,
         "intelligence": 4
       },
-      "skills": {},
+      "skills": {
+        "Melee": 12,
+        "Athletics": 10,
+        "Survival": 8,
+        "Firearms": 4,
+        "Awareness": 5,
+        "Resolution": 8,
+        "Stealth": 2,
+        "Dexterity": 4,
+        "Mechanics": 3,
+        "Barter": 2,
+        "Leadership": 6,
+        "Persuasion": 3,
+        "Knowledge": 2,
+        "Medicine": 2,
+        "Religion": 2
+      },
       "weaponId": "Sword",
       "armorId": "Shield"
     },
@@ -38,7 +70,23 @@
         "charisma": 5,
         "intelligence": 4
       },
-      "skills": {},
+      "skills": {
+        "Melee": 5,
+        "Athletics": 6,
+        "Survival": 4,
+        "Firearms": 3,
+        "Awareness": 8,
+        "Resolution": 3,
+        "Stealth": 12,
+        "Dexterity": 10,
+        "Mechanics": 8,
+        "Barter": 6,
+        "Leadership": 2,
+        "Persuasion": 5,
+        "Knowledge": 3,
+        "Medicine": 2,
+        "Religion": 1
+      },
       "weaponId": "Dagger",
       "armorId": "Cloak"
     },
@@ -52,7 +100,23 @@
         "charisma": 5,
         "intelligence": 7
       },
-      "skills": {},
+      "skills": {
+        "Melee": 3,
+        "Athletics": 3,
+        "Survival": 4,
+        "Firearms": 2,
+        "Awareness": 5,
+        "Resolution": 5,
+        "Stealth": 3,
+        "Dexterity": 4,
+        "Mechanics": 7,
+        "Barter": 4,
+        "Leadership": 3,
+        "Persuasion": 4,
+        "Knowledge": 12,
+        "Medicine": 10,
+        "Religion": 6
+      },
       "weaponId": "Potion",
       "armorId": "Robe"
     },
@@ -67,8 +131,21 @@
         "intelligence": 4
       },
       "skills": {
-        "Firearms": 2,
-        "Awareness": 1
+        "Melee": 4,
+        "Athletics": 7,
+        "Survival": 9,
+        "Firearms": 12,
+        "Awareness": 10,
+        "Resolution": 5,
+        "Stealth": 6,
+        "Dexterity": 7,
+        "Mechanics": 3,
+        "Barter": 3,
+        "Leadership": 4,
+        "Persuasion": 3,
+        "Knowledge": 4,
+        "Medicine": 3,
+        "Religion": 2
       },
       "weaponId": "ShortBow",
       "armorId": "Cloak"

@@ -12,4 +12,15 @@ namespace HHSGame.Core
     public sealed record EnemySpawn(string EnemyId, Coordinate Position, int Count = 1);
 
     public sealed record MapItemSpawn(string ItemId, Coordinate Position, int Quantity = 1);
+
+    public sealed record NpcSpawn(
+        string Id,
+        string Name,
+        char Glyph,
+        Terminal.Gui.Drawing.Attribute Attribute,
+        Stats.Attributes Attributes,
+        Stats.Skills Skills,
+        Coordinate Position,
+        string DialogueId,
+        List<string> StartingItems);
 }

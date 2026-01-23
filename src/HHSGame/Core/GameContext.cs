@@ -1,9 +1,12 @@
 
 using HHSGame.UI;
 using HHSGame.Core.Combat;
-using HHSGame.Core.Map;
+using HHSGame.Core.Dialogue;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
+using HHSGame.Core.Map;
+using HHSGame.Core.Npcs;
+using HHSGame.Core.Quests;
 using HHSGame.Core.Classes;
 
 namespace HHSGame.Core
@@ -24,6 +27,10 @@ namespace HHSGame.Core
         public List<PlayerSpawn> PlayerSpawns { get; set; } = [];
         public List<EnemySpawn> EnemySpawns { get; set; } = [];
         public List<MapItemSpawn> MapItems { get; set; } = [];
+        public List<NpcSpawn> NpcSpawns { get; set; } = [];
+        public List<DialogueDefinition> DialogueDefinitions { get; set; } = [];
+        public List<QuestDefinition> QuestDefinitions { get; set; } = [];
+        public List<AchievementDefinition> AchievementDefinitions { get; set; } = [];
     }
 
     public class GameContext(
@@ -35,10 +42,15 @@ namespace HHSGame.Core
         EnemyManager enemyManager,
         ItemManager itemManager,
         Items.ItemCatalog itemCatalog,
+        NpcFactory npcFactory,
+        NpcManager npcManager,
         SurroundingsManager surroundingsManager,
         InventoryManager inventoryManager,
         TurnManager turnManager,
         GameStateMachine stateMachine,
+        QuestManager questManager,
+        DialogueManager dialogueManager,
+        PartyState partyState,
         IDrawingContext drawingContext
     )
     {
@@ -52,10 +64,15 @@ namespace HHSGame.Core
         public EnemyManager EnemyManager => enemyManager;
         public ItemManager ItemManager => itemManager;
         public Items.ItemCatalog ItemCatalog => itemCatalog;
+        public NpcFactory NpcFactory => npcFactory;
+        public NpcManager NpcManager => npcManager;
         public SurroundingsManager SurroundingsManager => surroundingsManager;
         public InventoryManager InventoryManager => inventoryManager;
         public TurnManager TurnManager => turnManager;
         public GameStateMachine StateMachine => stateMachine;
+        public QuestManager QuestManager => questManager;
+        public DialogueManager DialogueManager => dialogueManager;
+        public PartyState PartyState => partyState;
         public IDrawingContext DrawingContext => drawingContext;
         public Player Player => player!;
         public Player? PlayerOrNull => player;
@@ -70,15 +87,20 @@ namespace HHSGame.Core
         public void InitializeContext(IReadOnlyList<Player> players, Player activePlayer)
         {
             enemyManager.SetEnemies(enemyFactory.SpawnEnemies(parameters.EnemySpawns));
+            npcManager.SetNpcs(npcFactory.CreateNpcs(parameters.NpcSpawns));
+            questManager.LoadDefinitions(parameters.QuestDefinitions, parameters.AchievementDefinitions);
+            dialogueManager.LoadDefinitions(parameters.DialogueDefinitions);
             collisionSystem.SetPlayers(players);
             this.players = players;
             SetActivePlayer(activePlayer);
+            partyState.SetPlayers(players, activePlayer);
         }
 
         public void SetActivePlayer(Player player)
         {
             this.player = player;
             ActivePlayerIndex = FindPlayerIndex(player);
+            partyState.SetActivePlayer(player);
         }
 
         private int FindPlayerIndex(Player player)

@@ -1,4 +1,4 @@
 {
   "name": "combat-toggle-smoke",
-  "inputs": ["C", "M", "Right", "Right", "Enter", "Enter", "C", "Q"]
+  "inputs": ["C", "M", "Right", "Right", "Enter", "Enter", "C", "QUIT"]
 }

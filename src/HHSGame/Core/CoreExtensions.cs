@@ -4,6 +4,9 @@ using HHSGame.Core.Combat;
 using HHSGame.Core.Map;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
+using HHSGame.Core.Npcs;
+using HHSGame.Core.Quests;
+using HHSGame.Core.Dialogue;
 
 namespace HHSGame.Core
 {
@@ -28,10 +31,15 @@ namespace HHSGame.Core
             serviceCollection.AddSingleton<MapState>();
             serviceCollection.AddSingleton<EnemyManager>();
             serviceCollection.AddSingleton<ItemManager>();
+            serviceCollection.AddSingleton<NpcFactory>();
+            serviceCollection.AddSingleton<NpcManager>();
             serviceCollection.AddSingleton<SurroundingsManager>();
             serviceCollection.AddSingleton<InventoryManager>();
             serviceCollection.AddSingleton<TurnManager>();
             serviceCollection.AddSingleton<GameStateMachine>();
+            serviceCollection.AddSingleton<PartyState>();
+            serviceCollection.AddSingleton<QuestManager>();
+            serviceCollection.AddSingleton<DialogueManager>();
 
             // Setup GameContext
             serviceCollection.AddSingleton<GameContext>();

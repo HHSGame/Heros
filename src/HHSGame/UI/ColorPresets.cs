@@ -40,6 +40,14 @@ namespace HHSGame.UI
         public static readonly Attribute Player = new(Color.BrightYellow, Color.Red);
         public static readonly Attribute PlayerActive = new(Color.Black, Color.BrightYellow);
 
+        public static class Npcs
+        {
+            public static readonly Attribute Default = new(Color.White, Color.DarkGray);
+            public static readonly Attribute Trader = new(Color.BrightGreen, Color.Black);
+            public static readonly Attribute Scholar = new(Color.BrightCyan, Color.Black);
+            public static readonly Attribute Guard = new(Color.BrightRed, Color.Black);
+        }
+
         public static readonly Attribute PathPreview = new(Color.BrightCyan, Color.Black);
         public static readonly Attribute TargetPreview = new(Color.BrightMagenta, Color.Black);
         public static readonly Attribute PlannedDestination = new(Color.BrightGreen, Color.Black);

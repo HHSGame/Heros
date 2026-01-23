@@ -116,6 +116,8 @@ namespace HHSGame.Core
             Context.MapState.Draw(ctx);
             // Draw enemies within viewport
             Context.EnemyManager.Draw(ctx);
+            // Draw NPCs within viewport
+            Context.NpcManager.Draw(ctx);
             // Draw loot within viewport
             Context.ItemManager.Draw(ctx);
         }

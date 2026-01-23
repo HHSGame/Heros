@@ -5,10 +5,10 @@
   },
   "map": {
     "style": "Cave",
-    "width": 14,
-    "height": 10,
+    "width": 18,
+    "height": 12,
     "useCustomMap": true,
-    "customMapPath": "data/maps/tactics-01.txt"
+    "customMapPath": "data/maps/dialogue-quest-01.txt"
   },
   "player": {
     "class": "Warrior",
@@ -20,8 +20,8 @@
       "glyph": "A",
       "class": "Warrior",
       "startPosition": {
-        "x": 1,
-        "y": 1
+        "x": 2,
+        "y": 5
       },
       "startingItems": [
         "HealthPotion"
@@ -32,8 +32,8 @@
       "glyph": "B",
       "class": "Thief",
       "startPosition": {
-        "x": 2,
-        "y": 1
+        "x": 3,
+        "y": 5
       },
       "startingItems": []
     },
@@ -42,8 +42,8 @@
       "glyph": "C",
       "class": "Alchemist",
       "startPosition": {
-        "x": 1,
-        "y": 2
+        "x": 4,
+        "y": 5
       },
       "startingItems": [
         "HealthPotion"
@@ -54,12 +54,10 @@
       "glyph": "D",
       "class": "Ranger",
       "startPosition": {
-        "x": 2,
-        "y": 2
+        "x": 5,
+        "y": 5
       },
-      "startingItems": [
-        "HealthPotion"
-      ]
+      "startingItems": []
     }
   ],
   "catalogs": {
@@ -71,18 +69,10 @@
   },
   "enemies": [
     {
-      "id": "Gangster",
-      "position": {
-        "x": 11,
-        "y": 8
-      },
-      "count": 1
-    },
-    {
       "id": "Bandit",
       "position": {
-        "x": 10,
-        "y": 6
+        "x": 14,
+        "y": 8
       },
       "count": 1
     }
@@ -91,27 +81,497 @@
     {
       "id": "HealthPotion",
       "position": {
-        "x": 5,
-        "y": 1
+        "x": 9,
+        "y": 5
       },
       "quantity": 1
     }
   ],
+  "npcs": [
+    {
+      "id": "Fixer",
+      "name": "Fixer",
+      "glyph": "F",
+      "colorKey": "Trader",
+      "attributes": {
+        "strength": 4,
+        "perception": 5,
+        "agility": 4,
+        "charisma": 6,
+        "intelligence": 4
+      },
+      "skills": {
+        "Melee": 2,
+        "Athletics": 2,
+        "Survival": 2,
+        "Firearms": 2,
+        "Awareness": 6,
+        "Resolution": 4,
+        "Stealth": 2,
+        "Dexterity": 3,
+        "Mechanics": 4,
+        "Barter": 10,
+        "Leadership": 5,
+        "Persuasion": 8,
+        "Knowledge": 4,
+        "Medicine": 2,
+        "Religion": 1
+      },
+      "position": {
+        "x": 6,
+        "y": 5
+      },
+      "dialogueId": "fixer-dialogue",
+      "startingItems": []
+    },
+    {
+      "id": "Scholar",
+      "name": "Scholar",
+      "glyph": "S",
+      "colorKey": "Scholar",
+      "attributes": {
+        "strength": 3,
+        "perception": 5,
+        "agility": 4,
+        "charisma": 5,
+        "intelligence": 7
+      },
+      "skills": {
+        "Melee": 1,
+        "Athletics": 2,
+        "Survival": 3,
+        "Firearms": 1,
+        "Awareness": 5,
+        "Resolution": 4,
+        "Stealth": 2,
+        "Dexterity": 3,
+        "Mechanics": 5,
+        "Barter": 3,
+        "Leadership": 4,
+        "Persuasion": 5,
+        "Knowledge": 12,
+        "Medicine": 10,
+        "Religion": 8
+      },
+      "position": {
+        "x": 9,
+        "y": 7
+      },
+      "dialogueId": "scholar-dialogue",
+      "startingItems": []
+    }
+  ],
+  "dialogues": [
+    {
+      "id": "fixer-dialogue",
+      "startNodeId": "start",
+      "nodes": [
+        {
+          "id": "start",
+          "text": "Need supplies? Bring me a health potion and I will pay.",
+          "options": [
+            {
+              "text": "I'll handle it.",
+              "nextNodeId": "accept",
+              "effects": [
+                {
+                  "type": "StartQuest",
+                  "target": "missing-supply"
+                }
+              ]
+            },
+            {
+              "text": "Pay me more for this.",
+              "nextNodeId": "accept",
+              "requirements": [
+                {
+                  "type": "Skill",
+                  "id": "Barter",
+                  "min": 4
+                }
+              ],
+              "effects": [
+                {
+                  "type": "StartQuest",
+                  "target": "missing-supply"
+                },
+                {
+                  "type": "AddCurrency",
+                  "amount": 10
+                }
+              ]
+            },
+            {
+              "text": "I can solve it with knowledge.",
+              "nextNodeId": "complete",
+              "requirements": [
+                {
+                  "type": "Skill",
+                  "id": "Knowledge",
+                  "min": 10
+                }
+              ],
+              "effects": [
+                {
+                  "type": "StartQuest",
+                  "target": "missing-supply"
+                },
+                {
+                  "type": "GiveItem",
+                  "target": "HealthPotion",
+                  "amount": 1
+                },
+                {
+                  "type": "CompleteQuest",
+                  "target": "missing-supply"
+                }
+              ]
+            },
+            {
+              "text": "Something feels off about this.",
+              "nextNodeId": "suspicious",
+              "requirements": [
+                {
+                  "type": "Skill",
+                  "id": "Awareness",
+                  "min": 8
+                },
+                {
+                  "type": "QuestStatus",
+                  "id": "missing-supply",
+                  "status": "Inactive"
+                }
+              ]
+            },
+            {
+              "text": "I'll deal with the bandit.",
+              "nextNodeId": "hunt",
+              "effects": [
+                {
+                  "type": "StartQuest",
+                  "target": "bandit-hunt"
+                }
+              ]
+            },
+            {
+              "text": "I brought the potion.",
+              "nextNodeId": "complete",
+              "effects": [
+                {
+                  "type": "CompleteQuest",
+                  "target": "missing-supply"
+                }
+              ]
+            },
+            {
+              "text": "The bandit is gone.",
+              "nextNodeId": "bandit-complete",
+              "effects": [
+                {
+                  "type": "CompleteQuest",
+                  "target": "bandit-hunt"
+                }
+              ]
+            },
+            {
+              "text": "Thanks again for your help.",
+              "nextNodeId": "praise",
+              "requirements": [
+                {
+                  "type": "QuestStatus",
+                  "id": "missing-supply",
+                  "status": "Completed"
+                }
+              ]
+            },
+            {
+              "text": "You made the area safer.",
+              "nextNodeId": "praise",
+              "requirements": [
+                {
+                  "type": "QuestStatus",
+                  "id": "bandit-hunt",
+                  "status": "Completed"
+                }
+              ]
+            },
+            {
+              "text": "Maybe later.",
+              "nextNodeId": ""
+            }
+          ]
+        },
+        {
+          "id": "accept",
+          "text": "Come back with the potion.",
+          "options": [
+            {
+              "text": "Got it.",
+              "nextNodeId": ""
+            }
+          ]
+        },
+        {
+          "id": "suspicious",
+          "text": "You have sharp eyes. Still want the job?",
+          "options": [
+            {
+              "text": "Fine, I'll help.",
+              "nextNodeId": "accept",
+              "effects": [
+                {
+                  "type": "StartQuest",
+                  "target": "missing-supply"
+                }
+              ]
+            },
+            {
+              "text": "No deal.",
+              "nextNodeId": ""
+            }
+          ]
+        },
+        {
+          "id": "hunt",
+          "text": "A bandit is lurking east of here. Take care of it.",
+          "options": [
+            {
+              "text": "On it.",
+              "nextNodeId": ""
+            }
+          ]
+        },
+        {
+          "id": "complete",
+          "text": "Impressive. Here's your reward.",
+          "options": [
+            {
+              "text": "Thanks.",
+              "nextNodeId": ""
+            }
+          ]
+        },
+        {
+          "id": "bandit-complete",
+          "text": "Good work. The area feels safer now.",
+          "options": [
+            {
+              "text": "Glad to help.",
+              "nextNodeId": ""
+            }
+          ]
+        },
+        {
+          "id": "praise",
+          "text": "Good to see you again.",
+          "options": [
+            {
+              "text": "Take care.",
+              "nextNodeId": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scholar-dialogue",
+      "startNodeId": "start",
+      "nodes": [
+        {
+          "id": "start",
+          "text": "I need someone to reach the marker and report back.",
+          "options": [
+            {
+              "text": "I'll scout it.",
+              "nextNodeId": "accept",
+              "effects": [
+                {
+                  "type": "StartQuest",
+                  "target": "scout-marker"
+                }
+              ]
+            },
+            {
+              "text": "Share your notes first.",
+              "nextNodeId": "accept",
+              "requirements": [
+                {
+                  "type": "Skill",
+                  "id": "Persuasion",
+                  "min": 5
+                }
+              ],
+              "effects": [
+                {
+                  "type": "StartQuest",
+                  "target": "scout-marker"
+                },
+                {
+                  "type": "AddCurrency",
+                  "amount": 5
+                }
+              ]
+            },
+            {
+              "text": "I've reached the marker.",
+              "nextNodeId": "report",
+              "effects": [
+                {
+                  "type": "CompleteQuest",
+                  "target": "scout-marker"
+                }
+              ]
+            },
+            {
+              "text": "Good to see you again.",
+              "nextNodeId": "praise",
+              "requirements": [
+                {
+                  "type": "QuestStatus",
+                  "id": "scout-marker",
+                  "status": "Completed"
+                }
+              ]
+            },
+            {
+              "text": "Goodbye.",
+              "nextNodeId": ""
+            }
+          ]
+        },
+        {
+          "id": "accept",
+          "text": "Return when you've reached the marker.",
+          "options": [
+            {
+              "text": "Understood.",
+              "nextNodeId": ""
+            }
+          ]
+        },
+        {
+          "id": "report",
+          "text": "Excellent. Here's your payment.",
+          "options": [
+            {
+              "text": "Happy to help.",
+              "nextNodeId": ""
+            }
+          ]
+        },
+        {
+          "id": "praise",
+          "text": "Your help is appreciated.",
+          "options": [
+            {
+              "text": "Anytime.",
+              "nextNodeId": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "quests": [
+    {
+      "id": "missing-supply",
+      "name": "Missing Supply",
+      "description": "Find a health potion for the fixer.",
+      "hint": "Potion around (9,5).",
+      "objectives": [
+        {
+          "type": "CollectItem",
+          "target": "HealthPotion",
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "type": "Currency",
+          "amount": 25
+        }
+      ]
+    },
+    {
+      "id": "scout-marker",
+      "name": "Scout the Marker",
+      "description": "Reach the marked location on the map.",
+      "hint": "Marker around (12,3).",
+      "objectives": [
+        {
+          "type": "ReachMarker",
+          "target": ">",
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "type": "Currency",
+          "amount": 15
+        }
+      ]
+    },
+    {
+      "id": "bandit-hunt",
+      "name": "Bandit Hunt",
+      "description": "Eliminate the bandit threatening the area.",
+      "hint": "Bandit around (14,8).",
+      "objectives": [
+        {
+          "type": "KillEnemy",
+          "target": "Bandit",
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "type": "Currency",
+          "amount": 30
+        }
+      ]
+    }
+  ],
+  "achievements": [
+    {
+      "id": "first-contact",
+      "name": "First Contact",
+      "description": "Speak with the fixer.",
+      "objectives": [
+        {
+          "type": "TalkToNpc",
+          "target": "Fixer",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "first-blood",
+      "name": "First Blood",
+      "description": "Defeat a bandit.",
+      "objectives": [
+        {
+          "type": "KillEnemy",
+          "target": "Bandit",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "trailblazer",
+      "name": "Trailblazer",
+      "description": "Reach the marked location.",
+      "objectives": [
+        {
+          "type": "ReachMarker",
+          "target": ">",
+          "count": 1
+        }
+      ]
+    }
+  ],
   "conditions": {
-    "winEntries": [
-      {
-        "id": "EnemyCountAtMost",
-        "value": 0
-      }
-    ],
     "lose": [
       "PlayerDeath"
-    ],
-    "loseEntries": [
-      {
-        "id": "TurnLimit",
-        "value": 30
-      }
     ]
   }
 }

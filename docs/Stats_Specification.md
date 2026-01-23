@@ -105,6 +105,13 @@ The game uses a **Roll-Under** system to determine success.
     *   **Critical Success:** Roll of 1 (Always succeeds, bonus effects).
     *   **Critical Failure:** Roll of 20 (Always fails, negative effects).
 
+### 4.1.1 Party Assist (Dialogue Checks)
+When a player initiates dialogue, nearby allies can help if their stat is higher.
+*   **Adjacency Requirement:** Only allies adjacent to the speaking character (8-direction) can assist.
+*   **Bonus Formula:** `Assist Bonus = (Ally Stat - Player Stat) / 2` when the ally’s stat is higher.
+*   **Effective Stat:** `Effective Stat = Player Stat + Best Assist Bonus` (use the single best adjacent ally; bonuses do not stack).
+*   **Example:** Player Persuasion 50 with an adjacent ally at 60 → bonus `(60-50)/2 = 5`, effective Persuasion 55.
+
 ### 4.2 Dynamic Modifiers
 Context determines difficulty. The equation is:
 $$ \text{Effective Target} = (\text{Base Stat}) - \text{Penalties} + \text{Bonuses} $$
@@ -285,4 +292,3 @@ Unique bonuses unlocked by reaching reputation thresholds.
 *   **Field Medic:** Medkits cost -1 AP. (Req: Medicine 40).
 *   **Slayer (Lv 12):** All Melee attacks Crit on 1-2. (Req: Str 8).
 *   **Grim Reaper's Sprint (Lv 12):** Kill restores 5 AP. (Req: Agi 8).
-

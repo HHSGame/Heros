@@ -11,6 +11,9 @@ namespace HHSGame.Core.Engine.Scripting
     {
         private bool isMoveSelection;
         private Coordinate moveTarget = new(0, 0);
+        private bool isQuestLogOpen;
+        private int dialogueOptionIndex;
+        private GameStateType lastNonMenuState = GameStateType.Exploration;
 
         public ScriptGameStateSnapshot GetSnapshot()
         {
@@ -38,6 +41,16 @@ namespace HHSGame.Core.Engine.Scripting
             }
 
             string token = NormalizeToken(input.Token);
+            if (game.Context.StateMachine.CurrentState == GameStateType.Dialogue)
+            {
+                return HandleDialogueInput(token);
+            }
+
+            if (game.Context.StateMachine.CurrentState == GameStateType.Menu)
+            {
+                return HandleMenuInput(token);
+            }
+
             if (isMoveSelection)
             {
                 return HandleMoveSelectionInput(token);
@@ -90,7 +103,11 @@ namespace HHSGame.Core.Engine.Scripting
                     SwitchPlayer(-1);
                     return true;
                 case "Q":
+                case "QUEST":
+                    ToggleQuestLog();
+                    return true;
                 case "QUIT":
+                case "CTRLQ":
                     game.Stop();
                     return true;
                 default:
@@ -172,9 +189,16 @@ namespace HHSGame.Core.Engine.Scripting
                     SwitchPlayer(-1);
                     return true;
                 case "Q":
+                case "QUEST":
+                    ToggleQuestLog();
+                    return true;
                 case "QUIT":
+                case "CTRLQ":
                     game.Stop();
                     return true;
+                case "T":
+                case "TALK":
+                    return BeginDialogue();
                 default:
                     return false;
             }
@@ -217,6 +241,60 @@ namespace HHSGame.Core.Engine.Scripting
             }
         }
 
+        private bool HandleDialogueInput(string token)
+        {
+            switch (token)
+            {
+                case "UP":
+                case "ARROWUP":
+                case "CURSORUP":
+                    dialogueOptionIndex = Math.Max(0, dialogueOptionIndex - 1);
+                    return true;
+                case "DOWN":
+                case "ARROWDOWN":
+                case "CURSORDOWN":
+                    dialogueOptionIndex++;
+                    return true;
+                case "ENTER":
+                case "RETURN":
+                    if (game.Context.DialogueManager.TrySelectOption(dialogueOptionIndex))
+                    {
+                        dialogueOptionIndex = 0;
+                        if (game.Context.DialogueManager.CurrentSession == null)
+                        {
+                            game.EndDialogue();
+                        }
+                    }
+                    return true;
+                case "ESC":
+                case "ESCAPE":
+                    game.Context.DialogueManager.EndDialogue();
+                    game.EndDialogue();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private bool HandleMenuInput(string token)
+        {
+            switch (token)
+            {
+                case "Q":
+                case "QUEST":
+                case "ESC":
+                case "ESCAPE":
+                    ToggleQuestLog();
+                    return true;
+                case "QUIT":
+                case "CTRLQ":
+                    game.Stop();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         private void SwitchPlayer(int direction)
         {
             if (!game.SwitchControlledPlayer(direction))
@@ -247,6 +325,41 @@ namespace HHSGame.Core.Engine.Scripting
             isMoveSelection = false;
             game.ClearOverlayCells();
             Events.RaiseGameMessage("Move mode cancelled.");
+        }
+
+        private void ToggleQuestLog()
+        {
+            isQuestLogOpen = !isQuestLogOpen;
+            if (isQuestLogOpen)
+            {
+                lastNonMenuState = game.Context.StateMachine.CurrentState;
+                game.Context.StateMachine.TryChangeState(GameStateType.Menu);
+                return;
+            }
+
+            game.Context.StateMachine.TryChangeState(lastNonMenuState);
+        }
+
+        private bool BeginDialogue()
+        {
+            if (game.Player == null)
+            {
+                return false;
+            }
+
+            if (game.IsCombatActive())
+            {
+                return false;
+            }
+
+            IReadOnlyList<Npc> nearby = game.Context.NpcManager.GetAdjacentNpcs(game.Player.Position, 1);
+            if (nearby.Count == 0)
+            {
+                return false;
+            }
+
+            dialogueOptionIndex = 0;
+            return game.TryStartDialogue(nearby[0]);
         }
 
         private void MoveSelectionBy(int dx, int dy)

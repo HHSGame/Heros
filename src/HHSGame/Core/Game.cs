@@ -357,6 +357,37 @@ namespace HHSGame.Core
             return PerformPlayerAction(() => Player.Move(move), ActionCosts.Movement, false, allowedStates);
         }
 
+        public bool TryStartDialogue(Npc npc)
+        {
+            if (!isRunning || Player == null)
+            {
+                return false;
+            }
+
+            if (IsCombatActive())
+            {
+                return false;
+            }
+
+            if (!context.StateMachine.TryChangeState(GameStateType.Dialogue))
+            {
+                return false;
+            }
+
+            bool started = context.DialogueManager.TryStartDialogue(npc);
+            if (!started)
+            {
+                context.StateMachine.TryChangeState(GameStateType.Exploration);
+            }
+
+            return started;
+        }
+
+        public void EndDialogue()
+        {
+            context.StateMachine.TryChangeState(GameStateType.Exploration);
+        }
+
         public void Stop()
         {
             isRunning = false;
@@ -425,14 +456,14 @@ namespace HHSGame.Core
 
             if (IsConditionMet(loseConditions))
             {
-                Events.RaiseGameMessage("Defeat! Press Q to quit.");
+                Events.RaiseGameMessage("Defeat! Press Ctrl+Q to quit.");
                 Stop();
                 return true;
             }
 
             if (IsConditionMet(winConditions))
             {
-                Events.RaiseGameMessage("Victory! Press Q to quit.");
+                Events.RaiseGameMessage("Victory! Press Ctrl+Q to quit.");
                 Stop();
                 return true;
             }

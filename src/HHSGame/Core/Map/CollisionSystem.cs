@@ -1,9 +1,10 @@
 using HHSGame.Core.Enemies;
+using HHSGame.Core.Npcs;
 using HHSGame.Utils;
 
 namespace HHSGame.Core.Map
 {
-    public class CollisionSystem(EnemyManager enemyManager, MapState mapState)
+    public class CollisionSystem(EnemyManager enemyManager, MapState mapState, NpcManager npcManager)
     {
         private readonly List<Player> players = [];
 
@@ -38,6 +39,12 @@ namespace HHSGame.Core.Map
                 return false;
             }
 
+            Npc? npcAtTarget = npcManager.GetNpcAt(x, y);
+            if (npcAtTarget != null && npcAtTarget != actor)
+            {
+                return false;
+            }
+
             foreach (Player player in players)
             {
                 if (actor != player && player.X == x && player.Y == y)
@@ -56,6 +63,12 @@ namespace HHSGame.Core.Map
             if (enemy != null)
             {
                 return enemy;
+            }
+
+            Npc? npc = npcManager.GetNpcAt(x, y);
+            if (npc != null)
+            {
+                return npc;
             }
 
             foreach (Player player in players)

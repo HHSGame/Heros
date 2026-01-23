@@ -18,23 +18,29 @@ namespace HHSGame.UI
             InventoryFrame inventoryFrame,
             SurroundingsFrame surroundingsFrame,
             UtilityWindow utilityWindow,
+            QuestLogWindow questLogWindow,
+            DialogueWindow dialogueWindow,
             PlayerSetupWizard playerSetupWizard,
             GameUiOptions options,
             Game game) : IDisposable
     {
         private GameStateType lastNonInventoryState = GameStateType.Exploration;
+        private GameStateType lastNonMenuState = GameStateType.Exploration;
         private bool isMoveSelection;
         private Coordinate moveTarget = new(0, 0);
         private bool isAttackSelection;
         private readonly List<Enemy> attackTargets = [];
         private int attackTargetIndex;
+        private bool isTalkSelection;
+        private readonly List<Npc> talkTargets = [];
+        private Npc? selectedTalkTarget;
         private bool isKeyHandlerRegistered;
         private bool isGameStarted;
         public Toplevel Start()
         {
             // Create main window
             Toplevel top = new();
-            top.Add(mapFrame, inventoryFrame, surroundingsFrame, statusBarView, messageFrame, actionSequenceFrame, utilityWindow);
+            top.Add(mapFrame, inventoryFrame, surroundingsFrame, statusBarView, messageFrame, actionSequenceFrame, utilityWindow, questLogWindow, dialogueWindow);
 
             if (options.SkipWizard)
             {
@@ -76,6 +82,13 @@ namespace HHSGame.UI
             }
 
             game.Start();
+            game.Context.DialogueManager.SessionChanged += (_, __) =>
+            {
+                if (game.Context.DialogueManager.CurrentSession == null)
+                {
+                    game.EndDialogue();
+                }
+            };
 
             if (!isKeyHandlerRegistered)
             {
@@ -133,10 +146,33 @@ namespace HHSGame.UI
                 return;
             }
 
+            if (isTalkSelection)
+            {
+                if (HandleTalkSelectionKey(key))
+                {
+                    key.Handled = true;
+                }
+                return;
+            }
+
             if (key.Handled)
             {
                 return;
             }
+
+            if (dialogueWindow.Visible)
+            {
+                if (dialogueWindow.HandleKeyEvent(key))
+                {
+                    if (!dialogueWindow.Visible)
+                    {
+                        game.EndDialogue();
+                    }
+                    key.Handled = true;
+                }
+                return;
+            }
+
             if (utilityWindow.Visible)
             {
                 bool wasUtilityVisible = utilityWindow.Visible;
@@ -145,6 +181,20 @@ namespace HHSGame.UI
                     if (wasUtilityVisible != utilityWindow.Visible)
                     {
                         SyncStateWithUtilityWindow();
+                    }
+                    key.Handled = true;
+                    return;
+                }
+            }
+
+            if (questLogWindow.Visible)
+            {
+                bool wasQuestVisible = questLogWindow.Visible;
+                if (questLogWindow.HandleKeyEvent(key))
+                {
+                    if (wasQuestVisible != questLogWindow.Visible)
+                    {
+                        SyncStateWithQuestLogWindow();
                     }
                     key.Handled = true;
                     return;
@@ -216,6 +266,10 @@ namespace HHSGame.UI
                         GameStateType.Combat);
                     break;
                 case KeyCode.Q:
+                    ToggleQuestLog();
+                    handled = true;
+                    break;
+                case KeyCode.Q | KeyCode.CtrlMask:
                     game.Stop();
                     Application.Shutdown();
                     return;
@@ -228,12 +282,20 @@ namespace HHSGame.UI
                         GameStateType.Combat);
                     break;
                 case KeyCode.I:
+                    if (questLogWindow.Visible)
+                    {
+                        questLogWindow.Toggle();
+                        SyncStateWithQuestLogWindow();
+                    }
                     utilityWindow.ToggleUtilityWindow();
                     SyncStateWithUtilityWindow();
                     handled = true;
                     break;
                 case KeyCode.C:
                     handled = HandleCombatToggle();
+                    break;
+                case KeyCode.T:
+                    handled = BeginTalkSelection();
                     break;
                 case KeyCode.Space:
                     if (!game.SwitchControlledPlayer(1))
@@ -290,6 +352,16 @@ namespace HHSGame.UI
                 case KeyCode.C:
                     HandleCombatToggle();
                     return true;
+                case KeyCode.Q:
+                    ToggleQuestLog();
+                    return true;
+                case KeyCode.Q | KeyCode.CtrlMask:
+                    game.Stop();
+                    Application.Shutdown();
+                    return true;
+                case KeyCode.T:
+                    BeginTalkSelection();
+                    return true;
                 case KeyCode.Enter:
                     game.CommitPlayerActions();
                     return true;
@@ -312,6 +384,33 @@ namespace HHSGame.UI
                     {
                         Events.RaiseGameMessage($"Switched control to {game.Player?.Name}.");
                     }
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private bool HandleTalkSelectionKey(Key key)
+        {
+            switch (key.KeyCode)
+            {
+                case KeyCode.CursorUp:
+                    SelectTalkTargetByDirection(0, -1);
+                    return true;
+                case KeyCode.CursorDown:
+                    SelectTalkTargetByDirection(0, 1);
+                    return true;
+                case KeyCode.CursorLeft:
+                    SelectTalkTargetByDirection(-1, 0);
+                    return true;
+                case KeyCode.CursorRight:
+                    SelectTalkTargetByDirection(1, 0);
+                    return true;
+                case KeyCode.Enter:
+                    ConfirmTalkSelection();
+                    return true;
+                case KeyCode.Esc:
+                    CancelTalkSelection();
                     return true;
                 default:
                     return false;
@@ -410,6 +509,41 @@ namespace HHSGame.UI
             UpdateAttackOverlay();
         }
 
+        private bool BeginTalkSelection()
+        {
+            if (game.Player == null)
+            {
+                return false;
+            }
+
+            if (game.IsCombatActive())
+            {
+                Events.RaiseGameMessage("Cannot start dialogue during combat.");
+                return true;
+            }
+
+            IReadOnlyList<Npc> nearby = game.Context.NpcManager.GetAdjacentNpcs(game.Player.Position, 1);
+            if (nearby.Count == 0)
+            {
+                Events.RaiseGameMessage("No one nearby to talk to.");
+                return true;
+            }
+
+            if (nearby.Count == 1)
+            {
+                StartDialogue(nearby[0]);
+                return true;
+            }
+
+            talkTargets.Clear();
+            talkTargets.AddRange(nearby);
+            selectedTalkTarget = talkTargets[0];
+            isTalkSelection = true;
+            Events.RaiseGameMessage("Select a direction to choose who to talk to.");
+            UpdateTalkOverlay();
+            return true;
+        }
+
         private void CancelMoveSelection()
         {
             isMoveSelection = false;
@@ -423,6 +557,15 @@ namespace HHSGame.UI
             attackTargets.Clear();
             game.ClearOverlayCells();
             Events.RaiseGameMessage("Attack mode cancelled.");
+        }
+
+        private void CancelTalkSelection()
+        {
+            isTalkSelection = false;
+            talkTargets.Clear();
+            selectedTalkTarget = null;
+            game.ClearOverlayCells();
+            Events.RaiseGameMessage("Talk selection cancelled.");
         }
 
         private void MoveSelectionBy(int dx, int dy)
@@ -616,6 +759,109 @@ namespace HHSGame.UI
             game.SetOverlayCells(overlay);
         }
 
+        private void UpdateTalkOverlay()
+        {
+            if (!isTalkSelection || selectedTalkTarget == null)
+            {
+                game.ClearOverlayCells();
+                return;
+            }
+
+            game.SetOverlayCells(new[]
+            {
+                (selectedTalkTarget.Position, new Cell
+                {
+                    Character = GUISettings.TargetPreviewGlyph,
+                    Attribute = ColorPresets.TargetPreview
+                })
+            });
+        }
+
+        private void SelectTalkTargetByDirection(int dx, int dy)
+        {
+            if (game.Player == null)
+            {
+                return;
+            }
+
+            Coordinate origin = game.Player.Position;
+            Npc? best = null;
+            int bestDistance = int.MaxValue;
+            foreach (Npc npc in talkTargets)
+            {
+                int deltaX = npc.X - origin.X;
+                int deltaY = npc.Y - origin.Y;
+                if (!MatchesDirection(deltaX, deltaY, dx, dy))
+                {
+                    continue;
+                }
+
+                int distance = (deltaX * deltaX) + (deltaY * deltaY);
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = npc;
+                }
+            }
+
+            if (best != null)
+            {
+                selectedTalkTarget = best;
+                UpdateTalkOverlay();
+            }
+        }
+
+        private static bool MatchesDirection(int deltaX, int deltaY, int dx, int dy)
+        {
+            if (dx == 0 && dy == -1)
+            {
+                return deltaY < 0 && Math.Abs(deltaY) >= Math.Abs(deltaX);
+            }
+
+            if (dx == 0 && dy == 1)
+            {
+                return deltaY > 0 && Math.Abs(deltaY) >= Math.Abs(deltaX);
+            }
+
+            if (dx == -1 && dy == 0)
+            {
+                return deltaX < 0 && Math.Abs(deltaX) >= Math.Abs(deltaY);
+            }
+
+            if (dx == 1 && dy == 0)
+            {
+                return deltaX > 0 && Math.Abs(deltaX) >= Math.Abs(deltaY);
+            }
+
+            return false;
+        }
+
+        private void ConfirmTalkSelection()
+        {
+            if (selectedTalkTarget == null)
+            {
+                return;
+            }
+
+            StartDialogue(selectedTalkTarget);
+            isTalkSelection = false;
+            talkTargets.Clear();
+            selectedTalkTarget = null;
+            game.ClearOverlayCells();
+        }
+
+        private void StartDialogue(Npc npc)
+        {
+            if (game.TryStartDialogue(npc))
+            {
+                dialogueWindow.ShowDialogue();
+            }
+            else
+            {
+                game.Context.StateMachine.TryChangeState(GameStateType.Exploration);
+            }
+        }
+
         private List<Coordinate> GetMovePath(Coordinate destination)
         {
             if (game.Player == null)
@@ -738,6 +984,34 @@ namespace HHSGame.UI
             }
 
             game.Context.StateMachine.TryChangeState(lastNonInventoryState);
+        }
+
+        private void ToggleQuestLog()
+        {
+            if (!questLogWindow.Visible && utilityWindow.Visible)
+            {
+                utilityWindow.ToggleUtilityWindow();
+                SyncStateWithUtilityWindow();
+            }
+
+            questLogWindow.Toggle();
+            SyncStateWithQuestLogWindow();
+        }
+
+        private void SyncStateWithQuestLogWindow()
+        {
+            if (questLogWindow.Visible)
+            {
+                GameStateType current = game.Context.StateMachine.CurrentState;
+                if (current != GameStateType.Menu)
+                {
+                    lastNonMenuState = current;
+                }
+                game.Context.StateMachine.TryChangeState(GameStateType.Menu);
+                return;
+            }
+
+            game.Context.StateMachine.TryChangeState(lastNonMenuState);
         }
 
         public void Dispose()

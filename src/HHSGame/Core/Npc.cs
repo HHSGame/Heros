@@ -11,8 +11,19 @@ namespace HHSGame.Core
         private Weapon? equippedWeapon;
         private Armor? equippedArmor;
 
-        public Npc(string name, char glyph, Terminal.Gui.Drawing.Attribute attribute, int x, int y, Attributes attributes, Skills skills, ItemCatalog itemCatalog)
+        public Npc(
+            string id,
+            string name,
+            char glyph,
+            Terminal.Gui.Drawing.Attribute attribute,
+            int x,
+            int y,
+            Attributes attributes,
+            Skills skills,
+            ItemCatalog itemCatalog,
+            string dialogueId)
         {
+            Id = id;
             Name = name;
             Glyph = glyph;
             Attribute = attribute;
@@ -21,13 +32,17 @@ namespace HHSGame.Core
             Stats = new CharacterStats(attributes with { }, skills.Clone());
             Inventory = new InventoryManager();
             this.itemCatalog = itemCatalog;
+            DialogueId = dialogueId;
         }
 
         public int X { get; set; }
         public int Y { get; set; }
+        public string Id { get; }
+        public string DialogueId { get; }
         public string Name { get; }
         public char Glyph { get; }
         public Terminal.Gui.Drawing.Attribute Attribute { get; }
+        public Coordinate Position => new(X, Y);
 
         public CharacterStats Stats { get; }
         public InventoryManager Inventory { get; }

@@ -95,6 +95,47 @@ namespace HHSGame.Core
         }
 
         [TestMethod]
+        public void PlannedActionsExecuteInInputOrderAcrossPlayers()
+        {
+            Game game = CreateGame(playerPositions: new[] { new Coordinate(2, 2), new Coordinate(4, 2) });
+            IReadOnlyList<Player> players = game.Context.Players;
+            game.Context.StateMachine.TryChangeState(GameStateType.Combat);
+            foreach (Player player in players)
+            {
+                player.ResetTurn(true, player == game.Player);
+            }
+
+            List<string> executionOrder = [];
+
+            Assert.IsTrue(game.TryQueuePlayerAction("A1", 1, () => executionOrder.Add("A1")));
+            Assert.IsTrue(game.SwitchControlledPlayer(1));
+            Assert.IsTrue(game.TryQueuePlayerAction("B1", 1, () => executionOrder.Add("B1")));
+            Assert.IsTrue(game.SwitchControlledPlayer(1));
+            Assert.IsTrue(game.TryQueuePlayerAction("A2", 1, () => executionOrder.Add("A2")));
+
+            game.CommitPlayerActions();
+
+            CollectionAssert.AreEqual(new[] { "A1", "B1", "A2" }, executionOrder);
+        }
+
+        [TestMethod]
+        public void DiagonalMovementCostRoundsUpPerTwoSteps()
+        {
+            Game game = CreateGame();
+            Player player = game.Player!;
+            List<Coordinate> path =
+            [
+                new Coordinate(1, 1),
+                new Coordinate(2, 2),
+                new Coordinate(3, 3)
+            ];
+
+            int cost = game.CalculateMovementApCost(player, path);
+
+            Assert.AreEqual(3, cost);
+        }
+
+        [TestMethod]
         public void GameEndsWhenPlayerDeathConditionMet()
         {
             Game game = CreateGame();
@@ -261,7 +302,7 @@ namespace HHSGame.Core
             Assert.ThrowsException<InvalidDataException>(() => CreateGame(config));
         }
 
-        private static Game CreateGame(GameConfig? config = null, string? mapPathOverride = null)
+        private static Game CreateGame(GameConfig? config = null, string? mapPathOverride = null, IReadOnlyList<Coordinate>? playerPositions = null)
         {
             const int mapSize = 30;
             string mapPath = mapPathOverride ?? CreateTempMapFile(mapSize, mapSize);
@@ -317,6 +358,19 @@ namespace HHSGame.Core
             GameWorld world = new(context);
             GameConfig gameConfig = config ?? new GameConfig();
             Game game = new(NullLogger<Game>.Instance, context, world, catalogs.ClassCatalog, gameConfig);
+            if (playerPositions != null)
+            {
+                parameters.PlayerSpawns = playerPositions
+                    .Select((position, index) => new PlayerSpawn(
+                        $"Player {index + 1}",
+                        (char)('A' + index),
+                        catalogs.ClassCatalog.GetDefault(),
+                        null,
+                        null,
+                        position,
+                        new List<string>()))
+                    .ToList();
+            }
             game.Start();
             return game;
         }

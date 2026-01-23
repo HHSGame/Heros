@@ -27,14 +27,14 @@ namespace HHSGame.Core.Map
 
                 closedSet.Add(current);
 
-                foreach (Coordinate neighbor in GetNeighbors(current))
+                foreach ((Coordinate neighbor, float stepCost) in GetNeighbors(current))
                 {
                     if (closedSet.Contains(neighbor))
                     {
                         continue;
                     }
 
-                    float tentativeGScore = gScore[current] + 1;
+                    float tentativeGScore = gScore[current] + stepCost;
 
                     if (!gScore.TryGetValue(neighbor, out float value) || tentativeGScore < value)
                     {
@@ -65,29 +65,49 @@ namespace HHSGame.Core.Map
             return path;
         }
 
-        private List<Coordinate> GetNeighbors(Coordinate pos)
+        private List<(Coordinate Neighbor, float Cost)> GetNeighbors(Coordinate pos)
         {
-            List<Coordinate> neighbors = [];
+            List<(Coordinate Neighbor, float Cost)> neighbors = [];
 
             // Check four directions
             if (mapState.IsWalkable(pos.X - 1, pos.Y))
             {
-                neighbors.Add(new Coordinate(pos.X - 1, pos.Y));
+                neighbors.Add((new Coordinate(pos.X - 1, pos.Y), 1f));
             }
 
             if (mapState.IsWalkable(pos.X + 1, pos.Y))
             {
-                neighbors.Add(new Coordinate(pos.X + 1, pos.Y));
+                neighbors.Add((new Coordinate(pos.X + 1, pos.Y), 1f));
             }
 
             if (mapState.IsWalkable(pos.X, pos.Y - 1))
             {
-                neighbors.Add(new Coordinate(pos.X, pos.Y - 1));
+                neighbors.Add((new Coordinate(pos.X, pos.Y - 1), 1f));
             }
 
             if (mapState.IsWalkable(pos.X, pos.Y + 1))
             {
-                neighbors.Add(new Coordinate(pos.X, pos.Y + 1));
+                neighbors.Add((new Coordinate(pos.X, pos.Y + 1), 1f));
+            }
+
+            if (mapState.IsWalkable(pos.X - 1, pos.Y - 1))
+            {
+                neighbors.Add((new Coordinate(pos.X - 1, pos.Y - 1), 1.5f));
+            }
+
+            if (mapState.IsWalkable(pos.X + 1, pos.Y - 1))
+            {
+                neighbors.Add((new Coordinate(pos.X + 1, pos.Y - 1), 1.5f));
+            }
+
+            if (mapState.IsWalkable(pos.X - 1, pos.Y + 1))
+            {
+                neighbors.Add((new Coordinate(pos.X - 1, pos.Y + 1), 1.5f));
+            }
+
+            if (mapState.IsWalkable(pos.X + 1, pos.Y + 1))
+            {
+                neighbors.Add((new Coordinate(pos.X + 1, pos.Y + 1), 1.5f));
             }
 
             return neighbors;
@@ -95,8 +115,11 @@ namespace HHSGame.Core.Map
 
         private static float HeuristicCostEstimate(Coordinate a, Coordinate b)
         {
-            // Manhattan distance
-            return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
+            int dx = Math.Abs(a.X - b.X);
+            int dy = Math.Abs(a.Y - b.Y);
+            int diagonal = Math.Min(dx, dy);
+            int straight = Math.Max(dx, dy) - diagonal;
+            return (diagonal * 1.5f) + straight;
         }
     }
 }

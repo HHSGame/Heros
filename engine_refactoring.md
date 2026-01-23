@@ -98,6 +98,8 @@ Decision: keep both a minimal linear script format (for quick smoke flows) and a
 - 2026-01-23: Added skill action definitions, targeting flows, and core execution hooks with initial tests for stealth and hidden-item interactions.
 - 2026-01-23: Added selection-mode status bar overrides plus blinking target highlights for move/attack/skill/talk selections.
 - 2026-01-23: Ensured map refresh after layout changes and cleared the map backbuffer each render to avoid blank/black screens when toggling UI windows.
+- 2026-01-23: Added diagonal move support in movement planning with 1.5 AP rounding rules and updated pathfinding to include diagonal costs.
+- 2026-01-23: Executed player action sequences in input order across all controlled characters (instead of per-character batching).
 
 ## Next Actions
 - Add more condition types (currency, quest flags) and expose end-state messaging.

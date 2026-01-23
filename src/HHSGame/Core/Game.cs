@@ -16,11 +16,16 @@ namespace HHSGame.Core
 {
     public partial class Game(ILogger<Game> logger, GameContext context, GameWorld world, ClassCatalog classCatalog, GameConfig config)
     {
+        private sealed record PlannedActionEntry(Player Player, QueuedAction Action);
+
         public Player? Player { get; private set; }
         private bool isRunning;
         private readonly List<Player> controlledPlayers = [];
         private int activePlayerIndex;
         private readonly List<(Coordinate Position, Cell Cell)> overlayCells = [];
+        private readonly List<PlannedActionEntry> plannedActions = [];
+        private int plannedActionCursor;
+        private readonly Dictionary<Player, int> plannedDiagonalMoves = new();
         private bool manualCombatMode;
         private readonly ClassCatalog classCatalog = classCatalog;
         private readonly IReadOnlyList<ConditionSpec> winConditions = BuildConditions(config.Conditions, isWin: true);
@@ -174,8 +179,27 @@ namespace HHSGame.Core
                 return false;
             }
 
-            Player.ActionSequence.Enqueue(new QueuedAction(description, apCost, action));
+            QueuedAction queuedAction = new(description, apCost, action);
+            Player.ActionSequence.Enqueue(queuedAction);
+            plannedActions.Add(new PlannedActionEntry(Player, queuedAction));
             Events.RaiseActionSequenceChanged();
+            return true;
+        }
+
+        public bool TryQueuePlayerMove(Move move)
+        {
+            if (Player == null)
+            {
+                return false;
+            }
+
+            int apCost = GetMovementApCost(Player, move);
+            if (!TryQueuePlayerAction("Move", apCost, () => Player.Move(move)))
+            {
+                return false;
+            }
+
+            RegisterQueuedMove(Player, move);
             return true;
         }
 
@@ -186,6 +210,9 @@ namespace HHSGame.Core
                 player.ActionSequence.Clear();
                 player.ResetPlannedPosition();
             }
+            plannedActions.Clear();
+            plannedActionCursor = 0;
+            plannedDiagonalMoves.Clear();
             Events.RaiseActionSequenceChanged();
         }
 
@@ -202,6 +229,69 @@ namespace HHSGame.Core
         public int GetPlannedApCost()
         {
             return Player?.ActionSequence.TotalCost ?? 0;
+        }
+
+        public int CalculateMovementApCost(Player player, IReadOnlyList<Coordinate> path)
+        {
+            if (path.Count <= 1)
+            {
+                return 0;
+            }
+
+            int diagonalCount = GetPlannedDiagonalMoves(player);
+            int totalCost = 0;
+            for (int i = 1; i < path.Count; i++)
+            {
+                Coordinate from = path[i - 1];
+                Coordinate to = path[i];
+                if (IsDiagonalStep(from, to))
+                {
+                    totalCost += GetDiagonalStepCost(diagonalCount);
+                    diagonalCount++;
+                }
+                else
+                {
+                    totalCost += ActionCosts.Movement;
+                }
+            }
+
+            return totalCost;
+        }
+
+        private int GetMovementApCost(Player player, Move move)
+        {
+            if (move is Move.Diagonal)
+            {
+                int diagonalCount = GetPlannedDiagonalMoves(player);
+                return GetDiagonalStepCost(diagonalCount);
+            }
+
+            return ActionCosts.Movement;
+        }
+
+        private void RegisterQueuedMove(Player player, Move move)
+        {
+            if (move is Move.Diagonal)
+            {
+                plannedDiagonalMoves[player] = GetPlannedDiagonalMoves(player) + 1;
+            }
+        }
+
+        private int GetPlannedDiagonalMoves(Player player)
+        {
+            return plannedDiagonalMoves.TryGetValue(player, out int value) ? value : 0;
+        }
+
+        private static int GetDiagonalStepCost(int diagonalCount)
+        {
+            return diagonalCount % 2 == 0 ? 2 : 1;
+        }
+
+        private static bool IsDiagonalStep(Coordinate from, Coordinate to)
+        {
+            int dx = Math.Abs(to.X - from.X);
+            int dy = Math.Abs(to.Y - from.Y);
+            return dx == 1 && dy == 1;
         }
 
         public bool TryUseSkillAction(SkillActionDefinition action, SkillActionTarget target)
@@ -734,12 +824,10 @@ namespace HHSGame.Core
             }
 
             List<string> descriptions = [];
-            foreach (Player player in controlledPlayers)
+            for (int i = plannedActionCursor; i < plannedActions.Count; i++)
             {
-                foreach (QueuedAction action in player.ActionSequence.Snapshot())
-                {
-                    descriptions.Add($"{player.Name} - {action.Description}");
-                }
+                PlannedActionEntry entry = plannedActions[i];
+                descriptions.Add($"{entry.Player.Name} - {entry.Action.Description}");
             }
 
             return descriptions;
@@ -922,17 +1010,16 @@ namespace HHSGame.Core
             bool useAp = context.StateMachine.CurrentState == GameStateType.Combat;
             if (useAp)
             {
+                ExecutePlannedPlayerActions();
                 foreach (Player player in controlledPlayers)
                 {
-                    player.ActionSequence.Execute(player.Stats, false, _ =>
-                    {
-                        Events.RaiseActionSequenceChanged();
-                        AnimateStep();
-                    });
                     player.ActionSequence.Clear();
                     player.EndTurn();
                     player.ResetPlannedPosition();
                 }
+                plannedActions.Clear();
+                plannedActionCursor = 0;
+                plannedDiagonalMoves.Clear();
                 Events.RaiseActionSequenceChanged();
             }
             else
@@ -942,6 +1029,9 @@ namespace HHSGame.Core
                     player.ActionSequence.Clear();
                     player.ResetPlannedPosition();
                 }
+                plannedActions.Clear();
+                plannedActionCursor = 0;
+                plannedDiagonalMoves.Clear();
                 Events.RaiseActionSequenceChanged();
             }
             context.TurnManager.EndPlayerTurn();
@@ -960,6 +1050,33 @@ namespace HHSGame.Core
             }
             context.TurnManager.BeginPlayerTurn();
             RenderFrame();
+        }
+
+        private void ExecutePlannedPlayerActions()
+        {
+            HashSet<Player> exhaustedPlayers = [];
+            while (plannedActionCursor < plannedActions.Count)
+            {
+                PlannedActionEntry entry = plannedActions[plannedActionCursor];
+                plannedActionCursor++;
+
+                if (exhaustedPlayers.Contains(entry.Player))
+                {
+                    Events.RaiseActionSequenceChanged();
+                    continue;
+                }
+
+                if (!entry.Player.Stats.TrySpendAp(entry.Action.ApCost))
+                {
+                    exhaustedPlayers.Add(entry.Player);
+                    Events.RaiseActionSequenceChanged();
+                    continue;
+                }
+
+                entry.Action.Execute();
+                Events.RaiseActionSequenceChanged();
+                AnimateStep();
+            }
         }
 
         private bool CheckGameConditions()

@@ -26,25 +26,18 @@ namespace HHSGame.UI
 
         public void UpdateViewport(int x, int y, int mapWidth, int mapHeight)
         {
-            int margin = 5;
-
-            if (x - X < margin)
+            if (Width <= 0 || Height <= 0)
             {
-                X = Math.Max(0, x - margin);
-            }
-            else if (x - X > Width - margin)
-            {
-                X = Math.Min(mapWidth - Width, x - Width + margin);
+                return;
             }
 
-            if (y - Y < margin)
-            {
-                Y = Math.Max(0, y - margin);
-            }
-            else if (y - Y > Height - margin)
-            {
-                Y = Math.Min(mapHeight - Height, y - Height + margin);
-            }
+            int maxX = Math.Max(0, mapWidth - Width);
+            int maxY = Math.Max(0, mapHeight - Height);
+            int halfWidth = Width / 2;
+            int halfHeight = Height / 2;
+
+            X = Math.Clamp(x - halfWidth, 0, maxX);
+            Y = Math.Clamp(y - halfHeight, 0, maxY);
         }
 
         public void Resize(int width, int height)
@@ -145,7 +138,7 @@ namespace HHSGame.UI
 
         public void Clear()
         {
+            mapView.ClearBuffer();
         }
     }
 }
-

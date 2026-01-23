@@ -1,3 +1,4 @@
+using System;
 using HHSGame.Core;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Enemies;
@@ -23,6 +24,7 @@ namespace HHSGame.UI
             SkillActionWindow skillActionWindow,
             DialogueWindow dialogueWindow,
             PlayerSetupWizard playerSetupWizard,
+            UiStatusState uiStatus,
             GameUiOptions options,
             Game game) : IDisposable
     {
@@ -48,6 +50,9 @@ namespace HHSGame.UI
         private Coordinate skillTargetPosition = new(0, 0);
         private bool isKeyHandlerRegistered;
         private bool isGameStarted;
+        private bool selectionBlinkOn;
+        private bool selectionBlinkTimerActive;
+        private readonly UiStatusState uiStatus = uiStatus;
         public Toplevel Start()
         {
             // Create main window
@@ -102,6 +107,12 @@ namespace HHSGame.UI
                 }
             };
             skillActionWindow.ActionSelected += (_, action) => BeginSkillAction(action);
+
+            Application.AddTimeout(TimeSpan.Zero, () =>
+            {
+                game.RefreshFrame();
+                return false;
+            });
 
             if (!isKeyHandlerRegistered)
             {
@@ -620,6 +631,7 @@ namespace HHSGame.UI
             moveTarget = game.Player.PlannedPosition;
             isMoveSelection = true;
             Events.RaiseGameMessage("Move mode: use arrow keys, Enter to confirm, Esc to cancel.");
+            EnsureSelectionBlinker();
             UpdateMovePreview();
         }
 
@@ -648,6 +660,7 @@ namespace HHSGame.UI
             attackTargetIndex = 0;
             isAttackSelection = true;
             Events.RaiseGameMessage("Attack mode: arrow keys/Tab to switch target, Enter to confirm, Esc to cancel.");
+            EnsureSelectionBlinker();
             UpdateAttackOverlay();
         }
 
@@ -682,6 +695,7 @@ namespace HHSGame.UI
             selectedTalkTarget = talkTargets[0];
             isTalkSelection = true;
             Events.RaiseGameMessage("Select a direction to choose who to talk to.");
+            EnsureSelectionBlinker();
             UpdateTalkOverlay();
             return true;
         }
@@ -751,6 +765,7 @@ namespace HHSGame.UI
             skillEnemyTargetIndex = 0;
             isSkillSelection = true;
             Events.RaiseGameMessage(message);
+            EnsureSelectionBlinker();
             UpdateSkillTargetOverlay();
         }
 
@@ -781,6 +796,7 @@ namespace HHSGame.UI
             selectedSkillNpc = skillNpcTargets[0];
             isSkillSelection = true;
             Events.RaiseGameMessage("Select a direction to choose a target.");
+            EnsureSelectionBlinker();
             UpdateSkillTargetOverlay();
         }
 
@@ -815,6 +831,7 @@ namespace HHSGame.UI
             skillPlayerTargetIndex = 0;
             isSkillSelection = true;
             Events.RaiseGameMessage("Select a target.");
+            EnsureSelectionBlinker();
             UpdateSkillTargetOverlay();
         }
 
@@ -835,6 +852,7 @@ namespace HHSGame.UI
             skillTargetPosition = initial;
             isSkillSelection = true;
             Events.RaiseGameMessage(message);
+            EnsureSelectionBlinker();
             UpdateSkillTargetOverlay();
         }
 
@@ -863,6 +881,7 @@ namespace HHSGame.UI
             skillTargetPosition = doors[0];
             isSkillSelection = true;
             Events.RaiseGameMessage("Select a direction to choose a door.");
+            EnsureSelectionBlinker();
             UpdateSkillTargetOverlay();
         }
 
@@ -877,6 +896,7 @@ namespace HHSGame.UI
             skillPlayerTargets.Clear();
             game.ClearOverlayCells();
             Events.RaiseGameMessage("Skill selection cancelled.");
+            ClearSelectionStatus();
         }
 
         private void ConfirmSkillSelection()
@@ -908,6 +928,7 @@ namespace HHSGame.UI
             selectedSkillNpc = null;
             skillPlayerTargets.Clear();
             game.ClearOverlayCells();
+            ClearSelectionStatus();
         }
 
         private void ExecuteSkillAction(SkillActionDefinition action, SkillActionTarget target)
@@ -928,6 +949,7 @@ namespace HHSGame.UI
             isMoveSelection = false;
             game.ClearOverlayCells();
             Events.RaiseGameMessage("Move mode cancelled.");
+            ClearSelectionStatus();
         }
 
         private void CancelAttackSelection()
@@ -936,6 +958,7 @@ namespace HHSGame.UI
             attackTargets.Clear();
             game.ClearOverlayCells();
             Events.RaiseGameMessage("Attack mode cancelled.");
+            ClearSelectionStatus();
         }
 
         private void CancelTalkSelection()
@@ -945,6 +968,7 @@ namespace HHSGame.UI
             selectedTalkTarget = null;
             game.ClearOverlayCells();
             Events.RaiseGameMessage("Talk selection cancelled.");
+            ClearSelectionStatus();
         }
 
         private void MoveSelectionBy(int dx, int dy)
@@ -988,7 +1012,7 @@ namespace HHSGame.UI
             }
 
             List<Coordinate> path = GetMovePath(moveTarget);
-            UpdateMoveOverlay(path);
+            UpdateMoveOverlayAndStatus(path);
             if (path.Count == 0)
             {
                 Events.RaiseGameMessage($"No path to {moveTarget}.");
@@ -999,6 +1023,12 @@ namespace HHSGame.UI
             int turns = CalculateTurnsNeeded(steps, game.Player.Stats.MaxAp);
             int remainingAp = game.GetRemainingPlannedAp();
             Events.RaiseGameMessage($"Move target {moveTarget}, steps {steps}, turns {turns}, remaining AP {remainingAp}.");
+        }
+
+        private void UpdateMoveOverlayAndStatus(List<Coordinate> path)
+        {
+            UpdateMoveOverlay(path);
+            UpdateMoveStatus(path);
         }
 
         private void ConfirmMoveSelection()
@@ -1015,6 +1045,7 @@ namespace HHSGame.UI
                 Events.RaiseGameMessage("No movement queued.");
                 isMoveSelection = false;
                 game.ClearOverlayCells();
+                ClearSelectionStatus();
                 return;
             }
 
@@ -1027,6 +1058,7 @@ namespace HHSGame.UI
                 Events.RaiseGameMessage($"Not enough AP. Steps {steps}, turns {turns}.");
                 isMoveSelection = false;
                 game.ClearOverlayCells();
+                ClearSelectionStatus();
                 return;
             }
 
@@ -1060,6 +1092,7 @@ namespace HHSGame.UI
 
             isMoveSelection = false;
             game.ClearOverlayCells();
+            ClearSelectionStatus();
         }
 
         private void ConfirmAttackSelection()
@@ -1073,6 +1106,7 @@ namespace HHSGame.UI
             isAttackSelection = false;
             attackTargets.Clear();
             game.ClearOverlayCells();
+            ClearSelectionStatus();
             QueueAttack(selected);
         }
 
@@ -1098,10 +1132,23 @@ namespace HHSGame.UI
             overlay.Add((target, new Cell
             {
                 Character = GUISettings.TargetPreviewGlyph,
-                Attribute = ColorPresets.TargetPreview
+                Attribute = SelectionHighlightAttribute
             }));
 
             game.SetOverlayCells(overlay);
+        }
+
+        private void UpdateMoveStatus(IReadOnlyList<Coordinate> path)
+        {
+            if (game.Player == null)
+            {
+                return;
+            }
+
+            int steps = Math.Max(0, path.Count - 1);
+            int turns = CalculateTurnsNeeded(steps, game.Player.Stats.MaxAp);
+            int remainingAp = game.GetRemainingPlannedAp();
+            SetSelectionStatus("Move", $"{moveTarget.X},{moveTarget.Y} steps {steps} turns {turns} AP {remainingAp}");
         }
 
         private void UpdateAttackOverlay()
@@ -1131,11 +1178,23 @@ namespace HHSGame.UI
                 overlay.Add((selected.Position, new Cell
                 {
                     Character = GUISettings.TargetPreviewGlyph,
-                    Attribute = ColorPresets.TargetPreview
+                    Attribute = SelectionHighlightAttribute
                 }));
             }
 
             game.SetOverlayCells(overlay);
+            UpdateAttackStatus();
+        }
+
+        private void UpdateAttackStatus()
+        {
+            if (!isAttackSelection || attackTargets.Count == 0)
+            {
+                return;
+            }
+
+            Enemy selected = attackTargets[attackTargetIndex];
+            SetSelectionStatus("Attack", $"{selected.Name} {selected.X},{selected.Y} ({attackTargetIndex + 1}/{attackTargets.Count})");
         }
 
         private void UpdateTalkOverlay()
@@ -1151,9 +1210,20 @@ namespace HHSGame.UI
                 (selectedTalkTarget.Position, new Cell
                 {
                     Character = GUISettings.TargetPreviewGlyph,
-                    Attribute = ColorPresets.TargetPreview
+                    Attribute = SelectionHighlightAttribute
                 })
             });
+            UpdateTalkStatus();
+        }
+
+        private void UpdateTalkStatus()
+        {
+            if (!isTalkSelection || selectedTalkTarget == null)
+            {
+                return;
+            }
+
+            SetSelectionStatus("Talk", $"{selectedTalkTarget.Name} {selectedTalkTarget.X},{selectedTalkTarget.Y}");
         }
 
         private void UpdateSkillTargetOverlay()
@@ -1194,7 +1264,7 @@ namespace HHSGame.UI
                 overlay.Add((targetPosition, new Cell
                 {
                     Character = GUISettings.TargetPreviewGlyph,
-                    Attribute = ColorPresets.TargetPreview
+                    Attribute = SelectionHighlightAttribute
                 }));
             }
 
@@ -1205,6 +1275,131 @@ namespace HHSGame.UI
             }
 
             game.SetOverlayCells(overlay);
+            UpdateSkillStatus();
+        }
+
+        private void UpdateSkillStatus()
+        {
+            if (!isSkillSelection || selectedSkillAction == null)
+            {
+                return;
+            }
+
+            string targetDescription = selectedSkillTargetType switch
+            {
+                SkillActionTargetType.AdjacentEnemy or SkillActionTargetType.RangedEnemy =>
+                    skillEnemyTargets.Count > 0
+                        ? BuildIndexedTargetDescription(skillEnemyTargets[skillEnemyTargetIndex].Name, skillEnemyTargets[skillEnemyTargetIndex].X, skillEnemyTargets[skillEnemyTargetIndex].Y, skillEnemyTargetIndex, skillEnemyTargets.Count)
+                        : "No target",
+                SkillActionTargetType.AdjacentNpc =>
+                    selectedSkillNpc != null
+                        ? $"{selectedSkillNpc.Name} {selectedSkillNpc.X},{selectedSkillNpc.Y}"
+                        : "No target",
+                SkillActionTargetType.AdjacentAllyOrSelf =>
+                    skillPlayerTargets.Count > 0
+                        ? BuildIndexedTargetDescription(skillPlayerTargets[skillPlayerTargetIndex].Name, skillPlayerTargets[skillPlayerTargetIndex].X, skillPlayerTargets[skillPlayerTargetIndex].Y, skillPlayerTargetIndex, skillPlayerTargets.Count)
+                        : "No target",
+                SkillActionTargetType.AdjacentDoor or SkillActionTargetType.Direction =>
+                    $"{skillTargetPosition.X},{skillTargetPosition.Y}",
+                _ => string.Empty
+            };
+
+            string detail = string.IsNullOrWhiteSpace(targetDescription)
+                ? selectedSkillAction.Name
+                : $"{selectedSkillAction.Name} -> {targetDescription}";
+
+            SetSelectionStatus("Action", detail);
+        }
+
+        private static string BuildIndexedTargetDescription(string name, int x, int y, int index, int count)
+        {
+            string baseText = $"{name} {x},{y}";
+            return count > 1 ? $"{baseText} ({index + 1}/{count})" : baseText;
+        }
+
+        private Terminal.Gui.Drawing.Attribute SelectionHighlightAttribute =>
+            selectionBlinkOn ? ColorPresets.TargetPreviewHighlight : ColorPresets.TargetPreview;
+
+        private void EnsureSelectionBlinker()
+        {
+            if (selectionBlinkTimerActive || !Application.Initialized)
+            {
+                return;
+            }
+
+            selectionBlinkTimerActive = true;
+            Application.AddTimeout(TimeSpan.FromMilliseconds(350), () =>
+            {
+                if (!IsSelectionActive())
+                {
+                    selectionBlinkTimerActive = false;
+                    return false;
+                }
+
+                selectionBlinkOn = !selectionBlinkOn;
+                RefreshSelectionOverlay();
+                return true;
+            });
+        }
+
+        private bool IsSelectionActive()
+        {
+            return isMoveSelection || isAttackSelection || isTalkSelection || isSkillSelection;
+        }
+
+        private void RefreshSelectionOverlay()
+        {
+            if (isMoveSelection)
+            {
+                UpdateMoveOverlayAndStatus(GetMovePath(moveTarget));
+                return;
+            }
+
+            if (isAttackSelection)
+            {
+                UpdateAttackOverlay();
+                return;
+            }
+
+            if (isTalkSelection)
+            {
+                UpdateTalkOverlay();
+                return;
+            }
+
+            if (isSkillSelection)
+            {
+                UpdateSkillTargetOverlay();
+            }
+        }
+
+        private void SetSelectionStatus(string mode, string detail)
+        {
+            uiStatus.SetOverride(mode, detail);
+        }
+
+        private void ClearSelectionStatus()
+        {
+            selectionBlinkOn = false;
+            if (utilityWindow.Visible)
+            {
+                uiStatus.SetOverride("Inventory", "Manage items");
+                return;
+            }
+
+            if (questLogWindow.Visible)
+            {
+                uiStatus.SetOverride("Quest Log", "Browse quests");
+                return;
+            }
+
+            if (skillActionWindow.Visible)
+            {
+                uiStatus.SetOverride("Skills", "Select an action");
+                return;
+            }
+
+            uiStatus.ClearOverride();
         }
 
         private void SelectSkillTargetByDirection(int dx, int dy)
@@ -1411,6 +1606,7 @@ namespace HHSGame.UI
             talkTargets.Clear();
             selectedTalkTarget = null;
             game.ClearOverlayCells();
+            ClearSelectionStatus();
         }
 
         private void StartDialogue(Npc npc)
@@ -1543,10 +1739,14 @@ namespace HHSGame.UI
                     lastNonInventoryState = current;
                 }
                 game.Context.StateMachine.TryChangeState(GameStateType.Inventory);
+                ScheduleFrameRefresh();
+                uiStatus.SetOverride("Inventory", "Manage items");
                 return;
             }
 
             game.Context.StateMachine.TryChangeState(lastNonInventoryState);
+            ScheduleFrameRefresh();
+            uiStatus.ClearOverride();
         }
 
         private void ToggleQuestLog()
@@ -1606,10 +1806,14 @@ namespace HHSGame.UI
                     lastNonMenuState = current;
                 }
                 game.Context.StateMachine.TryChangeState(GameStateType.Menu);
+                ScheduleFrameRefresh();
+                uiStatus.SetOverride("Quest Log", "Browse quests");
                 return;
             }
 
             game.Context.StateMachine.TryChangeState(lastNonMenuState);
+            ScheduleFrameRefresh();
+            uiStatus.ClearOverride();
         }
 
         private void SyncStateWithSkillWindow()
@@ -1622,10 +1826,31 @@ namespace HHSGame.UI
                     lastNonMenuState = current;
                 }
                 game.Context.StateMachine.TryChangeState(GameStateType.Menu);
+                ScheduleFrameRefresh();
+                uiStatus.SetOverride("Skills", "Select an action");
                 return;
             }
 
             game.Context.StateMachine.TryChangeState(lastNonMenuState);
+            ScheduleFrameRefresh();
+            uiStatus.ClearOverride();
+        }
+
+        private void ScheduleFrameRefresh()
+        {
+            if (!Application.Initialized)
+            {
+                game.RefreshFrame();
+                return;
+            }
+
+            Application.AddTimeout(TimeSpan.Zero, () =>
+            {
+                Application.LayoutAndDraw(true);
+                game.RefreshFrame();
+                Application.LayoutAndDraw(true);
+                return false;
+            });
         }
 
         public void Dispose()

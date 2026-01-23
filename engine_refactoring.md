@@ -95,6 +95,9 @@ Decision: keep both a minimal linear script format (for quick smoke flows) and a
 - 2026-01-23: Assigned full 15-skill profiles to all classes for role-based starts.
 - 2026-01-23: Added quest turn-in dialogue options, praise follow-ups, and completion gating updates in `data/game.json`.
 - 2026-01-23: Allowed combined start/complete dialogue effects to display when a quest is inactive, enabling knowledge-based instant resolution.
+- 2026-01-23: Added skill action definitions, targeting flows, and core execution hooks with initial tests for stealth and hidden-item interactions.
+- 2026-01-23: Added selection-mode status bar overrides plus blinking target highlights for move/attack/skill/talk selections.
+- 2026-01-23: Ensured map refresh after layout changes and cleared the map backbuffer each render to avoid blank/black screens when toggling UI windows.
 
 ## Next Actions
 - Add more condition types (currency, quest flags) and expose end-state messaging.

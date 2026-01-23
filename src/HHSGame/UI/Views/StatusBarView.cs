@@ -6,10 +6,12 @@ namespace HHSGame.UI.Views
     public class StatusBarView : View
     {
         private readonly GameContext context;
+        private readonly UiStatusState uiStatus;
 
-        public StatusBarView(GameContext context, MapFrame mapWindow)
+        public StatusBarView(GameContext context, MapFrame mapWindow, UiStatusState uiStatus)
         {
             this.context = context;
+            this.uiStatus = uiStatus;
             X = 0;
             Y = Pos.Bottom(mapWindow);
             Width = Dim.Fill();
@@ -19,6 +21,7 @@ namespace HHSGame.UI.Views
             Events.OnGameMessageEvent += (_, __) => SetNeedsDraw();
             Events.OnTurnChanged += (_, __) => SetNeedsDraw();
             Events.OnInventoryChange += (_, __) => SetNeedsDraw();
+            uiStatus.Changed += (_, __) => SetNeedsDraw();
         }
 
         protected override bool OnDrawingContent()
@@ -61,6 +64,15 @@ namespace HHSGame.UI.Views
             if (showCombatHints)
             {
                 status += " | M Move A Attack G Pick C Exit(no enemies) Enter End S Skills";
+            }
+
+            string baseMode = context.StateMachine.CurrentState == GameStateType.Combat ? "Combat" : "Travel";
+            string mode = uiStatus.ModeOverride ?? baseMode;
+            string detail = uiStatus.DetailOverride ?? string.Empty;
+            status += $" | {mode}";
+            if (!string.IsNullOrWhiteSpace(detail))
+            {
+                status += $": {detail}";
             }
 
             return PadToWidth(status);

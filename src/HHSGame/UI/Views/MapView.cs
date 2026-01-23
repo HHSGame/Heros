@@ -1,4 +1,5 @@
 using Terminal.Gui.ViewBase;
+using HHSGame.UI;
 using System.Drawing;
 
 using Attribute = Terminal.Gui.Drawing.Attribute;
@@ -8,6 +9,7 @@ namespace HHSGame.UI.Views
     public class MapView : View
     {
         private Cell[,] buffer;
+        private static readonly Cell DefaultCell = new() { Character = ' ', Attribute = ColorPresets.GreyedOut };
 
         public MapView()
         {
@@ -22,6 +24,18 @@ namespace HHSGame.UI.Views
             if (buffer.GetLength(0) != Frame.Height || buffer.GetLength(1) != Frame.Width)
             {
                 buffer = new Cell[Frame.Height, Frame.Width];
+            }
+        }
+
+        public void ClearBuffer()
+        {
+            ResizeBackBuffer();
+            for (int y = 0; y < Frame.Height; y++)
+            {
+                for (int x = 0; x < Frame.Width; x++)
+                {
+                    buffer[y, x] = DefaultCell;
+                }
             }
         }
 
@@ -47,6 +61,10 @@ namespace HHSGame.UI.Views
                 for (int x = 0; x < Frame.Width; x++)
                 {
                     Cell cell = buffer[y, x];
+                    if (cell.Character == '\0')
+                    {
+                        cell = DefaultCell;
+                    }
                     Move(x, y);
                     SetAttribute(cell.Attribute);
                     AddRune(cell.Character);

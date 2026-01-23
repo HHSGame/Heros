@@ -230,6 +230,16 @@ namespace HHSGame.Core
             return PerformPlayerAction(() => ExecuteSkillAction(action, target), action.ApCost, false, GameStateType.Exploration, GameStateType.Combat);
         }
 
+        public void RefreshFrame()
+        {
+            if (!isRunning || Player == null)
+            {
+                return;
+            }
+
+            RenderFrame();
+        }
+
         public void CommitPlayerActions()
         {
             if (!isRunning || Player == null)
@@ -1176,6 +1186,7 @@ namespace HHSGame.Core
             UI.IDrawingContext drawingContext = context.DrawingContext;
 
             drawingContext.Viewport.UpdateViewport(Player.X, Player.Y, context.MapState.Width, context.MapState.Height);
+            drawingContext.Clear();
 
             world.Draw(drawingContext);
             foreach ((Coordinate position, Cell cell) in overlayCells)

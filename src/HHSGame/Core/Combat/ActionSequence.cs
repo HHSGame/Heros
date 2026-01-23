@@ -14,6 +14,16 @@ namespace HHSGame.Core.Combat
         private readonly Queue<QueuedAction> actions = new();
         private int totalCost;
 
+        public static int CalculateTurnsNeeded(int apCost, int maxAp)
+        {
+            if (apCost <= 0 || maxAp <= 0)
+            {
+                return 0;
+            }
+
+            return (int)Math.Ceiling(apCost / (double)maxAp);
+        }
+
         public int TotalCost => totalCost;
         public int Count => actions.Count;
         public bool HasActions => actions.Count > 0;
@@ -42,12 +52,7 @@ namespace HHSGame.Core.Combat
 
         public int TurnsRequired(int maxAp)
         {
-            if (maxAp <= 0)
-            {
-                return 0;
-            }
-
-            return (int)Math.Ceiling(totalCost / (double)maxAp);
+            return CalculateTurnsNeeded(totalCost, maxAp);
         }
 
         public void Execute(CharacterStats stats, bool ignoreAp = false, Action<QueuedAction>? onExecuted = null)

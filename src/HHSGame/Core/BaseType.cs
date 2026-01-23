@@ -105,6 +105,27 @@ namespace HHSGame.Core
         }
     }
 
+    public static class CoordinateExtensions
+    {
+        public static Move ToMove(this Coordinate from, Coordinate to)
+        {
+            int dx = to.X - from.X;
+            int dy = to.Y - from.Y;
+            return (dx, dy) switch
+            {
+                (1, 0) => new Move.Forward(Direction.Right),
+                (-1, 0) => new Move.Forward(Direction.Left),
+                (0, 1) => new Move.Forward(Direction.Down),
+                (0, -1) => new Move.Forward(Direction.Up),
+                (1, 1) => new Move.Diagonal(Direction.Down, Direction.Right),
+                (1, -1) => new Move.Diagonal(Direction.Up, Direction.Right),
+                (-1, 1) => new Move.Diagonal(Direction.Down, Direction.Left),
+                (-1, -1) => new Move.Diagonal(Direction.Up, Direction.Left),
+                _ => new Move.None()
+            };
+        }
+    }
+
     public interface IBasicTraits
     {
         int Health { get; set; }

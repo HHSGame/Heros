@@ -231,6 +231,22 @@ namespace HHSGame.Core
             return Player?.ActionSequence.TotalCost ?? 0;
         }
 
+        public List<Coordinate> GetMovePath(Coordinate destination)
+        {
+            if (Player == null)
+            {
+                return [];
+            }
+
+            if (!Context.MapState.IsWalkable(destination))
+            {
+                return [];
+            }
+
+            Pathfinder pathfinder = new(Context.MapState);
+            return pathfinder.FindPath(Player.PlannedPosition, destination);
+        }
+
         public int CalculateMovementApCost(Player player, IReadOnlyList<Coordinate> path)
         {
             if (path.Count <= 1)

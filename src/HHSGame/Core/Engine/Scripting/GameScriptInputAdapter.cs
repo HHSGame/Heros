@@ -402,7 +402,7 @@ namespace HHSGame.Core.Engine.Scripting
                 return;
             }
 
-            List<Coordinate> path = GetMovePath(moveTarget);
+            List<Coordinate> path = game.GetMovePath(moveTarget);
             UpdateMoveOverlay(path);
             if (path.Count == 0)
             {
@@ -412,7 +412,7 @@ namespace HHSGame.Core.Engine.Scripting
 
             int steps = Math.Max(0, path.Count - 1);
             int apCost = game.CalculateMovementApCost(game.Player, path);
-            int turns = CalculateTurnsNeeded(apCost, game.Player.Stats.MaxAp);
+            int turns = ActionSequence.CalculateTurnsNeeded(apCost, game.Player.Stats.MaxAp);
             int remainingAp = game.GetRemainingPlannedAp();
             Events.RaiseGameMessage($"Move target {moveTarget}, steps {steps}, cost {apCost}, turns {turns}, remaining AP {remainingAp}.");
         }
@@ -425,7 +425,7 @@ namespace HHSGame.Core.Engine.Scripting
             }
 
             Player player = game.Player;
-            List<Coordinate> path = GetMovePath(moveTarget);
+            List<Coordinate> path = game.GetMovePath(moveTarget);
             if (path.Count <= 1)
             {
                 Events.RaiseGameMessage("No movement queued.");
@@ -440,7 +440,7 @@ namespace HHSGame.Core.Engine.Scripting
             {
                 Coordinate from = path[i - 1];
                 Coordinate to = path[i];
-                Move move = ToMove(from, to);
+                Move move = from.ToMove(to);
                 if (move is Move.None)
                 {
                     break;
@@ -456,7 +456,7 @@ namespace HHSGame.Core.Engine.Scripting
             if (stepsQueued <= 0)
             {
                 int apCost = game.CalculateMovementApCost(player, path);
-                int turns = CalculateTurnsNeeded(apCost, game.Player.Stats.MaxAp);
+                int turns = ActionSequence.CalculateTurnsNeeded(apCost, game.Player.Stats.MaxAp);
                 Events.RaiseGameMessage($"Not enough AP. Steps {steps}, cost {apCost}, turns {turns}.");
                 isMoveSelection = false;
                 game.ClearOverlayCells();
@@ -466,7 +466,7 @@ namespace HHSGame.Core.Engine.Scripting
             player.SetPlannedPosition(path[stepsQueued]);
 
             int totalCost = game.CalculateMovementApCost(player, path);
-            int turnsNeeded = CalculateTurnsNeeded(totalCost, game.Player.Stats.MaxAp);
+            int turnsNeeded = ActionSequence.CalculateTurnsNeeded(totalCost, game.Player.Stats.MaxAp);
             if (stepsQueued < steps)
             {
                 Events.RaiseGameMessage($"Queued {stepsQueued}/{steps} steps towards {moveTarget} (turns needed {turnsNeeded}).");
@@ -506,50 +506,6 @@ namespace HHSGame.Core.Engine.Scripting
             }));
 
             game.SetOverlayCells(overlay);
-        }
-
-        private List<Coordinate> GetMovePath(Coordinate destination)
-        {
-            if (game.Player == null)
-            {
-                return [];
-            }
-
-            if (!game.Context.MapState.IsWalkable(destination))
-            {
-                return [];
-            }
-
-            Pathfinder pathfinder = new(game.Context.MapState);
-            return pathfinder.FindPath(game.Player.PlannedPosition, destination);
-        }
-
-        private static int CalculateTurnsNeeded(int apCost, int maxAp)
-        {
-            if (apCost <= 0 || maxAp <= 0)
-            {
-                return 0;
-            }
-
-            return (int)Math.Ceiling(apCost / (double)maxAp);
-        }
-
-        private static Move ToMove(Coordinate from, Coordinate to)
-        {
-            int dx = to.X - from.X;
-            int dy = to.Y - from.Y;
-            return (dx, dy) switch
-            {
-                (1, 0) => new Move.Forward(Direction.Right),
-                (-1, 0) => new Move.Forward(Direction.Left),
-                (0, 1) => new Move.Forward(Direction.Down),
-                (0, -1) => new Move.Forward(Direction.Up),
-                (1, 1) => new Move.Diagonal(Direction.Down, Direction.Right),
-                (1, -1) => new Move.Diagonal(Direction.Up, Direction.Right),
-                (-1, 1) => new Move.Diagonal(Direction.Down, Direction.Left),
-                (-1, -1) => new Move.Diagonal(Direction.Up, Direction.Left),
-                _ => new Move.None()
-            };
         }
 
         private void QueueAttack()

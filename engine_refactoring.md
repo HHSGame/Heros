@@ -89,12 +89,12 @@ Decision: keep both a minimal linear script format (for quick smoke flows) and a
 - 2026-01-22: Added ranged target selection UI with attack range overlays in combat planning.
 - 2026-01-22: Expanded weapon catalog with ranged/magic examples and trajectory metadata.
 - 2026-01-22: Forced immediate per-action redraws via `Application.LayoutAndDraw` for clearer step-by-step animations.
-- 2026-01-22: Added NPC/quest/dialogue config models, runtime managers, and party assist logic for dialogue checks.
-- 2026-01-22: Added quest log and dialogue UI windows plus talk selection (T) and quest log toggle (Q, Ctrl+Q to quit).
-- 2026-01-22: Added NPC/quest scenario in `data/game.json` with dialogues, quests, achievements, and a dedicated map.
-- 2026-01-22: Assigned full 15-skill profiles to all classes for role-based starts.
-- 2026-01-22: Added quest turn-in dialogue options, praise follow-ups, and completion gating updates in `data/game.json`.
-- 2026-01-22: Allowed combined start/complete dialogue effects to display when a quest is inactive, enabling knowledge-based instant resolution.
+- 2026-01-23: Added NPC/quest/dialogue config models, runtime managers, and party assist logic for dialogue checks.
+- 2026-01-23: Added quest log and dialogue UI windows plus talk selection (T) and quest log toggle (Q, Ctrl+Q to quit).
+- 2026-01-23: Added NPC/quest scenario in `data/game.json` with dialogues, quests, achievements, and a dedicated map.
+- 2026-01-23: Assigned full 15-skill profiles to all classes for role-based starts.
+- 2026-01-23: Added quest turn-in dialogue options, praise follow-ups, and completion gating updates in `data/game.json`.
+- 2026-01-23: Allowed combined start/complete dialogue effects to display when a quest is inactive, enabling knowledge-based instant resolution.
 
 ## Next Actions
 - Add more condition types (currency, quest flags) and expose end-state messaging.

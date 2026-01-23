@@ -30,6 +30,10 @@ namespace HHSGame.Core
         private Weapon? equippedWeapon;
         private Armor? equippedArmor;
 
+        public bool IsSneaking { get; private set; }
+        public bool IsSkillLocked { get; private set; }
+        public int RangedAccuracyBonus { get; private set; }
+
         public Player(int x, int y, GameContext context, string? name = null, char? glyph = null, Attributes? attributes = null, Skills? skills = null)
         {
             X = x;
@@ -308,7 +312,7 @@ namespace HHSGame.Core
                 return;
             }
 
-            itemManager.RemoveItemsAt(X, Y);
+            itemManager.RemoveItemsAt(X, Y, includeHidden: false);
             foreach (Item item in items)
             {
                 AddItem(item);
@@ -325,6 +329,47 @@ namespace HHSGame.Core
         public bool IsStunned()
         {
             return activeEffects.Any(e => e is StunEffect);
+        }
+
+        public int RemoveEffects<T>() where T : ActiveEffect
+        {
+            int removed = 0;
+            for (int i = activeEffects.Count - 1; i >= 0; i--)
+            {
+                if (activeEffects[i] is T)
+                {
+                    activeEffects.RemoveAt(i);
+                    removed++;
+                }
+            }
+            return removed;
+        }
+
+        public void ToggleSneak()
+        {
+            IsSneaking = !IsSneaking;
+        }
+
+        public void SetSkillLocked(bool locked)
+        {
+            IsSkillLocked = locked;
+        }
+
+        public void SetRangedAccuracyBonus(int bonus)
+        {
+            RangedAccuracyBonus = Math.Max(0, bonus);
+        }
+
+        public int ConsumeRangedAccuracyBonus(Weapon weapon)
+        {
+            if (!WeaponRules.IsRanged(weapon.WeaponType))
+            {
+                return 0;
+            }
+
+            int bonus = RangedAccuracyBonus;
+            RangedAccuracyBonus = 0;
+            return bonus;
         }
 
         private void Die()

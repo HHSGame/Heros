@@ -11,6 +11,8 @@ namespace HHSGame.Core.Map
 
         private readonly List<(Coordinate Position, char Symbol)> specialPositions = [];
         public IReadOnlyList<(Coordinate Position, char Symbol)> SpecialPositions => specialPositions;
+        private readonly List<HiddenFeature> hiddenFeatures = [];
+        public IReadOnlyList<HiddenFeature> HiddenFeatures => hiddenFeatures;
 
         private readonly HashSet<Coordinate> visitedTileSet = [];
         private readonly HashSet<Coordinate> currentVisibleTiles = [];
@@ -31,6 +33,7 @@ namespace HHSGame.Core.Map
             Height = mapData.Height;
             map = mapData.Map;
             specialPositions.Clear();
+            hiddenFeatures.Clear();
             foreach ((Coordinate position, char symbol) in mapData.SpecialPositions)
             {
                 specialPositions.Add((position, symbol));
@@ -100,6 +103,38 @@ namespace HHSGame.Core.Map
         public bool IsProjectileBlocking(Coordinate coordinate)
         {
             return IsProjectileBlocking(coordinate.X, coordinate.Y);
+        }
+
+        public void AddHiddenFeature(HiddenFeature feature)
+        {
+            hiddenFeatures.Add(feature);
+        }
+
+        public List<HiddenFeature> RevealHiddenFeatures(Coordinate origin, int radius)
+        {
+            List<HiddenFeature> revealed = [];
+            foreach (HiddenFeature feature in hiddenFeatures)
+            {
+                if (feature.Revealed)
+                {
+                    continue;
+                }
+
+                int dx = Math.Abs(feature.Position.X - origin.X);
+                int dy = Math.Abs(feature.Position.Y - origin.Y);
+                if (dx <= radius && dy <= radius)
+                {
+                    feature.Revealed = true;
+                    SetCell(feature.Position.X, feature.Position.Y, new Cell
+                    {
+                        Character = feature.RevealedGlyph,
+                        Attribute = TilePresets.GetTerrainColor(feature.RevealedGlyph)
+                    });
+                    revealed.Add(feature);
+                }
+            }
+
+            return revealed;
         }
 
         public void MarkVisibleTiles(HashSet<(int x, int y)> visibleTiles)

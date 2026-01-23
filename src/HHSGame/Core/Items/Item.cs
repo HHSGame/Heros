@@ -22,6 +22,7 @@ namespace HHSGame.Core.Items
         public int Value { get; } = value;
         public float Weight { get; } = weight;
         public bool Consumable { get; set; }
+        public bool IsHidden { get; set; }
 
         public List<AttributeModifier> AttributeModifiers { get; set; } = [];
 

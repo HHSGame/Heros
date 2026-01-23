@@ -28,6 +28,7 @@ namespace HHSGame.Core.Enemies
         public string Id { get; }
         public EnemyState State { get; private set; }
         public int ExperienceValue { get; }
+        public int SkipTurnsRemaining { get; private set; }
 
         public CharacterStats Stats { get; }
         public ActionSequence ActionSequence { get; } = new();
@@ -97,6 +98,12 @@ namespace HHSGame.Core.Enemies
             }
 
             ActionSequence.Clear();
+
+            if (SkipTurnsRemaining > 0)
+            {
+                SkipTurnsRemaining--;
+                return;
+            }
 
             if (!useAp)
             {
@@ -187,12 +194,39 @@ namespace HHSGame.Core.Enemies
 
         private EnemyState DetermineState(Player player)
         {
+            if (!CanDetectPlayer(player))
+            {
+                return EnemyState.Idle;
+            }
+
             if (CombatTargeting.CanAttack(mapState, Position, player.Position, EquippedWeapon))
             {
                 return EnemyState.Attacking;
             }
 
             return DetermineState(player, X, Y);
+        }
+
+        public bool CanDetectPlayer(Player player)
+        {
+            if (!player.IsSneaking)
+            {
+                return true;
+            }
+
+            int awareness = Stats.Skills.GetValue(SkillType.Awareness, Stats.Attributes);
+            int stealth = player.Stats.Skills.GetValue(SkillType.Stealth, player.Stats.Attributes);
+            return awareness >= stealth;
+        }
+
+        public void SkipNextTurns(int turns)
+        {
+            if (turns <= 0)
+            {
+                return;
+            }
+
+            SkipTurnsRemaining = Math.Max(SkipTurnsRemaining, turns);
         }
 
         private void MoveTowards(Player player)

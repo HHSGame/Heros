@@ -184,16 +184,16 @@ namespace HHSGame.Core.Dialogue
 
         private int GetEffectiveSkillValue(Player player, SkillType skill)
         {
-            int baseValue = player.Stats.Skills.GetValue(skill, player.Stats.Attributes);
+            int baseValue = partyState.GetEffectiveSkillValue(player, skill);
             return baseValue + CalculateAssistBonus(player, ally =>
-                ally.Stats.Skills.GetValue(skill, ally.Stats.Attributes), baseValue);
+                partyState.GetEffectiveSkillValue(ally, skill), baseValue);
         }
 
         private int GetEffectiveAttributeValue(Player player, AttributeType attribute)
         {
-            int baseValue = player.Stats.Attributes.Get(attribute);
+            int baseValue = partyState.GetEffectiveAttributeValue(player, attribute);
             return baseValue + CalculateAssistBonus(player, ally =>
-                ally.Stats.Attributes.Get(attribute), baseValue);
+                partyState.GetEffectiveAttributeValue(ally, attribute), baseValue);
         }
 
         private int CalculateAssistBonus(Player player, Func<Player, int> valueSelector, int baseValue)

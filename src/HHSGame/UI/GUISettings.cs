@@ -20,6 +20,7 @@ namespace HHSGame.UI
         public static string UtilityWindowTitle => "Utilities";
         public static string QuestLogWindowTitle => "Quest Log";
         public static string DialogueWindowTitle => "Dialogue";
+        public static string SkillWindowTitle => "Skills";
 
         public static Scheme CommonWindowColorScheme => SchemeManager.GetScheme(Schemes.Toplevel);
 

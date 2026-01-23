@@ -32,6 +32,7 @@ namespace HHSGame.UI
             serviceCollection.AddSingleton<UtilityWindow>();
             serviceCollection.AddSingleton<QuestLogWindow>();
             serviceCollection.AddSingleton<DialogueWindow>();
+            serviceCollection.AddSingleton<SkillActionWindow>();
             serviceCollection.AddSingleton<PlayerSetupWizard>();
 
             // Setup Game UI

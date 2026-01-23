@@ -13,12 +13,22 @@ namespace HHSGame.Core.Combat
 
             int attributeValue = attacker.Stats.Attributes.Get(attributeType);
             int skillValue = attacker.Stats.Skills.GetValue(skillType, attacker.Stats.Attributes);
-            int target = attributeValue + skillValue - defender.EvasionBonus;
+            int accuracyBonus = 0;
+            if (attacker is Player player && WeaponRules.IsRanged(weapon.WeaponType))
+            {
+                accuracyBonus = player.RangedAccuracyBonus;
+            }
+            int target = attributeValue + skillValue + accuracyBonus - defender.EvasionBonus;
 
             int roll = random.Next(1, 21);
             bool criticalSuccess = roll == 1;
             bool criticalFailure = roll == 20;
             bool hit = (roll <= target && !criticalFailure) || criticalSuccess;
+
+            if (attacker is Player rangedPlayer && WeaponRules.IsRanged(weapon.WeaponType))
+            {
+                rangedPlayer.ConsumeRangedAccuracyBonus(weapon);
+            }
 
             if (!hit)
             {

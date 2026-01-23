@@ -1,4 +1,5 @@
 using HHSGame.UI;
+using HHSGame.Core;
 
 namespace HHSGame.Core.Items
 {
@@ -14,12 +15,60 @@ namespace HHSGame.Core.Items
 
         public List<Item> GetItemsAt(int x, int y)
         {
-            return Loot.Where(item => item.X == x && item.Y == y).ToList();
+            return Loot.Where(item => item.X == x && item.Y == y && !item.IsHidden).ToList();
         }
 
-        public void RemoveItemsAt(int x, int y)
+        public List<Item> GetItemsAt(int x, int y, bool includeHidden)
         {
-            Loot.RemoveAll(item => item.X == x && item.Y == y);
+            return Loot.Where(item => item.X == x && item.Y == y && (includeHidden || !item.IsHidden)).ToList();
+        }
+
+        public List<Item> GetItemsInRadius(Coordinate origin, int radius, bool includeHidden)
+        {
+            List<Item> result = [];
+            foreach (Item item in Loot)
+            {
+                if (!includeHidden && item.IsHidden)
+                {
+                    continue;
+                }
+
+                int dx = Math.Abs(item.X - origin.X);
+                int dy = Math.Abs(item.Y - origin.Y);
+                if (dx <= radius && dy <= radius)
+                {
+                    result.Add(item);
+                }
+            }
+
+            return result;
+        }
+
+        public List<Item> RevealHiddenItems(Coordinate origin, int radius)
+        {
+            List<Item> revealed = [];
+            foreach (Item item in Loot)
+            {
+                if (!item.IsHidden)
+                {
+                    continue;
+                }
+
+                int dx = Math.Abs(item.X - origin.X);
+                int dy = Math.Abs(item.Y - origin.Y);
+                if (dx <= radius && dy <= radius)
+                {
+                    item.IsHidden = false;
+                    revealed.Add(item);
+                }
+            }
+
+            return revealed;
+        }
+
+        public void RemoveItemsAt(int x, int y, bool includeHidden = false)
+        {
+            Loot.RemoveAll(item => item.X == x && item.Y == y && (includeHidden || !item.IsHidden));
         }
 
         public void AddLoot(Item item)
@@ -34,6 +83,11 @@ namespace HHSGame.Core.Items
 
             foreach (Item item in Loot)
             {
+                if (item.IsHidden)
+                {
+                    continue;
+                }
+
                 if (viewport.Contains((item.X, item.Y)))
                 {
                     ctx.DrawAt((item.X, item.Y), '*');

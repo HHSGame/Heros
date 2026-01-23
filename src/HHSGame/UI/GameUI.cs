@@ -3,6 +3,7 @@ using HHSGame.Core.Combat;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
+using HHSGame.Core.SkillActions;
 using Terminal.Gui.App;
 using Terminal.Gui.Drivers;
 using Terminal.Gui.Input;
@@ -19,6 +20,7 @@ namespace HHSGame.UI
             SurroundingsFrame surroundingsFrame,
             UtilityWindow utilityWindow,
             QuestLogWindow questLogWindow,
+            SkillActionWindow skillActionWindow,
             DialogueWindow dialogueWindow,
             PlayerSetupWizard playerSetupWizard,
             GameUiOptions options,
@@ -34,13 +36,23 @@ namespace HHSGame.UI
         private bool isTalkSelection;
         private readonly List<Npc> talkTargets = [];
         private Npc? selectedTalkTarget;
+        private bool isSkillSelection;
+        private SkillActionDefinition? selectedSkillAction;
+        private SkillActionTargetType selectedSkillTargetType;
+        private readonly List<Enemy> skillEnemyTargets = [];
+        private int skillEnemyTargetIndex;
+        private readonly List<Npc> skillNpcTargets = [];
+        private Npc? selectedSkillNpc;
+        private readonly List<Player> skillPlayerTargets = [];
+        private int skillPlayerTargetIndex;
+        private Coordinate skillTargetPosition = new(0, 0);
         private bool isKeyHandlerRegistered;
         private bool isGameStarted;
         public Toplevel Start()
         {
             // Create main window
             Toplevel top = new();
-            top.Add(mapFrame, inventoryFrame, surroundingsFrame, statusBarView, messageFrame, actionSequenceFrame, utilityWindow, questLogWindow, dialogueWindow);
+            top.Add(mapFrame, inventoryFrame, surroundingsFrame, statusBarView, messageFrame, actionSequenceFrame, utilityWindow, questLogWindow, skillActionWindow, dialogueWindow);
 
             if (options.SkipWizard)
             {
@@ -89,6 +101,7 @@ namespace HHSGame.UI
                     game.EndDialogue();
                 }
             };
+            skillActionWindow.ActionSelected += (_, action) => BeginSkillAction(action);
 
             if (!isKeyHandlerRegistered)
             {
@@ -155,6 +168,15 @@ namespace HHSGame.UI
                 return;
             }
 
+            if (isSkillSelection)
+            {
+                if (HandleSkillSelectionKey(key))
+                {
+                    key.Handled = true;
+                }
+                return;
+            }
+
             if (key.Handled)
             {
                 return;
@@ -181,6 +203,20 @@ namespace HHSGame.UI
                     if (wasUtilityVisible != utilityWindow.Visible)
                     {
                         SyncStateWithUtilityWindow();
+                    }
+                    key.Handled = true;
+                    return;
+                }
+            }
+
+            if (skillActionWindow.Visible)
+            {
+                bool wasSkillVisible = skillActionWindow.Visible;
+                if (skillActionWindow.HandleKeyEvent(key))
+                {
+                    if (wasSkillVisible != skillActionWindow.Visible)
+                    {
+                        SyncStateWithSkillWindow();
                     }
                     key.Handled = true;
                     return;
@@ -294,6 +330,10 @@ namespace HHSGame.UI
                 case KeyCode.C:
                     handled = HandleCombatToggle();
                     break;
+                case KeyCode.S:
+                    ToggleSkillWindow();
+                    handled = true;
+                    break;
                 case KeyCode.T:
                     handled = BeginTalkSelection();
                     break;
@@ -305,6 +345,7 @@ namespace HHSGame.UI
                     else
                     {
                         Events.RaiseGameMessage($"Switched control to {game.Player?.Name}.");
+                        RefreshSkillWindow();
                     }
                     handled = true;
                     break;
@@ -316,6 +357,7 @@ namespace HHSGame.UI
                     else
                     {
                         Events.RaiseGameMessage($"Switched control to {game.Player?.Name}.");
+                        RefreshSkillWindow();
                     }
                     handled = true;
                     break;
@@ -347,7 +389,7 @@ namespace HHSGame.UI
                     SyncStateWithUtilityWindow();
                     return true;
                 case KeyCode.S:
-                    Events.RaiseGameMessage("Skills are not available yet.");
+                    ToggleSkillWindow();
                     return true;
                 case KeyCode.C:
                     HandleCombatToggle();
@@ -373,6 +415,7 @@ namespace HHSGame.UI
                     else
                     {
                         Events.RaiseGameMessage($"Switched control to {game.Player?.Name}.");
+                        RefreshSkillWindow();
                     }
                     return true;
                 case KeyCode.Tab:
@@ -383,6 +426,7 @@ namespace HHSGame.UI
                     else
                     {
                         Events.RaiseGameMessage($"Switched control to {game.Player?.Name}.");
+                        RefreshSkillWindow();
                     }
                     return true;
                 default:
@@ -411,6 +455,104 @@ namespace HHSGame.UI
                     return true;
                 case KeyCode.Esc:
                     CancelTalkSelection();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private bool HandleSkillSelectionKey(Key key)
+        {
+            if (selectedSkillAction == null)
+            {
+                return false;
+            }
+
+            switch (selectedSkillTargetType)
+            {
+                case SkillActionTargetType.Direction:
+                case SkillActionTargetType.AdjacentDoor:
+                case SkillActionTargetType.AdjacentNpc:
+                    return HandleDirectionalSkillSelectionKey(key);
+                case SkillActionTargetType.AdjacentEnemy:
+                case SkillActionTargetType.RangedEnemy:
+                    return HandleEnemySkillSelectionKey(key);
+                case SkillActionTargetType.AdjacentAllyOrSelf:
+                    return HandleAllySkillSelectionKey(key);
+                default:
+                    return false;
+            }
+        }
+
+        private bool HandleDirectionalSkillSelectionKey(Key key)
+        {
+            switch (key.KeyCode)
+            {
+                case KeyCode.CursorUp:
+                    SelectSkillTargetByDirection(0, -1);
+                    return true;
+                case KeyCode.CursorDown:
+                    SelectSkillTargetByDirection(0, 1);
+                    return true;
+                case KeyCode.CursorLeft:
+                    SelectSkillTargetByDirection(-1, 0);
+                    return true;
+                case KeyCode.CursorRight:
+                    SelectSkillTargetByDirection(1, 0);
+                    return true;
+                case KeyCode.Enter:
+                    ConfirmSkillSelection();
+                    return true;
+                case KeyCode.Esc:
+                    CancelSkillSelection();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private bool HandleEnemySkillSelectionKey(Key key)
+        {
+            switch (key.KeyCode)
+            {
+                case KeyCode.CursorLeft:
+                case KeyCode.CursorUp:
+                    CycleSkillEnemyTarget(-1);
+                    return true;
+                case KeyCode.CursorRight:
+                case KeyCode.CursorDown:
+                case KeyCode.Tab:
+                    CycleSkillEnemyTarget(1);
+                    return true;
+                case KeyCode.Enter:
+                    ConfirmSkillSelection();
+                    return true;
+                case KeyCode.Esc:
+                    CancelSkillSelection();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private bool HandleAllySkillSelectionKey(Key key)
+        {
+            switch (key.KeyCode)
+            {
+                case KeyCode.CursorLeft:
+                case KeyCode.CursorUp:
+                    CycleSkillPlayerTarget(-1);
+                    return true;
+                case KeyCode.CursorRight:
+                case KeyCode.CursorDown:
+                case KeyCode.Tab:
+                    CycleSkillPlayerTarget(1);
+                    return true;
+                case KeyCode.Enter:
+                    ConfirmSkillSelection();
+                    return true;
+                case KeyCode.Esc:
+                    CancelSkillSelection();
                     return true;
                 default:
                     return false;
@@ -542,6 +684,243 @@ namespace HHSGame.UI
             Events.RaiseGameMessage("Select a direction to choose who to talk to.");
             UpdateTalkOverlay();
             return true;
+        }
+
+        private void BeginSkillAction(SkillActionDefinition action)
+        {
+            if (game.Player == null)
+            {
+                return;
+            }
+
+            if (skillActionWindow.Visible)
+            {
+                skillActionWindow.Toggle();
+                SyncStateWithSkillWindow();
+            }
+
+            selectedSkillAction = action;
+            selectedSkillTargetType = action.TargetType;
+
+            switch (action.TargetType)
+            {
+                case SkillActionTargetType.None:
+                    ExecuteSkillAction(action, new SkillActionTarget());
+                    break;
+                case SkillActionTargetType.AdjacentEnemy:
+                    BeginSkillEnemySelection(GetAdjacentEnemies(1), "Select an adjacent enemy.");
+                    break;
+                case SkillActionTargetType.RangedEnemy:
+                    BeginSkillEnemySelection(GetAttackTargets(), "Select a target in range.");
+                    break;
+                case SkillActionTargetType.AdjacentNpc:
+                    BeginSkillNpcSelection();
+                    break;
+                case SkillActionTargetType.AdjacentAllyOrSelf:
+                    BeginSkillAllySelection();
+                    break;
+                case SkillActionTargetType.Direction:
+                    BeginSkillDirectionSelection("Select a direction.");
+                    break;
+                case SkillActionTargetType.AdjacentDoor:
+                    BeginSkillDoorSelection();
+                    break;
+                default:
+                    CancelSkillSelection();
+                    break;
+            }
+        }
+
+        private void BeginSkillEnemySelection(List<Enemy> targets, string message)
+        {
+            if (targets.Count == 0)
+            {
+                Events.RaiseGameMessage("No valid targets.");
+                CancelSkillSelection();
+                return;
+            }
+
+            if (targets.Count == 1)
+            {
+                ExecuteSkillAction(selectedSkillAction!, new SkillActionTarget(Enemy: targets[0]));
+                return;
+            }
+
+            skillEnemyTargets.Clear();
+            skillEnemyTargets.AddRange(targets);
+            skillEnemyTargetIndex = 0;
+            isSkillSelection = true;
+            Events.RaiseGameMessage(message);
+            UpdateSkillTargetOverlay();
+        }
+
+        private void BeginSkillNpcSelection()
+        {
+            if (game.Player == null)
+            {
+                CancelSkillSelection();
+                return;
+            }
+
+            IReadOnlyList<Npc> nearby = game.Context.NpcManager.GetAdjacentNpcs(game.Player.Position, 1);
+            if (nearby.Count == 0)
+            {
+                Events.RaiseGameMessage("No NPC nearby.");
+                CancelSkillSelection();
+                return;
+            }
+
+            if (nearby.Count == 1)
+            {
+                ExecuteSkillAction(selectedSkillAction!, new SkillActionTarget(Npc: nearby[0]));
+                return;
+            }
+
+            skillNpcTargets.Clear();
+            skillNpcTargets.AddRange(nearby);
+            selectedSkillNpc = skillNpcTargets[0];
+            isSkillSelection = true;
+            Events.RaiseGameMessage("Select a direction to choose a target.");
+            UpdateSkillTargetOverlay();
+        }
+
+        private void BeginSkillAllySelection()
+        {
+            if (game.Player == null)
+            {
+                CancelSkillSelection();
+                return;
+            }
+
+            skillPlayerTargets.Clear();
+            foreach (Player player in game.Context.PartyState.Players)
+            {
+                if (IsAdjacent(game.Player.Position, player.Position))
+                {
+                    skillPlayerTargets.Add(player);
+                }
+            }
+
+            if (skillPlayerTargets.Count == 0)
+            {
+                skillPlayerTargets.Add(game.Player);
+            }
+
+            if (skillPlayerTargets.Count == 1)
+            {
+                ExecuteSkillAction(selectedSkillAction!, new SkillActionTarget(Player: skillPlayerTargets[0]));
+                return;
+            }
+
+            skillPlayerTargetIndex = 0;
+            isSkillSelection = true;
+            Events.RaiseGameMessage("Select a target.");
+            UpdateSkillTargetOverlay();
+        }
+
+        private void BeginSkillDirectionSelection(string message)
+        {
+            if (game.Player == null)
+            {
+                CancelSkillSelection();
+                return;
+            }
+
+            Coordinate origin = game.Player.Position;
+            Coordinate initial = origin.Target(0, -2);
+            if (!game.Context.MapState.IsInBounds(initial))
+            {
+                initial = origin.Target(0, 2);
+            }
+            skillTargetPosition = initial;
+            isSkillSelection = true;
+            Events.RaiseGameMessage(message);
+            UpdateSkillTargetOverlay();
+        }
+
+        private void BeginSkillDoorSelection()
+        {
+            if (game.Player == null)
+            {
+                CancelSkillSelection();
+                return;
+            }
+
+            List<Coordinate> doors = GetAdjacentDoors(game.Player.Position);
+            if (doors.Count == 0)
+            {
+                Events.RaiseGameMessage("No adjacent door.");
+                CancelSkillSelection();
+                return;
+            }
+
+            if (doors.Count == 1)
+            {
+                ExecuteSkillAction(selectedSkillAction!, new SkillActionTarget(Position: doors[0]));
+                return;
+            }
+
+            skillTargetPosition = doors[0];
+            isSkillSelection = true;
+            Events.RaiseGameMessage("Select a direction to choose a door.");
+            UpdateSkillTargetOverlay();
+        }
+
+        private void CancelSkillSelection()
+        {
+            isSkillSelection = false;
+            selectedSkillAction = null;
+            selectedSkillTargetType = SkillActionTargetType.None;
+            skillEnemyTargets.Clear();
+            skillNpcTargets.Clear();
+            selectedSkillNpc = null;
+            skillPlayerTargets.Clear();
+            game.ClearOverlayCells();
+            Events.RaiseGameMessage("Skill selection cancelled.");
+        }
+
+        private void ConfirmSkillSelection()
+        {
+            if (selectedSkillAction == null)
+            {
+                return;
+            }
+
+            SkillActionTarget target = selectedSkillTargetType switch
+            {
+                SkillActionTargetType.AdjacentEnemy or SkillActionTargetType.RangedEnemy =>
+                    skillEnemyTargets.Count > 0 ? new SkillActionTarget(Enemy: skillEnemyTargets[skillEnemyTargetIndex]) : new SkillActionTarget(),
+                SkillActionTargetType.AdjacentNpc =>
+                    selectedSkillNpc != null ? new SkillActionTarget(Npc: selectedSkillNpc) : new SkillActionTarget(),
+                SkillActionTargetType.AdjacentAllyOrSelf =>
+                    skillPlayerTargets.Count > 0 ? new SkillActionTarget(Player: skillPlayerTargets[skillPlayerTargetIndex]) : new SkillActionTarget(),
+                SkillActionTargetType.AdjacentDoor or SkillActionTargetType.Direction =>
+                    new SkillActionTarget(Position: skillTargetPosition),
+                _ => new SkillActionTarget()
+            };
+
+            ExecuteSkillAction(selectedSkillAction, target);
+            isSkillSelection = false;
+            selectedSkillAction = null;
+            selectedSkillTargetType = SkillActionTargetType.None;
+            skillEnemyTargets.Clear();
+            skillNpcTargets.Clear();
+            selectedSkillNpc = null;
+            skillPlayerTargets.Clear();
+            game.ClearOverlayCells();
+        }
+
+        private void ExecuteSkillAction(SkillActionDefinition action, SkillActionTarget target)
+        {
+            if (!game.TryUseSkillAction(action, target))
+            {
+                return;
+            }
+
+            if (skillActionWindow.Visible)
+            {
+                skillActionWindow.RefreshEntries();
+            }
         }
 
         private void CancelMoveSelection()
@@ -777,6 +1156,190 @@ namespace HHSGame.UI
             });
         }
 
+        private void UpdateSkillTargetOverlay()
+        {
+            if (!isSkillSelection || selectedSkillAction == null || game.Player == null)
+            {
+                game.ClearOverlayCells();
+                return;
+            }
+
+            List<(Coordinate Position, Cell Cell)> overlay = [];
+            if (selectedSkillTargetType == SkillActionTargetType.RangedEnemy)
+            {
+                Weapon weapon = game.Player.EquippedWeapon;
+                foreach (Coordinate cell in CombatTargeting.GetRangeCells(game.Context.MapState, game.Player.Position, weapon))
+                {
+                    overlay.Add((cell, new Cell
+                    {
+                        Character = GUISettings.RangePreviewGlyph,
+                        Attribute = ColorPresets.RangePreview
+                    }));
+                }
+            }
+
+            Coordinate? targetPosition = selectedSkillTargetType switch
+            {
+                SkillActionTargetType.AdjacentEnemy or SkillActionTargetType.RangedEnemy =>
+                    skillEnemyTargets.Count > 0 ? skillEnemyTargets[skillEnemyTargetIndex].Position : null,
+                SkillActionTargetType.AdjacentNpc => selectedSkillNpc?.Position,
+                SkillActionTargetType.AdjacentAllyOrSelf =>
+                    skillPlayerTargets.Count > 0 ? skillPlayerTargets[skillPlayerTargetIndex].Position : null,
+                SkillActionTargetType.Direction or SkillActionTargetType.AdjacentDoor => skillTargetPosition,
+                _ => null
+            };
+
+            if (targetPosition != null)
+            {
+                overlay.Add((targetPosition, new Cell
+                {
+                    Character = GUISettings.TargetPreviewGlyph,
+                    Attribute = ColorPresets.TargetPreview
+                }));
+            }
+
+            if (overlay.Count == 0)
+            {
+                game.ClearOverlayCells();
+                return;
+            }
+
+            game.SetOverlayCells(overlay);
+        }
+
+        private void SelectSkillTargetByDirection(int dx, int dy)
+        {
+            if (game.Player == null)
+            {
+                return;
+            }
+
+            Coordinate origin = game.Player.Position;
+            Coordinate adjacent = origin.Target(dx, dy);
+
+            switch (selectedSkillTargetType)
+            {
+                case SkillActionTargetType.AdjacentNpc:
+                    Npc? npc = game.Context.NpcManager.GetNpcAt(adjacent.X, adjacent.Y);
+                    if (npc != null && skillNpcTargets.Contains(npc))
+                    {
+                        selectedSkillNpc = npc;
+                        UpdateSkillTargetOverlay();
+                    }
+                    break;
+                case SkillActionTargetType.AdjacentDoor:
+                    if (game.Context.MapState.IsInBounds(adjacent))
+                    {
+                        Cell cell = game.Context.MapState.GetCell(adjacent.X, adjacent.Y);
+                        if (cell.Character == '+')
+                        {
+                            skillTargetPosition = adjacent;
+                            UpdateSkillTargetOverlay();
+                        }
+                    }
+                    break;
+                case SkillActionTargetType.Direction:
+                    Coordinate landing = origin.Target(dx * 2, dy * 2);
+                    if (game.Context.MapState.IsInBounds(landing))
+                    {
+                        skillTargetPosition = landing;
+                        UpdateSkillTargetOverlay();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void CycleSkillEnemyTarget(int delta)
+        {
+            if (skillEnemyTargets.Count == 0)
+            {
+                return;
+            }
+
+            skillEnemyTargetIndex = (skillEnemyTargetIndex + delta) % skillEnemyTargets.Count;
+            if (skillEnemyTargetIndex < 0)
+            {
+                skillEnemyTargetIndex += skillEnemyTargets.Count;
+            }
+
+            UpdateSkillTargetOverlay();
+        }
+
+        private void CycleSkillPlayerTarget(int delta)
+        {
+            if (skillPlayerTargets.Count == 0)
+            {
+                return;
+            }
+
+            skillPlayerTargetIndex = (skillPlayerTargetIndex + delta) % skillPlayerTargets.Count;
+            if (skillPlayerTargetIndex < 0)
+            {
+                skillPlayerTargetIndex += skillPlayerTargets.Count;
+            }
+
+            UpdateSkillTargetOverlay();
+        }
+
+        private List<Enemy> GetAdjacentEnemies(int radius)
+        {
+            if (game.Player == null)
+            {
+                return [];
+            }
+
+            List<Enemy> result = [];
+            foreach (Enemy enemy in game.Context.EnemyManager.Enemies)
+            {
+                if (enemy.IsDead)
+                {
+                    continue;
+                }
+
+                if (IsWithinRadius(game.Player.Position, enemy.Position, radius))
+                {
+                    result.Add(enemy);
+                }
+            }
+
+            return result;
+        }
+
+        private List<Coordinate> GetAdjacentDoors(Coordinate origin)
+        {
+            List<Coordinate> result = [];
+            foreach ((int dx, int dy) in new[] { (0, -1), (0, 1), (-1, 0), (1, 0) })
+            {
+                Coordinate target = origin.Target(dx, dy);
+                if (!game.Context.MapState.IsInBounds(target))
+                {
+                    continue;
+                }
+
+                Cell cell = game.Context.MapState.GetCell(target.X, target.Y);
+                if (cell.Character == '+')
+                {
+                    result.Add(target);
+                }
+            }
+
+            return result;
+        }
+
+        private static bool IsWithinRadius(Coordinate origin, Coordinate target, int radius)
+        {
+            int dx = Math.Abs(origin.X - target.X);
+            int dy = Math.Abs(origin.Y - target.Y);
+            return dx <= radius && dy <= radius;
+        }
+
+        private static bool IsAdjacent(Coordinate origin, Coordinate target)
+        {
+            return IsWithinRadius(origin, target, 1);
+        }
+
         private void SelectTalkTargetByDirection(int dx, int dy)
         {
             if (game.Player == null)
@@ -994,13 +1557,64 @@ namespace HHSGame.UI
                 SyncStateWithUtilityWindow();
             }
 
+            if (!questLogWindow.Visible && skillActionWindow.Visible)
+            {
+                skillActionWindow.Toggle();
+                SyncStateWithSkillWindow();
+            }
+
             questLogWindow.Toggle();
             SyncStateWithQuestLogWindow();
+        }
+
+        private void ToggleSkillWindow()
+        {
+            if (!skillActionWindow.Visible)
+            {
+                if (utilityWindow.Visible)
+                {
+                    utilityWindow.ToggleUtilityWindow();
+                    SyncStateWithUtilityWindow();
+                }
+
+                if (questLogWindow.Visible)
+                {
+                    questLogWindow.Toggle();
+                    SyncStateWithQuestLogWindow();
+                }
+            }
+
+            skillActionWindow.Toggle();
+            SyncStateWithSkillWindow();
+        }
+
+        private void RefreshSkillWindow()
+        {
+            if (skillActionWindow.Visible)
+            {
+                skillActionWindow.RefreshEntries();
+            }
         }
 
         private void SyncStateWithQuestLogWindow()
         {
             if (questLogWindow.Visible)
+            {
+                GameStateType current = game.Context.StateMachine.CurrentState;
+                if (current != GameStateType.Menu)
+                {
+                    lastNonMenuState = current;
+                }
+                game.Context.StateMachine.TryChangeState(GameStateType.Menu);
+                return;
+            }
+
+            game.Context.StateMachine.TryChangeState(lastNonMenuState);
+        }
+
+        private void SyncStateWithSkillWindow()
+        {
+            if (skillActionWindow.Visible)
             {
                 GameStateType current = game.Context.StateMachine.CurrentState;
                 if (current != GameStateType.Menu)

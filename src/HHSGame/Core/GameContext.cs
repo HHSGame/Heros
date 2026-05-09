@@ -3,6 +3,7 @@ using HHSGame.UI;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Dialogue;
 using HHSGame.Core.Enemies;
+using HHSGame.Core.Interactions;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using HHSGame.Core.Npcs;
@@ -46,11 +47,13 @@ namespace HHSGame.Core
         NpcManager npcManager,
         SurroundingsManager surroundingsManager,
         InventoryManager inventoryManager,
+        InteractableManager interactableManager,
         TurnManager turnManager,
         GameStateMachine stateMachine,
         QuestManager questManager,
         DialogueManager dialogueManager,
         PartyState partyState,
+        Factions.FactionManager factionManager,
         IDrawingContext drawingContext
     )
     {
@@ -68,11 +71,13 @@ namespace HHSGame.Core
         public NpcManager NpcManager => npcManager;
         public SurroundingsManager SurroundingsManager => surroundingsManager;
         public InventoryManager InventoryManager => inventoryManager;
+        public InteractableManager InteractableManager => interactableManager;
         public TurnManager TurnManager => turnManager;
         public GameStateMachine StateMachine => stateMachine;
         public QuestManager QuestManager => questManager;
         public DialogueManager DialogueManager => dialogueManager;
         public PartyState PartyState => partyState;
+        public Factions.FactionManager FactionManager => factionManager;
         public IDrawingContext DrawingContext => drawingContext;
         public Player Player => player!;
         public Player? PlayerOrNull => player;
@@ -88,6 +93,20 @@ namespace HHSGame.Core
         {
             enemyManager.SetEnemies(enemyFactory.SpawnEnemies(parameters.EnemySpawns));
             npcManager.SetNpcs(npcFactory.CreateNpcs(parameters.NpcSpawns));
+            questManager.LoadDefinitions(parameters.QuestDefinitions, parameters.AchievementDefinitions);
+            dialogueManager.LoadDefinitions(parameters.DialogueDefinitions);
+            collisionSystem.SetPlayers(players);
+            this.players = players;
+            SetActivePlayer(activePlayer);
+            partyState.SetPlayers(players, activePlayer);
+        }
+
+        /// <summary>
+        /// Restores context from saved state. Definitions are loaded but enemies/NPCs
+        /// are NOT re-spawned — they are restored from save data by LoadManager.
+        /// </summary>
+        public void RestoreContext(IReadOnlyList<Player> players, Player activePlayer)
+        {
             questManager.LoadDefinitions(parameters.QuestDefinitions, parameters.AchievementDefinitions);
             dialogueManager.LoadDefinitions(parameters.DialogueDefinitions);
             collisionSystem.SetPlayers(players);

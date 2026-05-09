@@ -77,7 +77,7 @@ namespace HHSGame.Core.Items
             {
                 if (!armors.TryGetValue(UnknownArmorId, out ArmorDefinition? fallback) || fallback == null)
                 {
-                    fallback = new ArmorDefinition(UnknownArmorId, "Unknown", ItemRarity.Common, 0, 0, 0);
+                    fallback = new ArmorDefinition(UnknownArmorId, "Unknown", ItemRarity.Common, 0, 0, 0, EquipmentSlot.Body);
                 }
 
                 definition = fallback;
@@ -133,7 +133,8 @@ namespace HHSGame.Core.Items
                 definition.Rarity,
                 definition.Value,
                 definition.Weight,
-                definition.ArmorValue);
+                definition.ArmorValue,
+                definition.Slot);
         }
 
         private static HealthPotion BuildItem(ItemDefinition definition, int? amountOverride)

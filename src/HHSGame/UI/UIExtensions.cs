@@ -35,6 +35,11 @@ namespace HHSGame.UI
             serviceCollection.AddSingleton<DialogueWindow>();
             serviceCollection.AddSingleton<SkillActionWindow>();
             serviceCollection.AddSingleton<PlayerSetupWizard>();
+            serviceCollection.AddSingleton<SaveLoadSlotDialog>();
+            serviceCollection.AddSingleton<MainMenuView>();
+            serviceCollection.AddSingleton<HelpView>();
+            serviceCollection.AddSingleton<TutorialHintDialog>();
+            serviceCollection.AddSingleton<CharacterCreationDialog>();
 
             // Setup Game UI
             serviceCollection.AddSingleton<GameUI>();

@@ -100,7 +100,48 @@ Decision: keep both a minimal linear script format (for quick smoke flows) and a
 - 2026-01-23: Ensured map refresh after layout changes and cleared the map backbuffer each render to avoid blank/black screens when toggling UI windows.
 - 2026-01-23: Added diagonal move support in movement planning with 1.5 AP rounding rules and updated pathfinding to include diagonal costs.
 - 2026-01-23: Executed player action sequences in input order across all controlled characters (instead of per-character batching).
+- 2026-01-23: Added currency and quest-status end conditions plus configurable win/lose messages.
+- 2026-01-23: Moved Serilog setup into the engine launcher for a self-contained entrypoint.
+- 2026-01-23: Added quest-objective and quest-ready end conditions with integration tests.
+- 2026-01-23: Added achievement-unlocked end condition plus game.json example and tests.
+- 2026-01-23: Expanded the default scenario with a larger map, a 3-member party, additional NPCs/quests, and updated spawns for manual verification.
 
 ## Next Actions
-- Add more condition types (currency, quest flags) and expose end-state messaging.
-- Consider moving Serilog setup into the launcher for a fully self-contained engine entrypoint.
+- Expand condition coverage with additional quest/currency variants as needed.
+- Implement LoadManager for full save/load round-trip.
+- Add Save/Load UI (SaveLoadWindow + F5/F9 shortcuts).
+- Wire Save/Load into GameStateMachine.
+- Add unit tests for Save/Load round-trip.
+
+## Progress Audit (2026-05-08)
+
+### Overall Status
+- Engine refactoring milestones 1-10: **Complete** ✅
+- Milestone 11 (Save/Load integration): **Backend only** ⚠️
+- Milestone 12 (Test scripted flow): **Partial** ⚠️
+
+### Key Findings
+1. **SaveManager exists** in `Core/Save/SaveManager.cs` with full Capture/Save logic, but:
+   - References APIs that don't exist yet (`GetTurnNumber()`, `GetTalkedNpcs()`, `GetCompletedDialogues()`, `GetDialogueCounters()`, `IsAlive`, `SkipTurnsCount`)
+   - No LoadManager counterpart
+   - No UI integration
+   - No unit tests
+
+2. **Duplicate code** was found in `Core/Saves/` (different namespace `HHSGame.Core.Saves`) — removed during audit.
+
+3. **Missing APIs needed for Save/Load**:
+   - `PartyState.Currency` — not present (currency is in InventoryManager)
+   - `DialogueManager.GetTalkedNpcs()` / `GetCompletedDialogues()` / `GetDialogueCounters()` — don't exist
+   - `Enemy.IsAlive` — uses `IsDead` instead
+   - `Enemy.SkipTurnsCount` — uses `SkipTurnsRemaining` instead
+   - `MapState.IsExplored()` — needs verification
+   - `TurnManager.GetTurnNumber()` — uses `TurnCount` instead
+
+### Recommended Next Steps (Priority Order)
+1. **P0**: Fix SaveManager APIs + Create SaveDataModels + Create LoadManager
+2. **P0**: Add Save/Load UI (SaveLoadWindow + F5/F9)
+3. **P0**: Wire into GameStateMachine
+4. **P1**: Unit tests for Save/Load round-trip
+5. **P1**: Phase-based TurnManager refactoring
+6. **P2**: Equipment slots + item rarity
+7. **P3**: Interactive objects framework

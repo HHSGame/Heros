@@ -1,54 +1,163 @@
 {
   "enemies": [
     {
-      "id": "Gangster",
-      "name": "Gangster",
+      "id": "Occupier",
+      "name": "占领军士兵",
       "attributes": {
-        "strength": 4,
+        "strength": 5,
         "perception": 5,
-        "agility": 5,
-        "charisma": 4,
+        "agility": 4,
+        "charisma": 3,
         "intelligence": 4
       },
       "skills": {},
-      "weaponId": "Dagger",
-      "armorId": "Cloak",
+      "weaponId": "Kar98k",
+      "armorId": "WehrmachtUniform",
       "experienceValue": 50,
-      "glyph": "g",
+      "glyph": "S",
       "colorKey": "Gangster",
+      "abilities": [],
+      "loot": [
+        {
+          "itemId": "Bandage",
+          "chance": 50,
+          "amount": 10,
+          "quantity": 1
+        }
+      ],
+      "faction": "Occupier"
+    },
+    {
+      "id": "Officer",
+      "name": "占领军军官",
+      "attributes": {
+        "strength": 6,
+        "perception": 7,
+        "agility": 5,
+        "charisma": 6,
+        "intelligence": 6
+      },
+      "skills": {},
+      "weaponId": "Luger",
+      "armorId": "HeavyCoat",
+      "experienceValue": 120,
+      "glyph": "O",
+      "colorKey": "BanditLeader",
       "abilities": [
         {
-          "kind": "Poison",
-          "chance": 20,
-          "duration": 3,
-          "amount": 2
+          "kind": "Stun",
+          "chance": 15,
+          "duration": 1,
+          "amount": 0
         }
       ],
       "loot": [
         {
-          "itemId": "HealthPotion",
-          "chance": 100,
-          "amount": 10,
+          "itemId": "MedicalKit",
+          "chance": 40,
+          "amount": 20,
           "quantity": 1
         }
-      ]
+      ],
+      "faction": "Occupier"
+    },
+    {
+      "id": "Gestapo",
+      "name": "盖世太保特务",
+      "attributes": {
+        "strength": 4,
+        "perception": 9,
+        "agility": 6,
+        "charisma": 7,
+        "intelligence": 8
+      },
+      "skills": {},
+      "weaponId": "MP40",
+      "armorId": "LeatherJacket",
+      "experienceValue": 150,
+      "glyph": "G",
+      "colorKey": "BanditLeader",
+      "abilities": [
+        {
+          "kind": "Stun",
+          "chance": 25,
+          "duration": 2,
+          "amount": 0
+        }
+      ],
+      "loot": [
+        {
+          "itemId": "MedicalKit",
+          "chance": 30,
+          "amount": 20,
+          "quantity": 1
+        }
+      ],
+      "faction": "Occupier"
+    },
+    {
+      "id": "Collaborator",
+      "name": "协作者",
+      "attributes": {
+        "strength": 3,
+        "perception": 5,
+        "agility": 5,
+        "charisma": 6,
+        "intelligence": 5
+      },
+      "skills": {},
+      "weaponId": "TT33",
+      "armorId": "CivilianClothes",
+      "experienceValue": 30,
+      "glyph": "c",
+      "colorKey": "Default",
+      "abilities": [],
+      "loot": [],
+      "faction": "Puppet"
+    },
+    {
+      "id": "Informer",
+      "name": "线人",
+      "attributes": {
+        "strength": 2,
+        "perception": 7,
+        "agility": 7,
+        "charisma": 4,
+        "intelligence": 6
+      },
+      "skills": {},
+      "weaponId": "Knife",
+      "armorId": "CivilianClothes",
+      "experienceValue": 25,
+      "glyph": "i",
+      "colorKey": "Default",
+      "abilities": [
+        {
+          "kind": "Poison",
+          "chance": 20,
+          "duration": 2,
+          "amount": 2
+        }
+      ],
+      "loot": [],
+      "faction": "Puppet"
     },
     {
       "id": "Bandit",
-      "name": "Bandit",
+      "name": "匪徒",
       "attributes": {
         "strength": 6,
-        "perception": 5,
+        "perception": 4,
         "agility": 5,
-        "charisma": 4,
-        "intelligence": 4
+        "charisma": 3,
+        "intelligence": 3
       },
       "skills": {},
-      "weaponId": "Axe",
-      "armorId": "LeatherArmor",
-      "experienceValue": 100,
+      "weaponId": "Shovel",
+      "armorId": "LeatherJacket",
+      "experienceValue": 35,
       "glyph": "b",
-      "colorKey": "Bandit",
+      "colorKey": "Thug",
       "abilities": [
         {
           "kind": "Stun",
@@ -59,99 +168,246 @@
       ],
       "loot": [
         {
-          "itemId": "HealthPotion",
-          "chance": 50,
-          "amount": 20,
+          "itemId": "Cigarettes",
+          "chance": 60,
+          "amount": 5,
           "quantity": 1
         }
-      ]
+      ],
+      "faction": "Bandits"
     },
     {
-      "id": "BanditLeader",
-      "name": "Bandit Leader",
+      "id": "BanditBoss",
+      "name": "匪徒头目",
       "attributes": {
         "strength": 8,
-        "perception": 6,
+        "perception": 5,
         "agility": 5,
         "charisma": 5,
-        "intelligence": 5
+        "intelligence": 4
       },
       "skills": {},
-      "weaponId": "Hammer",
-      "armorId": "Shield",
-      "experienceValue": 200,
-      "glyph": "L",
+      "weaponId": "Thompson",
+      "armorId": "FlakVest",
+      "experienceValue": 180,
+      "glyph": "B",
       "colorKey": "BanditLeader",
       "abilities": [
         {
           "kind": "HealSelf",
-          "chance": 30,
+          "chance": 20,
           "duration": 0,
-          "amount": 10
+          "amount": 15
         }
       ],
       "loot": [
         {
-          "itemId": "HealthPotion",
-          "chance": 70,
-          "amount": 30,
+          "itemId": "GoldBar",
+          "chance": 50,
+          "amount": 50,
           "quantity": 1
         }
-      ]
+      ],
+      "faction": "Bandits"
     },
     {
-      "id": "Thug",
-      "name": "Thug",
+      "id": "Deserter",
+      "name": "叛变士兵",
       "attributes": {
-        "strength": 4,
+        "strength": 5,
         "perception": 4,
         "agility": 4,
-        "charisma": 4,
-        "intelligence": 4
+        "charisma": 3,
+        "intelligence": 3
       },
       "skills": {},
-      "weaponId": "Dagger",
-      "armorId": "Cloak",
-      "experienceValue": 30,
-      "glyph": "t",
-      "colorKey": "Thug",
-      "loot": []
+      "weaponId": "MosinNagant",
+      "armorId": "ResistantVest",
+      "experienceValue": 40,
+      "glyph": "d",
+      "colorKey": "Default",
+      "abilities": [],
+      "loot": [],
+      "faction": "Neutral"
     },
     {
-      "id": "Soldier",
-      "name": "Soldier",
+      "id": "MGNest",
+      "name": "机枪阵地",
       "attributes": {
-        "strength": 6,
+        "strength": 10,
         "perception": 6,
-        "agility": 5,
-        "charisma": 4,
-        "intelligence": 4
+        "agility": 1,
+        "charisma": 1,
+        "intelligence": 2
       },
       "skills": {},
-      "weaponId": "Sword",
-      "armorId": "Shield",
-      "experienceValue": 60,
-      "glyph": "s",
-      "colorKey": "Soldier",
-      "loot": []
+      "weaponId": "MG34",
+      "armorId": "FlakVest",
+      "experienceValue": 200,
+      "glyph": "M",
+      "colorKey": "Default",
+      "loot": [
+        {
+          "itemId": "MedicalKit",
+          "chance": 80,
+          "amount": 40,
+          "quantity": 1
+        }
+      ],
+      "faction": "Occupier"
     },
     {
       "id": "Sniper",
-      "name": "Sniper",
+      "name": "狙击手",
       "attributes": {
         "strength": 4,
-        "perception": 8,
+        "perception": 10,
+        "agility": 7,
+        "charisma": 3,
+        "intelligence": 6
+      },
+      "skills": {},
+      "weaponId": "ScopedKar98k",
+      "armorId": "ResistantVest",
+      "experienceValue": 160,
+      "glyph": "s",
+      "colorKey": "Default",
+      "loot": [],
+      "faction": "Occupier"
+    },
+    {
+      "id": "Patrol",
+      "name": "巡逻兵",
+      "attributes": {
+        "strength": 4,
+        "perception": 6,
+        "agility": 5,
+        "charisma": 3,
+        "intelligence": 4
+      },
+      "skills": {},
+      "weaponId": "Kar98k",
+      "armorId": "WehrmachtUniform",
+      "experienceValue": 30,
+      "glyph": "p",
+      "colorKey": "Default",
+      "abilities": [],
+      "loot": [],
+      "faction": "Occupier"
+    },
+    {
+      "id": "Medic",
+      "name": "战地医护兵",
+      "attributes": {
+        "strength": 3,
+        "perception": 5,
+        "agility": 4,
+        "charisma": 5,
+        "intelligence": 6
+      },
+      "skills": {},
+      "weaponId": "M1911",
+      "armorId": "CivilianClothes",
+      "experienceValue": 45,
+      "glyph": "+",
+      "colorKey": "Default",
+      "abilities": [
+        {
+          "kind": "HealSelf",
+          "chance": 40,
+          "duration": 0,
+          "amount": 20
+        }
+      ],
+      "loot": [
+        {
+          "itemId": "MedicalKit",
+          "chance": 70,
+          "amount": 25,
+          "quantity": 1
+        }
+      ],
+      "faction": "Occupier"
+    },
+    {
+      "id": "Dog",
+      "name": "军犬",
+      "attributes": {
+        "strength": 4,
+        "perception": 9,
+        "agility": 9,
+        "charisma": 2,
+        "intelligence": 2
+      },
+      "skills": {},
+      "weaponId": "Knife",
+      "armorId": "UnknownArmor",
+      "experienceValue": 20,
+      "glyph": "d",
+      "colorKey": "Default",
+      "abilities": [
+        {
+          "kind": "Stun",
+          "chance": 15,
+          "duration": 1,
+          "amount": 0
+        }
+      ],
+      "loot": [],
+      "faction": "Occupier"
+    },
+    {
+      "id": "Tank",
+      "name": "轻型坦克",
+      "attributes": {
+        "strength": 12,
+        "perception": 5,
+        "agility": 2,
+        "charisma": 1,
+        "intelligence": 2
+      },
+      "skills": {},
+      "weaponId": "MG34",
+      "armorId": "FlakVest",
+      "experienceValue": 300,
+      "glyph": "T",
+      "colorKey": "BanditLeader",
+      "loot": [
+        {
+          "itemId": "MedicalKit",
+          "chance": 90,
+          "amount": 60,
+          "quantity": 2
+        }
+      ],
+      "faction": "Occupier"
+    },
+    {
+      "id": "Turncoat",
+      "name": "叛变抵抗者",
+      "attributes": {
+        "strength": 5,
+        "perception": 5,
         "agility": 6,
         "charisma": 4,
         "intelligence": 5
       },
       "skills": {},
-      "weaponId": "Bow",
-      "armorId": "Robe",
-      "experienceValue": 150,
-      "glyph": "s",
-      "colorKey": "Sniper",
-      "loot": []
+      "weaponId": "PPSh41",
+      "armorId": "ResistantVest",
+      "experienceValue": 55,
+      "glyph": "r",
+      "colorKey": "Default",
+      "abilities": [
+        {
+          "kind": "Poison",
+          "chance": 15,
+          "duration": 2,
+          "amount": 3
+        }
+      ],
+      "loot": [],
+      "faction": "Resistance"
     }
   ]
 }

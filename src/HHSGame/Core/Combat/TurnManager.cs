@@ -52,5 +52,15 @@ namespace HHSGame.Core.Combat
         {
             return currentTurnState == TurnState.EnemyTurn;
         }
+
+        public int GetTurnNumber()
+        {
+            return TurnCount;
+        }
+
+        public void SetTurnNumber(int turnNumber)
+        {
+            TurnCount = turnNumber;
+        }
     }
 }

@@ -1,13 +1,58 @@
 {
   "items": [
     {
-      "id": "HealthPotion",
+      "id": "Bandage",
       "kind": "HealthPotion",
-      "name": "Health Potion",
+      "name": "绷带",
       "rarity": "Common",
-      "value": 50,
-      "weight": 0.5,
-      "healAmount": 10
+      "value": 15,
+      "weight": 0.2,
+      "healAmount": 5
+    },
+    {
+      "id": "MedicalKit",
+      "kind": "HealthPotion",
+      "name": "医疗包",
+      "rarity": "Uncommon",
+      "value": 80,
+      "weight": 1.0,
+      "healAmount": 15
+    },
+    {
+      "id": "Morphine",
+      "kind": "HealthPotion",
+      "name": "吗啡注射器",
+      "rarity": "Rare",
+      "value": 200,
+      "weight": 0.3,
+      "healAmount": 30
+    },
+    {
+      "id": "Cigarettes",
+      "kind": "HealthPotion",
+      "name": "香烟",
+      "rarity": "Common",
+      "value": 10,
+      "weight": 0.1,
+      "healAmount": 1
+    },
+    {
+      "id": "Bread",
+      "kind": "HealthPotion",
+      "name": "黑面包",
+      "rarity": "Common",
+      "value": 12,
+      "weight": 0.4,
+      "healAmount": 4
+    },
+    {
+      "id": "GoldBar",
+      "kind": "HealthPotion",
+      "name": "金条",
+      "rarity": "Rare",
+      "value": 500,
+      "weight": 2.0,
+      "healAmount": 0
     }
   ]
 }

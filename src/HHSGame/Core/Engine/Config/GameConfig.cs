@@ -161,6 +161,8 @@ namespace HHSGame.Core.Engine.Config
         public List<string> Lose { get; init; } = new() { "PlayerDeath" };
         public List<ConditionEntryConfig> WinEntries { get; init; } = [];
         public List<ConditionEntryConfig> LoseEntries { get; init; } = [];
+        public string WinMessage { get; init; } = string.Empty;
+        public string LoseMessage { get; init; } = string.Empty;
     }
 
     public sealed class ConditionEntryConfig

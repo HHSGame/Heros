@@ -233,6 +233,7 @@ namespace HHSGame.Core.Engine
                     throw new InvalidDataException($"Dialogue '{id}' has no nodes.");
                 }
 
+                string fallbackStartNodeId = RequireId(config.Nodes[0].Id, $"dialogue {id} start node");
                 Dictionary<string, DialogueNode> nodes = new(StringComparer.OrdinalIgnoreCase);
                 foreach (DialogueNodeConfig node in config.Nodes)
                 {
@@ -252,7 +253,7 @@ namespace HHSGame.Core.Engine
                 }
 
                 string startNodeId = string.IsNullOrWhiteSpace(config.StartNodeId)
-                    ? nodes.Keys.First()
+                    ? fallbackStartNodeId
                     : config.StartNodeId.Trim();
 
                 if (!nodes.ContainsKey(startNodeId))

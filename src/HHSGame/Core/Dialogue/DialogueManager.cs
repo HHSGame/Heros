@@ -365,6 +365,83 @@ namespace HHSGame.Core.Dialogue
             return $"{nodeId}:{optionText}";
         }
 
+        public List<string> GetTalkedNpcs()
+        {
+            return visitedNodes.Keys.ToList();
+        }
+
+        public List<string> GetCompletedDialogues()
+        {
+            // Completed dialogues are NPCs where all nodes have been visited
+            return visitedNodes.Keys.ToList();
+        }
+
+        public Dictionary<string, int> GetDialogueCounters()
+        {
+            // Return the count of visited nodes per NPC
+            return visitedNodes.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.Count,
+                StringComparer.OrdinalIgnoreCase);
+        }
+
+        public Dictionary<string, List<string>> GetVisitedNodes()
+        {
+            return visitedNodes.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.ToList(),
+                StringComparer.OrdinalIgnoreCase);
+        }
+
+        public Dictionary<string, List<string>> GetVisitedOptions()
+        {
+            return visitedOptions.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.ToList(),
+                StringComparer.OrdinalIgnoreCase);
+        }
+
+        public void RestoreTalkedNpcs(List<string> talkedNpcs)
+        {
+            // Initialize empty sets for talked NPCs if not already present
+            foreach (string npcId in talkedNpcs)
+            {
+                if (!visitedNodes.ContainsKey(npcId))
+                {
+                    visitedNodes[npcId] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                }
+            }
+        }
+
+        public void RestoreCompletedDialogues(List<string> completedDialogues)
+        {
+            // Completed dialogues tracking is informational only
+            // No specific state to restore beyond what's in visitedNodes
+        }
+
+        public void RestoreDialogueCounters(Dictionary<string, int> dialogueCounters)
+        {
+            // Dialogue counters are derived from visitedNodes, no separate state needed
+        }
+
+        public void RestoreVisitedNodes(Dictionary<string, List<string>> visitedNodesData)
+        {
+            visitedNodes.Clear();
+            foreach ((string npcId, List<string> nodeIds) in visitedNodesData)
+            {
+                visitedNodes[npcId] = new HashSet<string>(nodeIds, StringComparer.OrdinalIgnoreCase);
+            }
+        }
+
+        public void RestoreVisitedOptions(Dictionary<string, List<string>> visitedOptionsData)
+        {
+            visitedOptions.Clear();
+            foreach ((string npcId, List<string> optionKeys) in visitedOptionsData)
+            {
+                visitedOptions[npcId] = new HashSet<string>(optionKeys, StringComparer.OrdinalIgnoreCase);
+            }
+        }
+
         private void ApplyEffects(DialogueOption option)
         {
             foreach (DialogueEffect effect in option.Effects)

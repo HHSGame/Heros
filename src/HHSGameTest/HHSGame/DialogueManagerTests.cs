@@ -1,3 +1,4 @@
+using HHSGame.Core.Interactions;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Dialogue;
 using HHSGame.Core.Enemies;
@@ -181,7 +182,7 @@ namespace HHSGame.Core
             NpcManager npcManager = new();
             CollisionSystem collisionSystem = new(enemyManager, mapState, npcManager);
             Pathfinder pathfinder = new(mapState);
-            EnemyFactory enemyFactory = new(enemyCatalog, itemCatalog, collisionSystem, mapState, pathfinder);
+            EnemyFactory enemyFactory = new(enemyCatalog, itemCatalog, collisionSystem, mapState, pathfinder, new global::HHSGame.Core.Factions.FactionManager());
             NpcFactory npcFactory = new(itemCatalog);
             DialogueManager dialogueManager = new(partyState, questManager);
             SurroundingsManager surroundingsManager = new(itemManager, enemyManager, mapState, npcManager);
@@ -202,11 +203,13 @@ namespace HHSGame.Core
                 npcManager,
                 surroundingsManager,
                 inventoryManager,
+                new InteractableManager(),
                 turnManager,
                 stateMachine,
                 questManager,
                 dialogueManager,
                 partyState,
+                new global::HHSGame.Core.Factions.FactionManager(),
                 drawingContext);
         }
 

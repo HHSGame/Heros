@@ -173,9 +173,7 @@ namespace HHSGame.Core
             EnemyCatalog enemyCatalog = new(new List<EnemyDefinition>
             {
                 new EnemyDefinition(
-                    "Gangster",
-                    "Gangster",
-                    new Stats.Attributes(),
+                    "Gangster", "Gangster", "Neutral", new Stats.Attributes(),
                     new Stats.Skills(),
                     "UnknownWeapon",
                     "UnknownArmor",

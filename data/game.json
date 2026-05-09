@@ -1,577 +1,252 @@
 {
-  "game": {
-    "name": "HHSGame",
-    "version": 1
-  },
-  "map": {
-    "style": "Cave",
-    "width": 18,
-    "height": 12,
-    "useCustomMap": true,
-    "customMapPath": "data/maps/dialogue-quest-01.txt"
-  },
-  "player": {
-    "class": "Warrior",
-    "startingItems": []
-  },
-  "players": [
-    {
-      "name": "Alpha",
-      "glyph": "A",
-      "class": "Warrior",
-      "startPosition": {
-        "x": 2,
-        "y": 5
-      },
-      "startingItems": [
-        "HealthPotion"
-      ]
-    },
-    {
-      "name": "Bravo",
-      "glyph": "B",
-      "class": "Thief",
-      "startPosition": {
-        "x": 3,
-        "y": 5
-      },
-      "startingItems": []
-    },
-    {
-      "name": "Charlie",
-      "glyph": "C",
-      "class": "Alchemist",
-      "startPosition": {
-        "x": 4,
-        "y": 5
-      },
-      "startingItems": [
-        "HealthPotion"
-      ]
-    },
-    {
-      "name": "Delta",
-      "glyph": "D",
-      "class": "Ranger",
-      "startPosition": {
-        "x": 5,
-        "y": 5
-      },
-      "startingItems": []
-    }
-  ],
-  "catalogs": {
-    "weapons": "data/catalogs/weapons.json",
-    "armors": "data/catalogs/armors.json",
-    "items": "data/catalogs/items.json",
-    "classes": "data/catalogs/classes.json",
-    "enemies": "data/catalogs/enemies.json"
-  },
+  "game": { "name": "沦陷区", "version": 2 },
+  "map": { "style": "Cave", "width": 40, "height": 25, "useCustomMap": true, "customMapPath": "data/maps/city-center.txt" },
+  "player": { "class": "Civilian", "startingItems": ["Bandage"] },
+  "players": [{ "name": "主角", "glyph": "@", "class": "Civilian", "startPosition": { "x": 2, "y": 2 }, "startingItems": ["Bandage", "Bread"] }],
+  "catalogs": { "weapons": "data/catalogs/weapons.json", "armors": "data/catalogs/armors.json", "items": "data/catalogs/items.json", "classes": "data/catalogs/classes.json", "enemies": "data/catalogs/enemies.json" },
   "enemies": [
-    {
-      "id": "Bandit",
-      "position": {
-        "x": 14,
-        "y": 8
-      },
-      "count": 1
-    }
+    { "id": "Patrol", "position": { "x": 15, "y": 8 }, "count": 1 },
+    { "id": "Patrol", "position": { "x": 20, "y": 12 }, "count": 1 },
+    { "id": "Occupier", "position": { "x": 25, "y": 10 }, "count": 1 },
+    { "id": "Occupier", "position": { "x": 30, "y": 15 }, "count": 1 },
+    { "id": "Informer", "position": { "x": 12, "y": 18 }, "count": 1 },
+    { "id": "Bandit", "position": { "x": 35, "y": 5 }, "count": 1 },
+    { "id": "Bandit", "position": { "x": 32, "y": 6 }, "count": 1 },
+    { "id": "Dog", "position": { "x": 22, "y": 8 }, "count": 1 }
   ],
   "items": [
-    {
-      "id": "HealthPotion",
-      "position": {
-        "x": 9,
-        "y": 5
-      },
-      "quantity": 1
-    }
+    { "id": "Bandage", "position": { "x": 10, "y": 15 }, "quantity": 1 },
+    { "id": "Bread", "position": { "x": 18, "y": 20 }, "quantity": 1 },
+    { "id": "MedicalKit", "position": { "x": 28, "y": 22 }, "quantity": 1 },
+    { "id": "Cigarettes", "position": { "x": 8, "y": 10 }, "quantity": 2 }
   ],
   "npcs": [
-    {
-      "id": "Fixer",
-      "name": "Fixer",
-      "glyph": "F",
-      "colorKey": "Trader",
-      "attributes": {
-        "strength": 4,
-        "perception": 5,
-        "agility": 4,
-        "charisma": 6,
-        "intelligence": 4
-      },
-      "skills": {
-        "Melee": 2,
-        "Athletics": 2,
-        "Survival": 2,
-        "Firearms": 2,
-        "Awareness": 6,
-        "Resolution": 4,
-        "Stealth": 2,
-        "Dexterity": 3,
-        "Mechanics": 4,
-        "Barter": 10,
-        "Leadership": 5,
-        "Persuasion": 8,
-        "Knowledge": 4,
-        "Medicine": 2,
-        "Religion": 1
-      },
-      "position": {
-        "x": 6,
-        "y": 5
-      },
-      "dialogueId": "fixer-dialogue",
-      "startingItems": []
-    },
-    {
-      "id": "Scholar",
-      "name": "Scholar",
-      "glyph": "S",
-      "colorKey": "Scholar",
-      "attributes": {
-        "strength": 3,
-        "perception": 5,
-        "agility": 4,
-        "charisma": 5,
-        "intelligence": 7
-      },
-      "skills": {
-        "Melee": 1,
-        "Athletics": 2,
-        "Survival": 3,
-        "Firearms": 1,
-        "Awareness": 5,
-        "Resolution": 4,
-        "Stealth": 2,
-        "Dexterity": 3,
-        "Mechanics": 5,
-        "Barter": 3,
-        "Leadership": 4,
-        "Persuasion": 5,
-        "Knowledge": 12,
-        "Medicine": 10,
-        "Religion": 8
-      },
-      "position": {
-        "x": 9,
-        "y": 7
-      },
-      "dialogueId": "scholar-dialogue",
-      "startingItems": []
-    }
+    { "id": "Marcel", "name": "马塞尔", "glyph": "C", "colorKey": "Trader", "faction": "Civilians", "attributes": { "strength": 3, "perception": 6, "agility": 3, "charisma": 7, "intelligence": 7 }, "skills": { "Persuasion": 8, "Knowledge": 6, "Barter": 10, "Awareness": 5, "Stealth": 3 }, "position": { "x": 8, "y": 8 }, "dialogueId": "marcel-dialogue", "startingItems": [] },
+    { "id": "Colette", "name": "科莱特", "glyph": "N", "colorKey": "Scholar", "faction": "Resistance", "attributes": { "strength": 4, "perception": 7, "agility": 6, "charisma": 6, "intelligence": 8 }, "skills": { "Stealth": 9, "Awareness": 8, "Firearms": 5, "Persuasion": 6, "Knowledge": 7, "Medicine": 4 }, "position": { "x": 14, "y": 6 }, "dialogueId": "colette-dialogue", "startingItems": [] },
+    { "id": "HauptmannMueller", "name": "穆勒上尉", "glyph": "M", "colorKey": "Guard", "faction": "Occupier", "attributes": { "strength": 7, "perception": 6, "agility": 4, "charisma": 5, "intelligence": 5 }, "skills": { "Melee": 8, "Firearms": 9, "Leadership": 8, "Athletics": 7, "Persuasion": 4, "Awareness": 6 }, "position": { "x": 25, "y": 5 }, "dialogueId": "mueller-dialogue", "startingItems": [] },
+    { "id": "Pierre", "name": "皮埃尔", "glyph": "P", "colorKey": "Default", "faction": "Puppet", "attributes": { "strength": 3, "perception": 5, "agility": 5, "charisma": 8, "intelligence": 7 }, "skills": { "Persuasion": 10, "Barter": 8, "Knowledge": 6, "Leadership": 5, "Stealth": 4 }, "position": { "x": 17, "y": 16 }, "dialogueId": "pierre-dialogue", "startingItems": [] },
+    { "id": "SoeurMarie", "name": "玛丽修女", "glyph": "S", "colorKey": "Scholar", "faction": "Church", "attributes": { "strength": 2, "perception": 6, "agility": 3, "charisma": 9, "intelligence": 7 }, "skills": { "Medicine": 12, "Religion": 10, "Persuasion": 8, "Knowledge": 6, "Resolution": 8 }, "position": { "x": 10, "y": 20 }, "dialogueId": "marie-dialogue", "startingItems": [] },
+    { "id": "Viktor", "name": "维克多", "glyph": "V", "colorKey": "Thug", "faction": "Bandits", "attributes": { "strength": 8, "perception": 4, "agility": 6, "charisma": 4, "intelligence": 3 }, "skills": { "Melee": 10, "Firearms": 7, "Athletics": 8, "Stealth": 5, "Barter": 6 }, "position": { "x": 35, "y": 12 }, "dialogueId": "viktor-dialogue", "startingItems": [] },
+    { "id": "CapitaineRenaud", "name": "雷诺队长", "glyph": "R", "colorKey": "Guard", "faction": "Resistance", "attributes": { "strength": 6, "perception": 7, "agility": 6, "charisma": 5, "intelligence": 6 }, "skills": { "Firearms": 8, "Stealth": 7, "Leadership": 7, "Awareness": 8, "Athletics": 6, "Melee": 5 }, "position": { "x": 2, "y": 12 }, "dialogueId": "renaud-dialogue", "startingItems": [] }
   ],
   "dialogues": [
-    {
-      "id": "fixer-dialogue",
-      "startNodeId": "start",
-      "nodes": [
-        {
-          "id": "start",
-          "text": "Need supplies? Bring me a health potion and I will pay.",
-          "options": [
-            {
-              "text": "I'll handle it.",
-              "nextNodeId": "accept",
-              "effects": [
-                {
-                  "type": "StartQuest",
-                  "target": "missing-supply"
-                }
-              ]
-            },
-            {
-              "text": "Pay me more for this.",
-              "nextNodeId": "accept",
-              "requirements": [
-                {
-                  "type": "Skill",
-                  "id": "Barter",
-                  "min": 4
-                }
-              ],
-              "effects": [
-                {
-                  "type": "StartQuest",
-                  "target": "missing-supply"
-                },
-                {
-                  "type": "AddCurrency",
-                  "amount": 10
-                }
-              ]
-            },
-            {
-              "text": "I can solve it with knowledge.",
-              "nextNodeId": "complete",
-              "requirements": [
-                {
-                  "type": "Skill",
-                  "id": "Knowledge",
-                  "min": 10
-                }
-              ],
-              "effects": [
-                {
-                  "type": "StartQuest",
-                  "target": "missing-supply"
-                },
-                {
-                  "type": "GiveItem",
-                  "target": "HealthPotion",
-                  "amount": 1
-                },
-                {
-                  "type": "CompleteQuest",
-                  "target": "missing-supply"
-                }
-              ]
-            },
-            {
-              "text": "Something feels off about this.",
-              "nextNodeId": "suspicious",
-              "requirements": [
-                {
-                  "type": "Skill",
-                  "id": "Awareness",
-                  "min": 8
-                },
-                {
-                  "type": "QuestStatus",
-                  "id": "missing-supply",
-                  "status": "Inactive"
-                }
-              ]
-            },
-            {
-              "text": "I'll deal with the bandit.",
-              "nextNodeId": "hunt",
-              "effects": [
-                {
-                  "type": "StartQuest",
-                  "target": "bandit-hunt"
-                }
-              ]
-            },
-            {
-              "text": "I brought the potion.",
-              "nextNodeId": "complete",
-              "effects": [
-                {
-                  "type": "CompleteQuest",
-                  "target": "missing-supply"
-                }
-              ]
-            },
-            {
-              "text": "The bandit is gone.",
-              "nextNodeId": "bandit-complete",
-              "effects": [
-                {
-                  "type": "CompleteQuest",
-                  "target": "bandit-hunt"
-                }
-              ]
-            },
-            {
-              "text": "Thanks again for your help.",
-              "nextNodeId": "praise",
-              "requirements": [
-                {
-                  "type": "QuestStatus",
-                  "id": "missing-supply",
-                  "status": "Completed"
-                }
-              ]
-            },
-            {
-              "text": "You made the area safer.",
-              "nextNodeId": "praise",
-              "requirements": [
-                {
-                  "type": "QuestStatus",
-                  "id": "bandit-hunt",
-                  "status": "Completed"
-                }
-              ]
-            },
-            {
-              "text": "Maybe later.",
-              "nextNodeId": ""
-            }
-          ]
-        },
-        {
-          "id": "accept",
-          "text": "Come back with the potion.",
-          "options": [
-            {
-              "text": "Got it.",
-              "nextNodeId": ""
-            }
-          ]
-        },
-        {
-          "id": "suspicious",
-          "text": "You have sharp eyes. Still want the job?",
-          "options": [
-            {
-              "text": "Fine, I'll help.",
-              "nextNodeId": "accept",
-              "effects": [
-                {
-                  "type": "StartQuest",
-                  "target": "missing-supply"
-                }
-              ]
-            },
-            {
-              "text": "No deal.",
-              "nextNodeId": ""
-            }
-          ]
-        },
-        {
-          "id": "hunt",
-          "text": "A bandit is lurking east of here. Take care of it.",
-          "options": [
-            {
-              "text": "On it.",
-              "nextNodeId": ""
-            }
-          ]
-        },
-        {
-          "id": "complete",
-          "text": "Impressive. Here's your reward.",
-          "options": [
-            {
-              "text": "Thanks.",
-              "nextNodeId": ""
-            }
-          ]
-        },
-        {
-          "id": "bandit-complete",
-          "text": "Good work. The area feels safer now.",
-          "options": [
-            {
-              "text": "Glad to help.",
-              "nextNodeId": ""
-            }
-          ]
-        },
-        {
-          "id": "praise",
-          "text": "Good to see you again.",
-          "options": [
-            {
-              "text": "Take care.",
-              "nextNodeId": ""
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "scholar-dialogue",
-      "startNodeId": "start",
-      "nodes": [
-        {
-          "id": "start",
-          "text": "I need someone to reach the marker and report back.",
-          "options": [
-            {
-              "text": "I'll scout it.",
-              "nextNodeId": "accept",
-              "effects": [
-                {
-                  "type": "StartQuest",
-                  "target": "scout-marker"
-                }
-              ]
-            },
-            {
-              "text": "Share your notes first.",
-              "nextNodeId": "accept",
-              "requirements": [
-                {
-                  "type": "Skill",
-                  "id": "Persuasion",
-                  "min": 5
-                }
-              ],
-              "effects": [
-                {
-                  "type": "StartQuest",
-                  "target": "scout-marker"
-                },
-                {
-                  "type": "AddCurrency",
-                  "amount": 5
-                }
-              ]
-            },
-            {
-              "text": "I've reached the marker.",
-              "nextNodeId": "report",
-              "effects": [
-                {
-                  "type": "CompleteQuest",
-                  "target": "scout-marker"
-                }
-              ]
-            },
-            {
-              "text": "Good to see you again.",
-              "nextNodeId": "praise",
-              "requirements": [
-                {
-                  "type": "QuestStatus",
-                  "id": "scout-marker",
-                  "status": "Completed"
-                }
-              ]
-            },
-            {
-              "text": "Goodbye.",
-              "nextNodeId": ""
-            }
-          ]
-        },
-        {
-          "id": "accept",
-          "text": "Return when you've reached the marker.",
-          "options": [
-            {
-              "text": "Understood.",
-              "nextNodeId": ""
-            }
-          ]
-        },
-        {
-          "id": "report",
-          "text": "Excellent. Here's your payment.",
-          "options": [
-            {
-              "text": "Happy to help.",
-              "nextNodeId": ""
-            }
-          ]
-        },
-        {
-          "id": "praise",
-          "text": "Your help is appreciated.",
-          "options": [
-            {
-              "text": "Anytime.",
-              "nextNodeId": ""
-            }
-          ]
-        }
-      ]
-    }
+    { "id": "marcel-dialogue", "startNodeId": "start", "nodes": [
+      { "id": "start", "text": "马塞尔压低声音：年轻人，这世道不太平。你是什么来路？不管怎样，如果你想在这沦陷区活下去，就得学会左右逢源。", "options": [
+        { "text": "我需要了解这里的情况。", "nextNodeId": "info" },
+        { "text": "我在找反抗军的人。", "nextNodeId": "resistant_hint", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 5 }] },
+        { "text": "我是占领军的人。", "nextNodeId": "occupier_threat", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 3 }] },
+        { "text": "告辞。", "nextNodeId": "" }
+      ]},
+      { "id": "info", "text": "马塞尔叹了口气：城里分三股势力——占领军盘踞北区指挥部，傀儡政权在市政厅办公，反抗军藏在东边山区。西边废弃工厂区被匪徒占了。你要小心行事。", "options": [
+        { "text": "帮我打听一下反抗军的消息。", "nextNodeId": "accept_intel", "effects": [{ "type": "StartQuest", "target": "act1-intel" }] },
+        { "text": "你这有什么物资？", "nextNodeId": "trade" },
+        { "text": "谢谢，我先走了。", "nextNodeId": "" }
+      ]},
+      { "id": "resistant_hint", "text": "马塞尔眼睛一亮：你找对人了。东边山区有个叫雷诺队长的人在组织抵抗。去找城东教堂的玛丽修女，她能帮你联络。", "options": [
+        { "text": "我去找玛丽修女。", "nextNodeId": "accept_church", "effects": [{ "type": "StartQuest", "target": "act1-church" }] },
+        { "text": "谢了。", "nextNodeId": "" }
+      ]},
+      { "id": "occupier_threat", "text": "马塞尔脸色一变：占领军的人？我……我只是个做小买卖的。北区指挥部的穆勒上尉是这里的最高长官。", "options": [
+        { "text": "给我收集反抗军的情报。", "nextNodeId": "accept_spy", "effects": [{ "type": "StartQuest", "target": "act1-spy" }] },
+        { "text": "记住你说的话。", "nextNodeId": "" }
+      ]},
+      { "id": "accept_intel", "text": "马塞尔点头：城东教堂的玛丽修女是联络人。小心路上的巡逻兵。", "options": [{ "text": "明白。", "nextNodeId": "" }] },
+      { "id": "accept_church", "text": "马塞尔低声说：教堂在城东，门口有个十字架标志。玛丽修女是个好人，她会帮你的。", "options": [{ "text": "我会小心。", "nextNodeId": "" }] },
+      { "id": "accept_spy", "text": "马塞尔无奈地说：我……我尽力。我听说反抗军在东边山区有个营地。", "options": [{ "text": "做得好，我不会亏待你。", "nextNodeId": "" }] },
+      { "id": "trade", "text": "马塞尔拿出一些物资：我这有绷带和食物，都是黑市价。你有货币吗？", "options": [
+        { "text": "买绷带 - 20货币", "nextNodeId": "trade_done", "effects": [{ "type": "GiveItem", "target": "Bandage", "amount": 2 }] },
+        { "text": "算了，太贵了。", "nextNodeId": "" }
+      ]},
+      { "id": "trade_done", "text": "马塞尔收了钱：好货，保命用的。下次再来。", "options": [{ "text": "谢了。", "nextNodeId": "" }] }
+    ]},
+    { "id": "colette-dialogue", "startNodeId": "start", "nodes": [
+      { "id": "start", "text": "科莱特警惕地看着你：你是谁？这里是反抗军的秘密联络点。如果你是占领军的人，我劝你赶紧离开。", "options": [
+        { "text": "我受马塞尔介绍来的。", "nextNodeId": "trust", "requirements": [{ "type": "QuestStatus", "id": "act1-intel", "status": "Active" }] },
+        { "text": "我是来加入反抗军的。", "nextNodeId": "recruit" },
+        { "text": "（亮出占领军证件）我代表占领军。", "nextNodeId": "enemy" },
+        { "text": "抱歉，走错了。", "nextNodeId": "" }
+      ]},
+      { "id": "trust", "text": "科莱特放松了警惕：马塞尔介绍的？好吧。我们需要有人去侦察北区指挥部的防御情况。", "options": [
+        { "text": "我去侦察。", "nextNodeId": "accept_scout", "effects": [{ "type": "StartQuest", "target": "act1-scout-hq" }, { "type": "AddCurrency", "amount": 20 }] },
+        { "text": "有什么好处？", "nextNodeId": "negotiate", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 6 }] },
+        { "text": "我需要想想。", "nextNodeId": "" }
+      ]},
+      { "id": "recruit", "text": "科莱特审视着你：加入反抗军不是儿戏。你得先证明自己——帮我完成一次侦察任务。", "options": [
+        { "text": "没问题。", "nextNodeId": "accept_scout", "effects": [{ "type": "StartQuest", "target": "act1-scout-hq" }] },
+        { "text": "我再考虑。", "nextNodeId": "" }
+      ]},
+      { "id": "enemy", "text": "科莱特猛地退后一步，拔出武器：占领军的走狗！来人！", "options": [{ "text": "（战斗）", "nextNodeId": "" }] },
+      { "id": "accept_scout", "text": "北区指挥部在地图北面，有重兵把守。你需要潜入外围，标记防御薄弱点。小心军犬和狙击手。", "options": [{ "text": "我这就去。", "nextNodeId": "" }] },
+      { "id": "negotiate", "text": "科莱特叹了口气：好吧，任务完成后我们会引荐你见雷诺队长——他手上有更高级的武器和情报。", "options": [
+        { "text": "成交。", "nextNodeId": "accept_scout", "effects": [{ "type": "StartQuest", "target": "act1-scout-hq" }, { "type": "AddCurrency", "amount": 30 }] },
+        { "text": "还是不够。", "nextNodeId": "" }
+      ]}
+    ]},
+    { "id": "mueller-dialogue", "startNodeId": "start", "nodes": [
+      { "id": "start", "text": "穆勒上尉冷冷地看着你：站住。这里是军事管制区，出示你的证件。", "options": [
+        { "text": "（出示伪造证件）我是市政厅的公务员。", "nextNodeId": "fake_id", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 7 }] },
+        { "text": "（出示反抗军通行证）我是来谈判的。", "nextNodeId": "negotiate" },
+        { "text": "（转身就跑）", "nextNodeId": "flee" },
+        { "text": "长官，我是平民，迷路了。", "nextNodeId": "civilian_excuse" }
+      ]},
+      { "id": "fake_id", "text": "穆勒上尉检查了证件：过去吧。不过我劝你不要在军事区逗留太久。", "options": [
+        { "text": "长官，我愿意为占领军效力。", "nextNodeId": "occupier_quest", "effects": [{ "type": "StartQuest", "target": "act1-infiltrate" }] },
+        { "text": "谢谢长官。", "nextNodeId": "" }
+      ]},
+      { "id": "negotiate", "text": "穆勒上尉挑了挑眉：谈判？有意思。如果你们愿意交出山区营地的位置，我可以保证你们的安全。", "options": [
+        { "text": "我可以提供情报。", "nextNodeId": "double_agent", "effects": [{ "type": "StartQuest", "target": "act2-double-agent" }] },
+        { "text": "我们不会出卖同志。", "nextNodeId": "defiance" }
+      ]},
+      { "id": "flee", "text": "穆勒上尉大声喊道：抓住他！开枪！（你成功逃脱，但占领军加强了巡逻。）", "options": [{ "text": "（逃离）", "nextNodeId": "" }] },
+      { "id": "civilian_excuse", "text": "穆勒上尉不耐烦地挥了挥手：赶紧离开这里。下次再被抓到，就不是这么简单了。", "options": [{ "text": "是是是，长官。", "nextNodeId": "" }] },
+      { "id": "occupier_quest", "text": "穆勒上尉微笑：很好。去监视傀儡政权的联络官皮埃尔，看看他们有没有和反抗军勾结。", "options": [{ "text": "明白，长官。", "nextNodeId": "" }] },
+      { "id": "double_agent", "text": "穆勒上尉沉吟：好。你给我提供反抗军的动向，我给你保护和报酬。不过别耍花招——我的盖世太保可不是吃素的。", "options": [{ "text": "我知道怎么做。", "nextNodeId": "" }] },
+      { "id": "defiance", "text": "穆勒上尉冷笑：卫兵，把他们抓起来！（战斗触发）", "options": [{ "text": "（战斗）", "nextNodeId": "" }] }
+    ]},
+    { "id": "pierre-dialogue", "startNodeId": "start", "nodes": [
+      { "id": "start", "text": "皮埃尔推了推眼镜：啊，新面孔。我是市政厅的联络官，负责协调占领军和本地政府之间的事务。", "options": [
+        { "text": "我听说傀儡政权想脱离占领军控制？", "nextNodeId": "ambition", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 6 }] },
+        { "text": "我需要假证件。", "nextNodeId": "forgery", "requirements": [{ "type": "Skill", "id": "Barter", "min": 5 }] },
+        { "text": "你知道反抗军的情况吗？", "nextNodeId": "resistant_intel" },
+        { "text": "没什么，就是路过。", "nextNodeId": "" }
+      ]},
+      { "id": "ambition", "text": "皮埃尔压低声音：你消息很灵通。上头一直在寻找机会。如果能获得盟军的支持，或者削弱占领军的力量，我们就有可能夺回控制权。", "options": [
+        { "text": "我可以帮你收集占领军的情报。", "nextNodeId": "accept_intel", "effects": [{ "type": "StartQuest", "target": "act2-puppet-intel" }] },
+        { "text": "（威胁）我要告诉穆勒上尉。", "nextNodeId": "threaten", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 8 }] },
+        { "text": "我再想想。", "nextNodeId": "" }
+      ]},
+      { "id": "forgery", "text": "皮埃尔微笑：假证件？高风险的活。如果你能去北区指挥部偷一份驻防计划，我倒是可以安排。", "options": [
+        { "text": "成交。", "nextNodeId": "accept_theft", "effects": [{ "type": "StartQuest", "target": "act2-theft" }] },
+        { "text": "太危险了。", "nextNodeId": "" }
+      ]},
+      { "id": "resistant_intel", "text": "皮埃尔犹豫了一下：反抗军在东边山区活动。有个叫雷诺队长的人在领导。不过占领军正在计划一次大规模扫荡。", "options": [
+        { "text": "扫荡什么时候？", "nextNodeId": "sweep_intel", "effects": [{ "type": "StartQuest", "target": "act2-warning" }] },
+        { "text": "谢谢你的信息。", "nextNodeId": "" }
+      ]},
+      { "id": "accept_intel", "text": "皮埃尔点头：很好。北区指挥部的穆勒上尉最近在策划什么行动，我需要知道具体内容。", "options": [{ "text": "我这就去。", "nextNodeId": "" }] },
+      { "id": "threaten", "text": "皮埃尔脸色一变，随即恢复镇定：你不会这么做的。因为你告诉穆勒上尉，你自己也脱不了干系。", "options": [
+        { "text": "好吧，合作。", "nextNodeId": "accept_intel", "effects": [{ "type": "StartQuest", "target": "act2-puppet-intel" }] },
+        { "text": "你最好别耍我。", "nextNodeId": "" }
+      ]},
+      { "id": "accept_theft", "text": "皮埃尔低声说：北区指挥部的二楼有一间档案室，驻防计划就锁在保险柜里。你需要找到钥匙，或者想办法撬开它。", "options": [{ "text": "我知道怎么做了。", "nextNodeId": "" }] },
+      { "id": "sweep_intel", "text": "皮埃尔紧张地说：就在这周。穆勒上尉集结了大量兵力，还调来了坦克。你得赶紧通知反抗军。", "options": [{ "text": "我会想办法。", "nextNodeId": "" }] }
+    ]},
+    { "id": "marie-dialogue", "startNodeId": "start", "nodes": [
+      { "id": "start", "text": "玛丽修女在祈祷台前转过身来：愿主保佑你，孩子。在这黑暗的时代，教堂是唯一安全的庇护所。", "options": [
+        { "text": "我需要治疗。", "nextNodeId": "heal" },
+        { "text": "我受马塞尔介绍来的。", "nextNodeId": "resistant_contact", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 4 }] },
+        { "text": "修女，你知道盟军的消息吗？", "nextNodeId": "allies_intel" },
+        { "text": "打扰了。", "nextNodeId": "" }
+      ]},
+      { "id": "heal", "text": "玛丽修女拿出一些医疗用品：拿去吧，好好保重。在这乱世中，活着本身就是一种反抗。", "options": [
+        { "text": "谢谢修女。", "nextNodeId": "", "effects": [{ "type": "GiveItem", "target": "MedicalKit", "amount": 1 }] },
+        { "text": "我给你一些钱。", "nextNodeId": "donate", "effects": [{ "type": "AddCurrency", "amount": -10 }] }
+      ]},
+      { "id": "resistant_contact", "text": "玛丽修女压低声音：教堂的地下室是反抗军的秘密联络点。我可以帮你联络雷诺队长。", "options": [
+        { "text": "请帮我联络雷诺队长。", "nextNodeId": "accept_contact", "effects": [{ "type": "StartQuest", "target": "act1-meet-renaud" }] },
+        { "text": "我需要先准备一下。", "nextNodeId": "" }
+      ]},
+      { "id": "allies_intel", "text": "玛丽修女低声说：盟军在南边集结，据说正在准备反攻。但正面突破很难，盟军需要有人从后方摧毁占领军的指挥部。", "options": [
+        { "text": "这是个机会。", "nextNodeId": "accept_allies", "effects": [{ "type": "StartQuest", "target": "act2-allies-plan" }] },
+        { "text": "太危险了。", "nextNodeId": "" }
+      ]},
+      { "id": "accept_contact", "text": "玛丽修女点头：从教堂后门出去，沿山路向东走，就能找到反抗军的营地。到了营地找雷诺队长，告诉他'十字架下的人'。", "options": [{ "text": "我这就去。", "nextNodeId": "" }] },
+      { "id": "accept_allies", "text": "玛丽修女祈祷：愿主保佑你。如果能摧毁占领军的指挥部，盟军就能长驱直入。雷诺队长应该有具体的计划。", "options": [{ "text": "我会找到办法的。", "nextNodeId": "" }] },
+      { "id": "donate", "text": "玛丽修女感动地说：你的心意我领了。愿主保佑你。", "options": [{ "text": "阿门。", "nextNodeId": "" }] }
+    ]},
+    { "id": "viktor-dialogue", "startNodeId": "start", "nodes": [
+      { "id": "start", "text": "维克多大笑着拍了拍你的肩膀：哈！又一个不怕死的。我是这一带的老大。你想活命的话，最好老实点。", "options": [
+        { "text": "合作？怎么合作？", "nextNodeId": "deal" },
+        { "text": "我只想过路。", "nextNodeId": "pass" },
+        { "text": "我代表反抗军来谈判。", "nextNodeId": "resistant_deal", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 7 }] },
+        { "text": "我不和匪徒合作。", "nextNodeId": "fight" }
+      ]},
+      { "id": "deal", "text": "维克多搓了搓手：很简单。占领军的运输队经常从北边经过，车上装满了物资。我们一起截获它，五五分成。", "options": [
+        { "text": "成交。", "nextNodeId": "accept_raid", "effects": [{ "type": "StartQuest", "target": "act2-raid" }] },
+        { "text": "六四分，我六。", "nextNodeId": "negotiate_split", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 6 }] },
+        { "text": "我再想想。", "nextNodeId": "" }
+      ]},
+      { "id": "pass", "text": "维克多拦住你：过路？这里没有免费的路。要么交过路费，要么帮我做件事。", "options": [
+        { "text": "交过路费 - 30货币", "nextNodeId": "pay_toll", "requirements": [{ "type": "Skill", "id": "Barter", "min": 3 }] },
+        { "text": "什么事？", "nextNodeId": "deal" },
+        { "text": "我不交钱。", "nextNodeId": "fight" }
+      ]},
+      { "id": "resistant_deal", "text": "维克多眯起眼睛：反抗军？可以，但我要占领军指挥部里的金库。只要你们帮我拿到，我就帮你们牵制占领军的侧翼。", "options": [
+        { "text": "一言为定。", "nextNodeId": "accept_gold", "effects": [{ "type": "StartQuest", "target": "act2-gold-vault" }] },
+        { "text": "这太冒险了。", "nextNodeId": "" }
+      ]},
+      { "id": "accept_raid", "text": "维克多大笑：好！运输队明天经过北边公路。到时候你负责引开护卫，我的人负责搬运。", "options": [{ "text": "放心。", "nextNodeId": "" }] },
+      { "id": "negotiate_split", "text": "维克多皱眉：六四？好吧——但你得亲自打头阵。", "options": [
+        { "text": "没问题。", "nextNodeId": "accept_raid", "effects": [{ "type": "StartQuest", "target": "act2-raid" }, { "type": "AddCurrency", "amount": 20 }] },
+        { "text": "还是五五吧。", "nextNodeId": "accept_raid", "effects": [{ "type": "StartQuest", "target": "act2-raid" }] }
+      ]},
+      { "id": "pay_toll", "text": "维克多收了钱：好，你可以走了。下次再来记得带好东西。", "options": [{ "text": "走了。", "nextNodeId": "" }] },
+      { "id": "accept_gold", "text": "维克多兴奋地说：金库在指挥部的地下。你需要找到入口。我的人在外面接应。", "options": [{ "text": "我会想办法。", "nextNodeId": "" }] },
+      { "id": "fight", "text": "维克多拔出武器：不识好歹！兄弟们，给我上！", "options": [{ "text": "（战斗）", "nextNodeId": "" }] }
+    ]},
+    { "id": "renaud-dialogue", "startNodeId": "start", "nodes": [
+      { "id": "start", "text": "雷诺队长警惕地看着你：站住！你是谁？如果你是占领军的探子，就别怪我不客气。", "options": [
+        { "text": "我受科莱特/玛丽修女介绍来的。", "nextNodeId": "trusted", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 5 }] },
+        { "text": "我有占领军的扫荡计划。", "nextNodeId": "critical_intel", "requirements": [{ "type": "QuestStatus", "id": "act2-warning", "status": "Active" }] },
+        { "text": "我是来加入反抗军的。", "nextNodeId": "join" },
+        { "text": "我走错了。", "nextNodeId": "" }
+      ]},
+      { "id": "trusted", "text": "雷诺队长放下武器：既然是同志介绍的，进来吧。占领军的扫荡迫在眉睫，我们必须摧毁占领军的通讯塔。", "options": [
+        { "text": "我去摧毁通讯塔。", "nextNodeId": "accept_final", "effects": [{ "type": "StartQuest", "target": "act3-destroy-comm" }] },
+        { "text": "有没有更安全的方案？", "nextNodeId": "alternative" },
+        { "text": "我需要时间准备。", "nextNodeId": "" }
+      ]},
+      { "id": "critical_intel", "text": "雷诺队长震惊地说：扫荡？什么时候？快告诉我！（你将情报告诉了雷诺队长）雷诺队长感激地说：你救了我们。我们只有一次机会——摧毁占领军的指挥部。", "options": [
+        { "text": "我来执行。", "nextNodeId": "accept_final", "effects": [{ "type": "StartQuest", "target": "act3-destroy-hq" }] },
+        { "text": "我需要盟军的支援。", "nextNodeId": "allies_support" }
+      ]},
+      { "id": "join", "text": "雷诺队长审视着你：加入反抗军？你需要先证明自己——去完成一个侦察任务。", "options": [
+        { "text": "没问题。", "nextNodeId": "accept_scout", "effects": [{ "type": "StartQuest", "target": "act1-scout-hq" }] },
+        { "text": "我再想想。", "nextNodeId": "" }
+      ]},
+      { "id": "accept_final", "text": "雷诺队长握住你的手：好同志！通讯塔在北区指挥部的东侧。你需要炸弹——去找皮埃尔，他可能有办法弄到。沦陷区的人民会记住你的牺牲！", "options": [{ "text": "为了自由。", "nextNodeId": "" }] },
+      { "id": "alternative", "text": "雷诺队长摇头：没有更安全的方案了。但如果你能策反傀儡政权的人，或许能从内部瓦解他们。", "options": [
+        { "text": "我去试试。", "nextNodeId": "", "effects": [{ "type": "StartQuest", "target": "act3-puppet-alliance" }] },
+        { "text": "还是正面进攻吧。", "nextNodeId": "accept_final", "effects": [{ "type": "StartQuest", "target": "act3-destroy-hq" }] }
+      ]},
+      { "id": "allies_support", "text": "雷诺队长点头：盟军在南边。如果你能联络他们，让他们在总攻时从南面夹击，胜算会大很多。但你需要穿越前线。", "options": [
+        { "text": "我去联络盟军。", "nextNodeId": "", "effects": [{ "type": "StartQuest", "target": "act3-contact-allies" }] },
+        { "text": "太危险了。", "nextNodeId": "accept_final", "effects": [{ "type": "StartQuest", "target": "act3-destroy-hq" }] }
+      ]}
+    ]}
   ],
   "quests": [
-    {
-      "id": "missing-supply",
-      "name": "Missing Supply",
-      "description": "Find a health potion for the fixer.",
-      "hint": "Potion around (9,5).",
-      "objectives": [
-        {
-          "type": "CollectItem",
-          "target": "HealthPotion",
-          "count": 1
-        }
-      ],
-      "rewards": [
-        {
-          "type": "Currency",
-          "amount": 25
-        }
-      ]
-    },
-    {
-      "id": "scout-marker",
-      "name": "Scout the Marker",
-      "description": "Reach the marked location on the map.",
-      "hint": "Marker around (12,3).",
-      "objectives": [
-        {
-          "type": "ReachMarker",
-          "target": ">",
-          "count": 1
-        }
-      ],
-      "rewards": [
-        {
-          "type": "Currency",
-          "amount": 15
-        }
-      ]
-    },
-    {
-      "id": "bandit-hunt",
-      "name": "Bandit Hunt",
-      "description": "Eliminate the bandit threatening the area.",
-      "hint": "Bandit around (14,8).",
-      "objectives": [
-        {
-          "type": "KillEnemy",
-          "target": "Bandit",
-          "count": 1
-        }
-      ],
-      "rewards": [
-        {
-          "type": "Currency",
-          "amount": 30
-        }
-      ]
-    }
+    { "id": "act1-intel", "name": "情报收集", "description": "马塞尔让你了解沦陷区的局势，去城东教堂找玛丽修女。", "hint": "教堂在城东区域。", "objectives": [{ "type": "TalkToNpc", "target": "SoeurMarie", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 15 }] },
+    { "id": "act1-church", "name": "教堂联络", "description": "马塞尔指引你去城东教堂找玛丽修女联络反抗军。", "hint": "教堂在城东区域。", "objectives": [{ "type": "TalkToNpc", "target": "SoeurMarie", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 10 }] },
+    { "id": "act1-spy", "name": "占领军的眼线", "description": "你选择为占领军效力，去收集反抗军的情报。", "hint": "寻找反抗军的活动迹象。", "objectives": [{ "type": "TalkToNpc", "target": "CapitaineRenaud", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 25 }] },
+    { "id": "act1-scout-hq", "name": "侦察指挥部", "description": "前往北区指挥部外围侦察防御情况。", "hint": "指挥部在北区，小心巡逻兵和军犬。", "objectives": [{ "type": "ReachMarker", "target": ">", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 30 }, { "type": "Item", "target": "MedicalKit", "amount": 1 }] },
+    { "id": "act1-meet-renaud", "name": "会见雷诺队长", "description": "前往东边山区的反抗军营地，与雷诺队长取得联系。", "hint": "从教堂后门出去，沿山路向东走。", "objectives": [{ "type": "TalkToNpc", "target": "CapitaineRenaud", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 20 }, { "type": "Item", "target": "Bandage", "amount": 3 }] },
+    { "id": "act1-infiltrate", "name": "渗透傀儡政权", "description": "穆勒上尉让你监视傀儡政权的联络官皮埃尔。", "hint": "皮埃尔在市政厅附近。", "objectives": [{ "type": "TalkToNpc", "target": "Pierre", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 30 }] },
+    { "id": "act2-double-agent", "name": "双面间谍", "description": "你同时为占领军和反抗军效力。在两方之间周旋。", "hint": "注意不要暴露身份。", "objectives": [{ "type": "TalkToNpc", "target": "CapitaineRenaud", "count": 1 }, { "type": "TalkToNpc", "target": "HauptmannMueller", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 50 }] },
+    { "id": "act2-puppet-intel", "name": "傀儡政权的秘密", "description": "为皮埃尔收集占领军的驻防计划。", "hint": "北区指挥部的档案室。", "objectives": [{ "type": "CollectItem", "target": "MedicalKit", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 40 }] },
+    { "id": "act2-theft", "name": "驻防计划", "description": "潜入北区指挥部，偷取驻防计划交给皮埃尔。", "hint": "指挥部北区，需要找到入口。", "objectives": [{ "type": "ReachMarker", "target": ">", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 50 }] },
+    { "id": "act2-warning", "name": "紧急情报", "description": "占领军即将发动大规模扫荡！必须尽快通知反抗军。", "hint": "雷诺队长在东边山区。", "objectives": [{ "type": "TalkToNpc", "target": "CapitaineRenaud", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 35 }] },
+    { "id": "act2-allies-plan", "name": "盟军的计划", "description": "盟军需要从后方摧毁占领军指挥部。与雷诺队长商讨具体方案。", "hint": "雷诺队长在东边山区营地。", "objectives": [{ "type": "TalkToNpc", "target": "CapitaineRenaud", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 30 }] },
+    { "id": "act2-raid", "name": "截获运输队", "description": "与维克多合作，截获占领军的运输车队。", "hint": "运输队从北边公路经过。", "objectives": [{ "type": "KillEnemy", "target": "Occupier", "count": 2 }], "rewards": [{ "type": "Currency", "amount": 60 }] },
+    { "id": "act2-gold-vault", "name": "金库劫案", "description": "帮维克多从占领军指挥部地下金库偷取黄金。", "hint": "金库在指挥部地下。", "objectives": [{ "type": "ReachMarker", "target": ">", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 100 }] },
+    { "id": "act3-destroy-comm", "name": "摧毁通讯塔", "description": "摧毁占领军的通讯塔，切断他们和总部的联系。", "hint": "通讯塔在北区指挥部东侧。", "objectives": [{ "type": "KillEnemy", "target": "Officer", "count": 2 }], "rewards": [{ "type": "Currency", "amount": 80 }] },
+    { "id": "act3-destroy-hq", "name": "摧毁指挥部", "description": "摧毁占领军指挥部，为盟军扫清障碍。这是最终决战。", "hint": "指挥部在北区，重兵把守。", "objectives": [{ "type": "KillEnemy", "target": "Officer", "count": 3 }, { "type": "KillEnemy", "target": "Occupier", "count": 5 }], "rewards": [{ "type": "Currency", "amount": 150 }] },
+    { "id": "act3-puppet-alliance", "name": "策反傀儡政权", "description": "说服皮埃尔从内部瓦解占领军的防线。", "hint": "皮埃尔在市政厅附近。", "objectives": [{ "type": "TalkToNpc", "target": "Pierre", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 40 }] },
+    { "id": "act3-contact-allies", "name": "联络盟军", "description": "穿越前线，联络盟军指挥部，请求他们在总攻时从南面夹击。", "hint": "盟军在南边前线。", "objectives": [{ "type": "ReachMarker", "target": "<", "count": 1 }], "rewards": [{ "type": "Currency", "amount": 50 }] }
   ],
   "achievements": [
-    {
-      "id": "first-contact",
-      "name": "First Contact",
-      "description": "Speak with the fixer.",
-      "objectives": [
-        {
-          "type": "TalkToNpc",
-          "target": "Fixer",
-          "count": 1
-        }
-      ]
-    },
-    {
-      "id": "first-blood",
-      "name": "First Blood",
-      "description": "Defeat a bandit.",
-      "objectives": [
-        {
-          "type": "KillEnemy",
-          "target": "Bandit",
-          "count": 1
-        }
-      ]
-    },
-    {
-      "id": "trailblazer",
-      "name": "Trailblazer",
-      "description": "Reach the marked location.",
-      "objectives": [
-        {
-          "type": "ReachMarker",
-          "target": ">",
-          "count": 1
-        }
-      ]
-    }
+    { "id": "first-contact", "name": "初次接触", "description": "与马塞尔交谈，了解沦陷区的局势。", "objectives": [{ "type": "TalkToNpc", "target": "Marcel", "count": 1 }] },
+    { "id": "resistant-hero", "name": "反抗英雄", "description": "消灭占领军军官，完成反抗军的最终任务。", "objectives": [{ "type": "KillEnemy", "target": "Officer", "count": 3 }] },
+    { "id": "spy-master", "name": "间谍大师", "description": "与穆勒上尉和雷诺队长都交谈过，成为双面间谍。", "objectives": [{ "type": "TalkToNpc", "target": "HauptmannMueller", "count": 1 }, { "type": "TalkToNpc", "target": "CapitaineRenaud", "count": 1 }] },
+    { "id": "bandit-king", "name": "匪徒之王", "description": "消灭匪徒，证明实力。", "objectives": [{ "type": "KillEnemy", "target": "Bandit", "count": 2 }] },
+    { "id": "liberator", "name": "解放者", "description": "摧毁占领军指挥部，解放沦陷区。", "objectives": [{ "type": "KillEnemy", "target": "Officer", "count": 5 }] }
   ],
   "conditions": {
-    "lose": [
-      "PlayerDeath"
-    ]
+    "win": [], "lose": ["PlayerDeath"],
+    "winEntries": [
+      { "id": "QuestObjectivesComplete", "param": "act3-destroy-hq", "description": "摧毁占领军指挥部" },
+      { "id": "QuestObjectivesComplete", "param": "act3-destroy-comm", "description": "摧毁通讯塔" }
+    ],
+    "loseEntries": [{ "id": "PlayerDeath", "description": "你牺牲了" }]
   }
 }

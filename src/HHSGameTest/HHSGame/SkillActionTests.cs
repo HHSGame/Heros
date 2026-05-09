@@ -1,3 +1,4 @@
+using HHSGame.Core.Interactions;
 using HHSGame.Core;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Dialogue;
@@ -94,10 +95,11 @@ namespace HHSGame.Core
             NpcManager npcManager = new();
             CollisionSystem collisionSystem = new(enemyManager, mapState, npcManager);
             Pathfinder pathfinder = new(mapState);
-            EnemyFactory enemyFactory = new(catalogs.EnemyCatalog, catalogs.ItemCatalog, collisionSystem, mapState, pathfinder);
+            EnemyFactory enemyFactory = new(catalogs.EnemyCatalog, catalogs.ItemCatalog, collisionSystem, mapState, pathfinder, new global::HHSGame.Core.Factions.FactionManager());
             NpcFactory npcFactory = new(catalogs.ItemCatalog);
             DialogueManager dialogueManager = new(partyState, questManager);
             SurroundingsManager surroundingsManager = new(itemManager, enemyManager, mapState, npcManager);
+            InteractableManager interactableManager = new();
             TurnManager turnManager = new();
             GameStateMachine stateMachine = new();
             IDrawingContext drawingContext = new TestDrawingContext(20, 10);
@@ -115,11 +117,13 @@ namespace HHSGame.Core
                 npcManager,
                 surroundingsManager,
                 inventoryManager,
+                interactableManager,
                 turnManager,
                 stateMachine,
                 questManager,
                 dialogueManager,
                 partyState,
+                new global::HHSGame.Core.Factions.FactionManager(),
                 drawingContext);
 
             GameWorld world = new(context);
@@ -164,9 +168,7 @@ namespace HHSGame.Core
             List<EnemyDefinition> enemies =
             [
                 new EnemyDefinition(
-                    "Gangster",
-                    "Gangster",
-                    new Attributes { Strength = 4, Perception = 3, Agility = 4, Charisma = 4, Intelligence = 3 },
+                    "Gangster", "Gangster", "Neutral", new Attributes { Strength = 4, Perception = 3, Agility = 4, Charisma = 4, Intelligence = 3 },
                     new Skills(),
                     "Dagger",
                     "UnknownArmor",

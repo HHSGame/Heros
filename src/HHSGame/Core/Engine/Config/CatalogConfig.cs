@@ -43,6 +43,7 @@ namespace HHSGame.Core.Engine.Config
         public int Value { get; init; }
         public float Weight { get; init; }
         public int ArmorValue { get; init; }
+        public string Slot { get; init; } = "body";
     }
 
     public sealed class ItemCatalogConfig
@@ -85,7 +86,7 @@ namespace HHSGame.Core.Engine.Config
     {
         public string Id { get; init; } = string.Empty;
         public string Name { get; init; } = string.Empty;
-        public Attributes Attributes { get; init; } = new();
+        public string Faction { get; init; } = "Neutral";        public Attributes Attributes { get; init; } = new();
         public Dictionary<string, int> Skills { get; init; } = new(StringComparer.OrdinalIgnoreCase);
         public string WeaponId { get; init; } = string.Empty;
         public string ArmorId { get; init; } = string.Empty;

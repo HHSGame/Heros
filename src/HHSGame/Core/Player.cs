@@ -15,7 +15,6 @@ namespace HHSGame.Core
     {
         private const int FOVRadius = 7;
         private readonly HashSet<Coordinate> visibleTiles = [];
-        private readonly List<ActiveEffect> activeEffects = [];
 
         private readonly CollisionSystem collisionSystem;
         private readonly InventoryManager inventoryManager;
@@ -28,7 +27,13 @@ namespace HHSGame.Core
         private readonly char glyph;
 
         private Weapon? equippedWeapon;
-        private Armor? equippedArmor;
+        private readonly EquipmentManager equipmentManager;
+
+        public IReadOnlyList<ActiveEffect> ActiveEffects => activeEffects;
+        private readonly List<ActiveEffect> activeEffects = [];
+
+        public Armor? EquippedArmor => equipmentManager.GetEquipped(EquipmentSlot.Body);
+        public EquipmentManager Equipment => equipmentManager;
 
         public bool IsSneaking { get; private set; }
         public bool IsSkillLocked { get; private set; }
@@ -41,6 +46,7 @@ namespace HHSGame.Core
             PlannedPosition = new Coordinate(x, y);
             collisionSystem = context.CollisionSystem;
             inventoryManager = context.InventoryManager;
+            equipmentManager = new EquipmentManager(context.InventoryManager);
             itemManager = context.ItemManager;
             itemCatalog = context.ItemCatalog;
             mapState = context.MapState;
@@ -80,7 +86,7 @@ namespace HHSGame.Core
         public int Level => Stats.Progression.Level;
         public int EvasionBonus => Stats.EvasionBonus;
 
-        public int ArmorValue => equippedArmor?.ArmorValue ?? 0;
+        public int ArmorValue => equipmentManager.GetArmorValue();
         public Weapon EquippedWeapon => equippedWeapon ?? itemCatalog.CreateWeapon(itemCatalog.UnknownWeaponId);
 
         public Coordinate Position => new(X, Y);
@@ -295,11 +301,7 @@ namespace HHSGame.Core
 
         public void EquipArmor(Armor armor)
         {
-            if (equippedArmor != null)
-            {
-                inventoryManager.AddItem(equippedArmor);
-            }
-            equippedArmor = armor;
+            equipmentManager.Equip(armor);
             Events.RaiseGameMessage(I18n.T("EquippedArmor", armor.Name));
         }
 
@@ -348,6 +350,11 @@ namespace HHSGame.Core
         public void ToggleSneak()
         {
             IsSneaking = !IsSneaking;
+        }
+
+        public void SetSneaking(bool sneaking)
+        {
+            IsSneaking = sneaking;
         }
 
         public void SetSkillLocked(bool locked)

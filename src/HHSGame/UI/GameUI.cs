@@ -2,9 +2,13 @@ using System;
 using HHSGame.Core;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Enemies;
+using HHSGame.Core.CharacterCreation;
+using HHSGame.Core.Interactions;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
+using HHSGame.Core.Save;
 using HHSGame.Core.SkillActions;
+using HHSGame.Core.Tutorial;
 using Terminal.Gui.App;
 using Terminal.Gui.Drivers;
 using Terminal.Gui.Input;
@@ -24,9 +28,17 @@ namespace HHSGame.UI
             SkillActionWindow skillActionWindow,
             DialogueWindow dialogueWindow,
             PlayerSetupWizard playerSetupWizard,
+            SaveLoadSlotDialog saveLoadSlotDialog,
+            MainMenuView mainMenuView,
+            HelpView helpView,
+            TutorialHintDialog tutorialHintDialog,
+            CharacterCreationDialog characterCreationDialog,
+            TutorialManager tutorialManager,
             UiStatusState uiStatus,
             GameUiOptions options,
-            Game game) : IDisposable
+            Game game,
+            SaveManager saveManager,
+            LoadManager loadManager) : IDisposable
     {
         private GameStateType lastNonInventoryState = GameStateType.Exploration;
         private GameStateType lastNonMenuState = GameStateType.Exploration;
@@ -50,6 +62,7 @@ namespace HHSGame.UI
         private Coordinate skillTargetPosition = new(0, 0);
         private bool isKeyHandlerRegistered;
         private bool isGameStarted;
+        private bool isMainMenuShowing;
         private bool selectionBlinkOn;
         private bool selectionBlinkTimerActive;
         private readonly UiStatusState uiStatus = uiStatus;
@@ -57,31 +70,178 @@ namespace HHSGame.UI
         {
             // Create main window
             Toplevel top = new();
-            top.Add(mapFrame, inventoryFrame, surroundingsFrame, statusBarView, messageFrame, actionSequenceFrame, utilityWindow, questLogWindow, skillActionWindow, dialogueWindow);
+            top.Add(mapFrame, inventoryFrame, surroundingsFrame, statusBarView, messageFrame, actionSequenceFrame, utilityWindow, questLogWindow, skillActionWindow, dialogueWindow, saveLoadSlotDialog, mainMenuView, helpView, tutorialHintDialog, characterCreationDialog);
 
-            if (options.SkipWizard)
+            playerSetupWizard.Visible = false;
+
+            // Register key handler early so menu and character creation can receive input
+            if (!isKeyHandlerRegistered)
             {
-                playerSetupWizard.Visible = false;
+                Application.KeyDown -= HandleKeyEvent;
+                Application.KeyDown += HandleKeyEvent;
+                isKeyHandlerRegistered = true;
+            }            if (options.SkipWizard)
+            {
+                mainMenuView.Visible = false;
                 StartGame(false);
             }
             else
             {
-                top.Add(playerSetupWizard);
-                // Show player setup wizard before starting the game
-                playerSetupWizard.Finished += (sender, args) =>
-                {
-                    if (isGameStarted)
-                    {
-                        return;
-                    }
-                    StartGame(true);
-                    playerSetupWizard.Visible = false;
-                    top.Remove(playerSetupWizard);
-                };
-                playerSetupWizard.Visible = true;
+                ShowMainMenu();
             }
 
             return top;
+        }
+
+        private void ShowMainMenu()
+        {
+            isMainMenuShowing = true;
+            mainMenuView.Show();
+
+            mainMenuView.NewGameSelected += (_, _) =>
+            {
+                isMainMenuShowing = false;
+                characterCreationDialog.Start();
+            };
+
+            mainMenuView.ContinueSelected += (_, _) =>
+            {
+                // Try to load most recent save
+                SaveSlotInfo[] slots = saveManager.ListSlots();
+                int targetSlot = -1;
+                for (int i = 0; i < slots.Length; i++)
+                {
+                    if (slots[i].IsOccupied)
+                    {
+                        targetSlot = slots[i].SlotNumber;
+                        break;
+                    }
+                }
+
+                if (targetSlot < 0)
+                {
+                    Events.RaiseGameMessage("No save files found. Start a New Game.");
+                    return;
+                }
+
+                isMainMenuShowing = false;
+                mainMenuView.Visible = false;
+                playerSetupWizard.Visible = false;
+                SkipWizardAndLoad(targetSlot);
+            };
+
+            mainMenuView.LoadSelected += (_, _) =>
+            {
+                // Show load dialog directly
+                isMainMenuShowing = false;
+                mainMenuView.Visible = false;
+                playerSetupWizard.Visible = false;
+                saveLoadSlotDialog.ShowForLoad();
+            };
+
+            mainMenuView.HelpSelected += (_, _) =>
+            {
+                helpView.Show();
+            };
+
+            mainMenuView.QuitSelected += (_, _) =>
+            {
+                Application.Shutdown();
+            };
+
+            helpView.Closed += (_, _) =>
+            {
+                // Return to main menu after help closes
+                if (!isGameStarted)
+                {
+                    mainMenuView.Show();
+                }
+            };
+
+            playerSetupWizard.Finished += (sender, args) =>
+            {
+                if (isGameStarted)
+                {
+                    return;
+                }
+                StartGame(true);
+                playerSetupWizard.Visible = false;
+            };
+
+            characterCreationDialog.Completed += (_, _) =>
+            {
+                if (isGameStarted)
+                {
+                    return;
+                }
+                ApplyCharacterCreationSelections();
+                StartGame(false);
+            };
+
+            characterCreationDialog.Cancelled += (_, _) =>
+            {
+                if (!isGameStarted)
+                {
+                    mainMenuView.Show();
+                    isMainMenuShowing = true;
+                }
+            };
+
+            // Wire load slot selection for menu-initiated loads
+            saveLoadSlotDialog.SlotSelected += HandleSlotSelected;
+            saveLoadSlotDialog.SlotDeleted += (_, slot) => Events.RaiseGameMessage($"Deleted save slot {slot}.");
+            saveLoadSlotDialog.Cancelled += (_, _) =>
+            {
+                if (!isGameStarted)
+                {
+                    mainMenuView.Show();
+                    isMainMenuShowing = true;
+                }
+            };
+        }
+
+        private void SkipWizardAndLoad(int slot)
+        {
+            if (!isGameStarted)
+            {
+                isGameStarted = true;
+                game.Start();
+                WireGameEvents();
+            }
+
+            ExecuteLoad(slot);
+        }
+
+        private void ApplyCharacterCreationSelections()
+        {
+            CharacterCreationManager cc = characterCreationDialog.Manager;
+            GameParameters parameters = game.Context.Parameters;
+
+            if (cc.UseCustomMap && !string.IsNullOrEmpty(cc.SelectedMap))
+            {
+                parameters.UseCustomMap = true;
+                parameters.CustomMapPath = Path.Combine("data/maps", cc.SelectedMap + ".txt");
+            }
+
+            parameters.PlayerClass = cc.SelectedClass;
+            parameters.PlayerAttributes = cc.GetFinalAttributes();
+            parameters.PlayerSkills = cc.SelectedClass?.Skills;
+
+            // Set player faction based on playstyle
+            if (cc.SelectedPlaystyle?.SuggestedClassId != null)
+            {
+                Core.Factions.Faction faction = cc.SelectedPlaystyle.SuggestedClassId switch
+                {
+                    "Resistant" => Core.Factions.Faction.Resistance,
+                    "OccupierOfficer" => Core.Factions.Faction.Occupier,
+                    "Bureaucrat" => Core.Factions.Faction.Puppet,
+                    "Civilian" => Core.Factions.Faction.Civilians,
+                    "ExiledSoldier" => Core.Factions.Faction.Neutral,
+                    "Bandit" => Core.Factions.Faction.Bandits,
+                    _ => Core.Factions.Faction.Neutral
+                };
+                game.Context.FactionManager.PlayerFaction = faction;
+            }
         }
 
         private void StartGame(bool applyWizardSelections)
@@ -99,6 +259,19 @@ namespace HHSGame.UI
             }
 
             game.Start();
+            WireGameEvents();
+            StartTutorial();
+
+            Application.AddTimeout(TimeSpan.Zero, () =>
+            {
+                game.RefreshFrame();
+                return false;
+            });
+
+        }
+
+        private void WireGameEvents()
+        {
             game.Context.DialogueManager.SessionChanged += (_, __) =>
             {
                 if (game.Context.DialogueManager.CurrentSession == null)
@@ -107,19 +280,23 @@ namespace HHSGame.UI
                 }
             };
             skillActionWindow.ActionSelected += (_, action) => BeginSkillAction(action);
-
-            Application.AddTimeout(TimeSpan.Zero, () =>
+            tutorialHintDialog.ContinuePressed += (_, _) => tutorialManager.AdvanceStep();
+            tutorialHintDialog.SkipPressed += (_, _) =>
             {
-                game.RefreshFrame();
-                return false;
-            });
-
-            if (!isKeyHandlerRegistered)
+                tutorialManager.Dismiss();
+                tutorialHintDialog.Hide();
+                Events.RaiseGameMessage("Tutorial skipped.");
+            };
+            tutorialManager.HintReady += (_, step) =>
             {
-                Application.KeyDown -= HandleKeyEvent;
-                Application.KeyDown += HandleKeyEvent;
-                isKeyHandlerRegistered = true;
-            }
+                tutorialHintDialog.ShowHint(step, tutorialManager.CompletedCount, tutorialManager.TotalCount);
+            };
+            tutorialManager.TutorialCompleted += (_, _) =>
+            {
+                tutorialHintDialog.Hide();
+                Events.RaiseGameMessage("Tutorial complete! Good luck, adventurer.");
+            };
+
         }
 
         private void ApplyWizardSelections()
@@ -147,8 +324,48 @@ namespace HHSGame.UI
 
         private void HandleKeyEvent(object? sender, Key key)
         {
-            if (playerSetupWizard.Visible)
+            if (characterCreationDialog.Visible)
             {
+                if (characterCreationDialog.HandleKeyEvent(key))
+                {
+                    key.Handled = true;
+                }
+                return;
+            }
+
+            if (tutorialHintDialog.Visible)
+            {
+                if (tutorialHintDialog.HandleKeyEvent(key))
+                {
+                    key.Handled = true;
+                }
+                return;
+            }
+
+            if (isMainMenuShowing && mainMenuView.Visible)
+            {
+                if (mainMenuView.HandleKeyEvent(key))
+                {
+                    key.Handled = true;
+                }
+                return;
+            }
+
+            if (helpView.Visible)
+            {
+                if (helpView.HandleKeyEvent(key))
+                {
+                    key.Handled = true;
+                }
+                return;
+            }
+
+            if (saveLoadSlotDialog.Visible)
+            {
+                if (saveLoadSlotDialog.HandleKeyEvent(key))
+                {
+                    key.Handled = true;
+                }
                 return;
             }
 
@@ -316,6 +533,14 @@ namespace HHSGame.UI
                     ToggleQuestLog();
                     handled = true;
                     break;
+                case KeyCode.S | KeyCode.CtrlMask:
+                    HandleSave();
+                    handled = true;
+                    break;
+                case KeyCode.L | KeyCode.CtrlMask:
+                    HandleLoad();
+                    handled = true;
+                    break;
                 case KeyCode.Q | KeyCode.CtrlMask:
                     game.Stop();
                     Application.Shutdown();
@@ -408,6 +633,12 @@ namespace HHSGame.UI
                 case KeyCode.Q:
                     ToggleQuestLog();
                     return true;
+                case KeyCode.S | KeyCode.CtrlMask:
+                    HandleSave();
+                    return true;
+                case KeyCode.L | KeyCode.CtrlMask:
+                    HandleLoad();
+                    return true;
                 case KeyCode.Q | KeyCode.CtrlMask:
                     game.Stop();
                     Application.Shutdown();
@@ -484,6 +715,7 @@ namespace HHSGame.UI
                 case SkillActionTargetType.Direction:
                 case SkillActionTargetType.AdjacentDoor:
                 case SkillActionTargetType.AdjacentNpc:
+                case SkillActionTargetType.AdjacentObject:
                     return HandleDirectionalSkillSelectionKey(key);
                 case SkillActionTargetType.AdjacentEnemy:
                 case SkillActionTargetType.RangedEnemy:
@@ -755,6 +987,9 @@ namespace HHSGame.UI
                 case SkillActionTargetType.AdjacentDoor:
                     BeginSkillDoorSelection();
                     break;
+                case SkillActionTargetType.AdjacentObject:
+                    BeginSkillObjectSelection();
+                    break;
                 default:
                     CancelSkillSelection();
                     break;
@@ -901,6 +1136,36 @@ namespace HHSGame.UI
             UpdateSkillTargetOverlay();
         }
 
+        private void BeginSkillObjectSelection()
+        {
+            if (game.Player == null)
+            {
+                CancelSkillSelection();
+                return;
+            }
+
+            List<IInteractable> nearby = game.Context.InteractableManager.GetInteractableNearPlayer(game.Player.Position);
+            if (nearby.Count == 0)
+            {
+                Events.RaiseGameMessage("No interactive objects nearby.");
+                CancelSkillSelection();
+                return;
+            }
+
+            if (nearby.Count == 1)
+            {
+                ExecuteSkillAction(selectedSkillAction!, new SkillActionTarget(Position: nearby[0].Position));
+                return;
+            }
+
+            // Use directional selection for multiple objects
+            skillTargetPosition = nearby[0].Position;
+            isSkillSelection = true;
+            Events.RaiseGameMessage("Select a direction to choose an object.");
+            EnsureSelectionBlinker();
+            UpdateSkillTargetOverlay();
+        }
+
         private void CancelSkillSelection()
         {
             isSkillSelection = false;
@@ -930,7 +1195,7 @@ namespace HHSGame.UI
                     selectedSkillNpc != null ? new SkillActionTarget(Npc: selectedSkillNpc) : new SkillActionTarget(),
                 SkillActionTargetType.AdjacentAllyOrSelf =>
                     skillPlayerTargets.Count > 0 ? new SkillActionTarget(Player: skillPlayerTargets[skillPlayerTargetIndex]) : new SkillActionTarget(),
-                SkillActionTargetType.AdjacentDoor or SkillActionTargetType.Direction =>
+                SkillActionTargetType.AdjacentDoor or SkillActionTargetType.Direction or SkillActionTargetType.AdjacentObject =>
                     new SkillActionTarget(Position: skillTargetPosition),
                 _ => new SkillActionTarget()
             };
@@ -1157,7 +1422,7 @@ namespace HHSGame.UI
             game.SetOverlayCells(overlay);
         }
 
-        private void UpdateMoveStatus(IReadOnlyList<Coordinate> path)
+        private void UpdateMoveStatus(List<Coordinate> path)
         {
             if (game.Player == null)
             {
@@ -1319,7 +1584,7 @@ namespace HHSGame.UI
                     skillPlayerTargets.Count > 0
                         ? BuildIndexedTargetDescription(skillPlayerTargets[skillPlayerTargetIndex].Name, skillPlayerTargets[skillPlayerTargetIndex].X, skillPlayerTargets[skillPlayerTargetIndex].Y, skillPlayerTargetIndex, skillPlayerTargets.Count)
                         : "No target",
-                SkillActionTargetType.AdjacentDoor or SkillActionTargetType.Direction =>
+                SkillActionTargetType.AdjacentDoor or SkillActionTargetType.Direction or SkillActionTargetType.AdjacentObject =>
                     $"{skillTargetPosition.X},{skillTargetPosition.Y}",
                 _ => string.Empty
             };
@@ -1447,6 +1712,17 @@ namespace HHSGame.UI
                     {
                         Cell cell = game.Context.MapState.GetCell(adjacent.X, adjacent.Y);
                         if (cell.Character == '+')
+                        {
+                            skillTargetPosition = adjacent;
+                            UpdateSkillTargetOverlay();
+                        }
+                    }
+                    break;
+                case SkillActionTargetType.AdjacentObject:
+                    if (game.Context.MapState.IsInBounds(adjacent))
+                    {
+                        IInteractable? obj = game.Context.InteractableManager.GetAt(adjacent);
+                        if (obj != null)
                         {
                             skillTargetPosition = adjacent;
                             UpdateSkillTargetOverlay();
@@ -1814,6 +2090,82 @@ namespace HHSGame.UI
             game.Context.StateMachine.TryChangeState(lastNonMenuState);
             ScheduleFrameRefresh();
             uiStatus.ClearOverride();
+        }
+
+        private void StartTutorial()
+        {
+            TutorialScenario scenario = TutorialScenarios.CreateDefaultScenario();
+            tutorialManager.LoadScenario(scenario);
+        }
+
+        private void HandleSave()
+        {
+            GameStateType currentState = game.Context.StateMachine.CurrentState;
+            if (!SaveManager.CanSaveInCurrentState(currentState))
+            {
+                Events.RaiseGameMessage("Cannot save during combat or dialogue.");
+                return;
+            }
+
+            saveLoadSlotDialog.ShowForSave();
+        }
+
+        private void HandleLoad()
+        {
+            GameStateType currentState = game.Context.StateMachine.CurrentState;
+            if (!LoadManager.CanLoadInCurrentState(currentState))
+            {
+                Events.RaiseGameMessage("Cannot load during combat or dialogue.");
+                return;
+            }
+
+            saveLoadSlotDialog.ShowForLoad();
+        }
+
+        private void HandleSlotSelected(object? sender, int slotNumber)
+        {
+            if (saveLoadSlotDialog.Title == "Save Game")
+            {
+                ExecuteSave(slotNumber);
+            }
+            else
+            {
+                ExecuteLoad(slotNumber);
+            }
+        }
+
+        private void ExecuteSave(int slot)
+        {
+            bool success = saveManager.Save(game, slot);
+            if (success)
+            {
+                Events.RaiseGameMessage($"Game saved to slot {slot}.");
+            }
+            else
+            {
+                Events.RaiseGameMessage("Save failed!");
+            }
+        }
+
+        private void ExecuteLoad(int slot)
+        {
+            SaveGameData? data = loadManager.LoadSlot(slot);
+            if (data == null)
+            {
+                Events.RaiseGameMessage($"Failed to load slot {slot}.");
+                return;
+            }
+
+            bool success = loadManager.RestoreGameState(game, data);
+            if (success)
+            {
+                Events.RaiseGameMessage($"Game loaded from slot {slot}.");
+                game.RefreshFrame();
+            }
+            else
+            {
+                Events.RaiseGameMessage("Load failed!");
+            }
         }
 
         private void ScheduleFrameRefresh()

@@ -1,12 +1,17 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using HHSGame.Core.Combat;
+using HHSGame.Core.CharacterCreation;
+using HHSGame.Core.Factions;
+using HHSGame.Core.Interactions;
 using HHSGame.Core.Map;
+using HHSGame.Core.Tutorial;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
 using HHSGame.Core.Npcs;
 using HHSGame.Core.Quests;
 using HHSGame.Core.Dialogue;
+using HHSGame.Core.Save;
 
 namespace HHSGame.Core
 {
@@ -35,11 +40,19 @@ namespace HHSGame.Core
             serviceCollection.AddSingleton<NpcManager>();
             serviceCollection.AddSingleton<SurroundingsManager>();
             serviceCollection.AddSingleton<InventoryManager>();
+            serviceCollection.AddSingleton<InteractableManager>();
+            serviceCollection.AddSingleton<TutorialManager>();
+            serviceCollection.AddSingleton<CharacterCreationManager>();
+            serviceCollection.AddSingleton<FactionManager>();
             serviceCollection.AddSingleton<TurnManager>();
             serviceCollection.AddSingleton<GameStateMachine>();
             serviceCollection.AddSingleton<PartyState>();
             serviceCollection.AddSingleton<QuestManager>();
             serviceCollection.AddSingleton<DialogueManager>();
+
+            // Save/Load
+            serviceCollection.AddSingleton<SaveManager>();
+            serviceCollection.AddSingleton<LoadManager>();
 
             // Setup GameContext
             serviceCollection.AddSingleton<GameContext>();

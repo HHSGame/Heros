@@ -47,7 +47,7 @@ namespace HHSGame.Core.Engine
                 return new EnemyDefinition(
                     id,
                     string.IsNullOrWhiteSpace(config.Name) ? id : config.Name,
-                    config.Attributes,
+                    string.IsNullOrWhiteSpace(config.Faction) ? "Neutral" : config.Faction,                    config.Attributes,
                     SkillMapper.BuildSkills(config.Skills),
                     RequireWeapon(itemCatalog, config.WeaponId, $"enemy {id} weapon"),
                     RequireArmor(itemCatalog, config.ArmorId, $"enemy {id} armor"),
@@ -84,13 +84,24 @@ namespace HHSGame.Core.Engine
 
         private static ArmorDefinition ParseArmor(ArmorDefinitionConfig config)
         {
+            EquipmentSlot slot = EquipmentSlot.Body;
+            if (!string.IsNullOrWhiteSpace(config.Slot))
+            {
+                EquipmentSlot? parsed = EquipmentSlotRules.ParseSlot(config.Slot);
+                if (parsed.HasValue)
+                {
+                    slot = parsed.Value;
+                }
+            }
+
             return new ArmorDefinition(
                 RequireId(config.Id, "armor"),
                 string.IsNullOrWhiteSpace(config.Name) ? config.Id : config.Name,
                 ParseEnum<ItemRarity>(config.Rarity, "armor rarity"),
                 config.Value,
                 config.Weight,
-                config.ArmorValue);
+                config.ArmorValue,
+                slot);
         }
 
         private static ItemDefinition ParseItem(ItemDefinitionConfig config)

@@ -25,11 +25,11 @@ namespace HHSGame.Core.Enemies
         private readonly ItemCatalog itemCatalog;
         private readonly MapState mapState;
 
-        public string Id { get; }
+        private readonly Factions.FactionManager factionManager;        public string Id { get; }
         public EnemyState State { get; private set; }
         public int ExperienceValue { get; }
         public int SkipTurnsRemaining { get; private set; }
-
+        public Factions.Faction Faction { get; }
         public CharacterStats Stats { get; }
         public ActionSequence ActionSequence { get; } = new();
         public int ArmorValue => equippedArmor?.ArmorValue ?? 0;
@@ -55,8 +55,10 @@ namespace HHSGame.Core.Enemies
             Pathfinder pathfinder,
             EnemyDefinition definition,
             ItemCatalog itemCatalog,
-            MapState mapState)
+            MapState mapState,
+            Factions.FactionManager factionManager)
         {
+            this.factionManager = factionManager;
             random = new Random();
             Id = definition.Id;
             X = x;
@@ -65,9 +67,10 @@ namespace HHSGame.Core.Enemies
             this.pathfinder = pathfinder;
             this.itemCatalog = itemCatalog;
             this.mapState = mapState;
-            State = EnemyState.Chasing;
+            State = EnemyState.Idle;
 
             Name = definition.Name;
+            Faction = Factions.FactionManager.ParseFaction(definition.Faction);
             ExperienceValue = definition.ExperienceValue;
             Glyph = definition.Glyph;
             Attribute = definition.Attribute;
@@ -195,6 +198,13 @@ namespace HHSGame.Core.Enemies
         private EnemyState DetermineState(Player player)
         {
             if (!CanDetectPlayer(player))
+            {
+                return EnemyState.Idle;
+            }
+
+            // Check faction — allied/neutral factions don't attack each other
+            Factions.Faction playerFaction = factionManager.GetEffectivePlayerFaction();
+            if (!factionManager.WillAttack(Faction, playerFaction))
             {
                 return EnemyState.Idle;
             }

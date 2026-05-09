@@ -185,6 +185,21 @@ namespace HHSGame.Core.Stats
             UnspentSkillPoints -= cost;
             return true;
         }
+
+        public void SetLevel(int level)
+        {
+            Level = Math.Max(1, level);
+        }
+
+        public void SetExperience(int exp)
+        {
+            Experience = Math.Max(0, exp);
+        }
+
+        public void SetUnspentSkillPoints(int points)
+        {
+            UnspentSkillPoints = Math.Max(0, points);
+        }
     }
 
     public static class DerivedStats
@@ -293,6 +308,16 @@ namespace HHSGame.Core.Stats
             }
 
             CurrentHp = Math.Min(MaxHp, CurrentHp + amount);
+        }
+
+        public void SetHp(int hp)
+        {
+            CurrentHp = Math.Clamp(hp, 0, MaxHp);
+        }
+
+        public void SetSp(int sp)
+        {
+            CurrentSp = Math.Clamp(sp, 0, MaxSp);
         }
 
         public void RestoreSanity(int amount)

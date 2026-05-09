@@ -36,6 +36,19 @@ namespace HHSGame.Core.Quests
             }
         }
 
+        public void SetStatus(QuestStatus status)
+        {
+            Status = status;
+        }
+
+        public void SetProgress(int objectiveIndex, int value)
+        {
+            if (objectiveIndex >= 0 && objectiveIndex < progress.Length)
+            {
+                progress[objectiveIndex] = value;
+            }
+        }
+
         public void Complete()
         {
             if (Status == QuestStatus.Active)
@@ -186,6 +199,19 @@ namespace HHSGame.Core.Quests
         {
             IsUnlocked = true;
         }
+
+        public void SetProgress(int objectiveIndex, int value)
+        {
+            if (objectiveIndex >= 0 && objectiveIndex < progress.Length)
+            {
+                progress[objectiveIndex] = value;
+            }
+        }
+
+        public void SetUnlocked(bool unlocked)
+        {
+            IsUnlocked = unlocked;
+        }
     }
 
     public sealed class QuestManager
@@ -309,32 +335,45 @@ namespace HHSGame.Core.Quests
             AdvanceObjectives(QuestObjectiveKind.TalkToNpc, npcId, 1);
         }
 
-        public bool TryGetQuest(string questId, out QuestState quest)
+        public bool TryGetQuest(string questId, out QuestState? quest)
         {
-            quest = null!;
+            quest = null;
             if (string.IsNullOrWhiteSpace(questId))
             {
                 return false;
             }
 
-            return quests.TryGetValue(questId.Trim(), out quest) && quest != null;
+            return quests.TryGetValue(questId.Trim(), out quest);
         }
 
         public bool IsQuestInStatus(string questId, QuestStatus status)
         {
-            return TryGetQuest(questId, out QuestState quest) && quest.Status == status;
+            return TryGetQuest(questId, out QuestState? quest) && quest != null && quest.Status == status;
         }
 
         public bool AreQuestObjectivesComplete(string questId)
         {
-            return TryGetQuest(questId, out QuestState quest) && quest.AreObjectivesComplete();
+            return TryGetQuest(questId, out QuestState? quest) && quest != null && quest.AreObjectivesComplete();
         }
 
         public bool CanCompleteQuest(string questId)
         {
-            return TryGetQuest(questId, out QuestState quest)
+            return TryGetQuest(questId, out QuestState? quest)
+                && quest != null
                 && quest.Status == QuestStatus.Active
                 && quest.AreObjectivesComplete();
+        }
+
+        public bool IsAchievementUnlocked(string achievementId)
+        {
+            if (string.IsNullOrWhiteSpace(achievementId))
+            {
+                return false;
+            }
+
+            return achievements.TryGetValue(achievementId.Trim(), out AchievementState? achievement)
+                && achievement != null
+                && achievement.IsUnlocked;
         }
 
         public void GiveItemReward(string itemId, int amount)
@@ -360,6 +399,47 @@ namespace HHSGame.Core.Quests
                 player.AddItem(reward);
                 NotifyItemCollected(reward.Id, 1);
             }
+        }
+
+        public void RestoreQuest(string questId, QuestStatus status, List<int> progress)
+        {
+            if (!quests.TryGetValue(questId, out QuestState? quest))
+            {
+                return;
+            }
+
+            quest.SetStatus(status);
+            for (int i = 0; i < progress.Count && i < quest.Progress.Count; i++)
+            {
+                quest.SetProgress(i, progress[i]);
+            }
+
+            if (quest.Status == QuestStatus.Active && quest.AreObjectivesComplete())
+            {
+                readyForTurnIn.Add(questId);
+            }
+
+            QuestLogChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void RestoreAchievement(string achievementId, bool isUnlocked, List<int> progress)
+        {
+            if (!achievements.TryGetValue(achievementId, out AchievementState? achievement))
+            {
+                return;
+            }
+
+            for (int i = 0; i < progress.Count && i < achievement.Progress.Count; i++)
+            {
+                achievement.SetProgress(i, progress[i]);
+            }
+
+            if (isUnlocked)
+            {
+                achievement.SetUnlocked(true);
+            }
+
+            QuestLogChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void GiveCurrencyReward(int amount)

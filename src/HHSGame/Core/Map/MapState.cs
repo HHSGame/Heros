@@ -181,6 +181,14 @@ namespace HHSGame.Core.Map
             return IsInBounds(x, y) && visitedTileSet.Contains(new(x, y));
         }
 
+        public void MarkExplored(int x, int y)
+        {
+            if (IsInBounds(x, y))
+            {
+                visitedTileSet.Add(new(x, y));
+            }
+        }
+
 
         public void Draw(IDrawingContext ctx)
         {

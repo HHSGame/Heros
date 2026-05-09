@@ -139,10 +139,61 @@ namespace HHSGame.Core.Items
         }
     }
 
+    public enum EquipmentSlot
+    {
+        Weapon,
+        Head,
+        Body,
+        Legs,
+        Accessory1,
+        Accessory2
+    }
+
+    public static class EquipmentSlotRules
+    {
+        public static string GetDisplayName(EquipmentSlot slot)
+        {
+            return slot switch
+            {
+                EquipmentSlot.Weapon => "Weapon",
+                EquipmentSlot.Head => "Head",
+                EquipmentSlot.Body => "Body",
+                EquipmentSlot.Legs => "Legs",
+                EquipmentSlot.Accessory1 => "Accessory 1",
+                EquipmentSlot.Accessory2 => "Accessory 2",
+                _ => "Unknown"
+            };
+        }
+
+        public static EquipmentSlot? ParseSlot(string slotName)
+        {
+            return slotName?.ToLowerInvariant() switch
+            {
+                "head" => EquipmentSlot.Head,
+                "body" => EquipmentSlot.Body,
+                "legs" => EquipmentSlot.Legs,
+                "accessory" or "accessory1" => EquipmentSlot.Accessory1,
+                "accessory2" => EquipmentSlot.Accessory2,
+                _ => null
+            };
+        }
+
+        public static int GetTotalArmor(IReadOnlyDictionary<EquipmentSlot, Armor> equipped)
+        {
+            int total = 0;
+            foreach (Armor armor in equipped.Values)
+            {
+                total += armor.ArmorValue;
+            }
+            return total;
+        }
+    }
+
     public class Armor(string id, string name, ItemRarity rarity, int value, float weight,
-        int armorValue) : Item(id, name, rarity, value, weight)
+        int armorValue, EquipmentSlot slot = EquipmentSlot.Body) : Item(id, name, rarity, value, weight)
     {
         public int ArmorValue { get; } = armorValue;
+        public EquipmentSlot Slot { get; } = slot;
 
         public override void Use(Player player)
         {

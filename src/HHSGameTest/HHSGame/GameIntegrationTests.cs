@@ -1,3 +1,4 @@
+using HHSGame.Core.Interactions;
 using System.Text;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Engine;
@@ -257,6 +258,158 @@ namespace HHSGame.Core
         }
 
         [TestMethod]
+        public void GameEndsWhenCurrencyAtLeastConditionMet()
+        {
+            GameConfig config = new()
+            {
+                Conditions = new ConditionConfig
+                {
+                    WinEntries = new List<ConditionEntryConfig>
+                    {
+                        new ConditionEntryConfig { Id = "CurrencyAtLeast", Value = 10 }
+                    },
+                    Lose = new List<string>()
+                }
+            };
+            Game game = CreateGame(config);
+            game.Context.InventoryManager.AddCurrency(10);
+
+            bool result = game.PerformPlayerAction(() => { }, 1, false, GameStateType.Exploration);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(GameStateType.GameOver, game.Context.StateMachine.CurrentState);
+        }
+
+        [TestMethod]
+        public void GameEndsWhenQuestStatusConditionMet()
+        {
+            QuestDefinition quest = new(
+                "Quest-1",
+                "Quest-1",
+                string.Empty,
+                string.Empty,
+                Array.Empty<QuestObjectiveDefinition>(),
+                Array.Empty<QuestRewardDefinition>());
+            GameConfig config = new()
+            {
+                Conditions = new ConditionConfig
+                {
+                    WinEntries = new List<ConditionEntryConfig>
+                    {
+                        new ConditionEntryConfig { Id = "QuestStatus", Param = "Quest-1", Value = (int)QuestStatus.Active }
+                    },
+                    Lose = new List<string>()
+                }
+            };
+            Game game = CreateGame(config, questDefinitions: new[] { quest });
+            game.Context.QuestManager.StartQuest("Quest-1");
+
+            bool result = game.PerformPlayerAction(() => { }, 1, false, GameStateType.Exploration);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(GameStateType.GameOver, game.Context.StateMachine.CurrentState);
+        }
+
+        [TestMethod]
+        public void GameEndsWhenQuestObjectivesCompleteConditionMet()
+        {
+            QuestDefinition quest = new(
+                "Quest-2",
+                "Quest-2",
+                string.Empty,
+                string.Empty,
+                new[]
+                {
+                    new QuestObjectiveDefinition(QuestObjectiveKind.TalkToNpc, "npc-1", 1)
+                },
+                Array.Empty<QuestRewardDefinition>());
+            GameConfig config = new()
+            {
+                Conditions = new ConditionConfig
+                {
+                    WinEntries = new List<ConditionEntryConfig>
+                    {
+                        new ConditionEntryConfig { Id = "QuestObjectivesComplete", Param = "Quest-2" }
+                    },
+                    Lose = new List<string>()
+                }
+            };
+            Game game = CreateGame(config, questDefinitions: new[] { quest });
+            game.Context.QuestManager.StartQuest("Quest-2");
+            game.Context.QuestManager.NotifyNpcTalked("npc-1");
+
+            bool result = game.PerformPlayerAction(() => { }, 1, false, GameStateType.Exploration);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(GameStateType.GameOver, game.Context.StateMachine.CurrentState);
+        }
+
+        [TestMethod]
+        public void GameEndsWhenQuestReadyToTurnInConditionMet()
+        {
+            QuestDefinition quest = new(
+                "Quest-3",
+                "Quest-3",
+                string.Empty,
+                string.Empty,
+                new[]
+                {
+                    new QuestObjectiveDefinition(QuestObjectiveKind.TalkToNpc, "npc-2", 1)
+                },
+                Array.Empty<QuestRewardDefinition>());
+            GameConfig config = new()
+            {
+                Conditions = new ConditionConfig
+                {
+                    WinEntries = new List<ConditionEntryConfig>
+                    {
+                        new ConditionEntryConfig { Id = "QuestReadyToTurnIn", Param = "Quest-3" }
+                    },
+                    Lose = new List<string>()
+                }
+            };
+            Game game = CreateGame(config, questDefinitions: new[] { quest });
+            game.Context.QuestManager.StartQuest("Quest-3");
+            game.Context.QuestManager.NotifyNpcTalked("npc-2");
+
+            bool result = game.PerformPlayerAction(() => { }, 1, false, GameStateType.Exploration);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(GameStateType.GameOver, game.Context.StateMachine.CurrentState);
+        }
+
+        [TestMethod]
+        public void GameEndsWhenAchievementUnlockedConditionMet()
+        {
+            AchievementDefinition achievement = new(
+                "Ach-1",
+                "Ach-1",
+                string.Empty,
+                new[]
+                {
+                    new QuestObjectiveDefinition(QuestObjectiveKind.TalkToNpc, "npc-3", 1)
+                });
+            GameConfig config = new()
+            {
+                Conditions = new ConditionConfig
+                {
+                    WinEntries = new List<ConditionEntryConfig>
+                    {
+                        new ConditionEntryConfig { Id = "AchievementUnlocked", Param = "Ach-1" }
+                    },
+                    Lose = new List<string>()
+                }
+            };
+            Game game = CreateGame(config, achievementDefinitions: new[] { achievement });
+            game.Context.QuestManager.NotifyNpcTalked("npc-3");
+
+            bool result = game.PerformPlayerAction(() => { }, 1, false, GameStateType.Exploration);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(GameStateType.GameOver, game.Context.StateMachine.CurrentState);
+        }
+
+        [TestMethod]
         public void GameEndsWhenReachMarkerConditionMet()
         {
             string mapPath = CreateTempMapFile(new[]
@@ -302,7 +455,7 @@ namespace HHSGame.Core
             Assert.ThrowsException<InvalidDataException>(() => CreateGame(config));
         }
 
-        private static Game CreateGame(GameConfig? config = null, string? mapPathOverride = null, IReadOnlyList<Coordinate>? playerPositions = null)
+        private static Game CreateGame(GameConfig? config = null, string? mapPathOverride = null, IReadOnlyList<Coordinate>? playerPositions = null, IReadOnlyList<QuestDefinition>? questDefinitions = null, IReadOnlyList<AchievementDefinition>? achievementDefinitions = null)
         {
             const int mapSize = 30;
             string mapPath = mapPathOverride ?? CreateTempMapFile(mapSize, mapSize);
@@ -327,7 +480,7 @@ namespace HHSGame.Core
             NpcManager npcManager = new();
             CollisionSystem collisionSystem = new(enemyManager, mapState, npcManager);
             Pathfinder pathfinder = new(mapState);
-            EnemyFactory enemyFactory = new(catalogs.EnemyCatalog, catalogs.ItemCatalog, collisionSystem, mapState, pathfinder);
+            EnemyFactory enemyFactory = new(catalogs.EnemyCatalog, catalogs.ItemCatalog, collisionSystem, mapState, pathfinder, new global::HHSGame.Core.Factions.FactionManager());
             NpcFactory npcFactory = new(catalogs.ItemCatalog);
             DialogueManager dialogueManager = new(partyState, questManager);
             SurroundingsManager surroundingsManager = new(itemManager, enemyManager, mapState, npcManager);
@@ -348,11 +501,13 @@ namespace HHSGame.Core
                 npcManager,
                 surroundingsManager,
                 inventoryManager,
+                new InteractableManager(),
                 turnManager,
                 stateMachine,
                 questManager,
                 dialogueManager,
                 partyState,
+                new global::HHSGame.Core.Factions.FactionManager(),
                 drawingContext);
 
             GameWorld world = new(context);
@@ -370,6 +525,14 @@ namespace HHSGame.Core
                         position,
                         new List<string>()))
                     .ToList();
+            }
+            if (questDefinitions != null)
+            {
+                parameters.QuestDefinitions = questDefinitions.ToList();
+            }
+            if (achievementDefinitions != null)
+            {
+                parameters.AchievementDefinitions = achievementDefinitions.ToList();
             }
             game.Start();
             return game;
@@ -421,9 +584,7 @@ namespace HHSGame.Core
             List<EnemyDefinition> enemies =
             [
                 new EnemyDefinition(
-                    "Gangster",
-                    "Gangster",
-                    new Stats.Attributes { Strength = 4, Perception = 5, Agility = 5, Charisma = 4, Intelligence = 4 },
+                    "Gangster", "Gangster", "Neutral", new Stats.Attributes { Strength = 4, Perception = 5, Agility = 5, Charisma = 4, Intelligence = 4 },
                     new Stats.Skills(),
                     "Dagger",
                     "Cloak",

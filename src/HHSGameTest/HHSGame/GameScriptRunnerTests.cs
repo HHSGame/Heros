@@ -1,3 +1,4 @@
+using HHSGame.Core.Interactions;
 using System.Text;
 using HHSGame.Core.Engine;
 using HHSGame.Core.Engine.Catalogs;
@@ -81,7 +82,7 @@ namespace HHSGame.Core.Engine.Scripting
             NpcManager npcManager = new();
             CollisionSystem collisionSystem = new(enemyManager, mapState, npcManager);
             Pathfinder pathfinder = new(mapState);
-            EnemyFactory enemyFactory = new(catalogs.EnemyCatalog, catalogs.ItemCatalog, collisionSystem, mapState, pathfinder);
+            EnemyFactory enemyFactory = new(catalogs.EnemyCatalog, catalogs.ItemCatalog, collisionSystem, mapState, pathfinder, new global::HHSGame.Core.Factions.FactionManager());
             NpcFactory npcFactory = new(catalogs.ItemCatalog);
             DialogueManager dialogueManager = new(partyState, questManager);
             SurroundingsManager surroundingsManager = new(itemManager, enemyManager, mapState, npcManager);
@@ -102,11 +103,13 @@ namespace HHSGame.Core.Engine.Scripting
                 npcManager,
                 surroundingsManager,
                 inventoryManager,
+                new InteractableManager(),
                 turnManager,
                 stateMachine,
                 questManager,
                 dialogueManager,
                 partyState,
+                new global::HHSGame.Core.Factions.FactionManager(),
                 drawingContext);
 
             GameWorld world = new(context);

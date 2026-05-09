@@ -18,7 +18,9 @@ namespace HHSGame.Core.SkillActions
         Appraise,
         Demoralize,
         TreatWounds,
-        Bless
+        Bless,
+        Examine,
+        UseObject
     }
 
     public enum SkillActionTargetType
@@ -29,7 +31,8 @@ namespace HHSGame.Core.SkillActions
         AdjacentNpc,
         AdjacentAllyOrSelf,
         AdjacentDoor,
-        RangedEnemy
+        RangedEnemy,
+        AdjacentObject
     }
 
     public sealed record SkillActionDefinition(
@@ -148,7 +151,21 @@ namespace HHSGame.Core.SkillActions
                 SkillType.Religion,
                 3,
                 SkillActionTargetType.None,
-                "Offer a blessing to restore sanity and ward off afflictions.")
+                "Offer a blessing to restore sanity and ward off afflictions."),
+            new SkillActionDefinition(
+                SkillActionId.Examine,
+                "Examine",
+                SkillType.Awareness,
+                1,
+                SkillActionTargetType.AdjacentObject,
+                "Examine an interactive object nearby to learn about it."),
+            new SkillActionDefinition(
+                SkillActionId.UseObject,
+                "Use Object",
+                SkillType.Mechanics,
+                2,
+                SkillActionTargetType.AdjacentObject,
+                "Interact with a nearby object (open chest, read inscription, pull lever, etc.).")
         ];
 
         public static IReadOnlyList<SkillActionDefinition> All => Actions;

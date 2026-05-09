@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "workspace-delivery-loop": {
+      "source": "myz-suite/skills",
+      "sourceType": "github",
+      "skillPath": "dev/workspace-delivery-loop/SKILL.md",
+      "computedHash": "526775c01537834e94d9aa54fd7edd4decc9047615a3b3947bffd45bb89d8f8a"
+    }
+  }
+}

@@ -23,7 +23,8 @@ namespace HHSGame.Core.Engine.Catalogs
         ItemRarity Rarity,
         int Value,
         float Weight,
-        int ArmorValue);
+        int ArmorValue,
+        EquipmentSlot Slot = EquipmentSlot.Body);
 
     public sealed record ItemDefinition(
         string Id,
@@ -58,6 +59,7 @@ namespace HHSGame.Core.Engine.Catalogs
     public sealed record EnemyDefinition(
         string Id,
         string Name,
+        string Faction,
         Attributes Attributes,
         Skills Skills,
         string WeaponId,
@@ -66,5 +68,4 @@ namespace HHSGame.Core.Engine.Catalogs
         char Glyph,
         Attribute Attribute,
         IReadOnlyList<EnemyLootEntry> Loot,
-        IReadOnlyList<EnemyAbilityDefinition> Abilities);
-}
+        IReadOnlyList<EnemyAbilityDefinition> Abilities);}

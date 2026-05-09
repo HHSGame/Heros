@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Serilog;
+using System.Globalization;
 
 namespace HHSGame.Core.Engine
 {
@@ -7,15 +9,27 @@ namespace HHSGame.Core.Engine
     {
         public static void Run(string[] args, Action<ILoggingBuilder>? configureLogging = null)
         {
+            bool useDefaultLogging = configureLogging == null;
+            Action<ILoggingBuilder> logging = configureLogging ?? ConfigureDefaultLogging;
             LaunchOptions options = ParseArgs(args);
             GameEngine engine = LoadEngine(options.ConfigPath);
             GameEngineHost host = new(engine);
-            host.Run(new GameHostOptions
+            try
             {
-                SkipWizard = options.SkipWizard,
-                ScriptedRun = options.ScriptedRun,
-                ConfigureLogging = configureLogging
-            });
+                host.Run(new GameHostOptions
+                {
+                    SkipWizard = options.SkipWizard,
+                    ScriptedRun = options.ScriptedRun,
+                    ConfigureLogging = logging
+                });
+            }
+            finally
+            {
+                if (useDefaultLogging)
+                {
+                    Log.CloseAndFlush();
+                }
+            }
         }
 
         private static GameEngine LoadEngine(string? configPath)
@@ -64,6 +78,15 @@ namespace HHSGame.Core.Engine
             }
 
             return new ScriptedRunOptions(scriptPath, stepDelayMs);
+        }
+
+        private static void ConfigureDefaultLogging(ILoggingBuilder loggingBuilder)
+        {
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.File("hss.log", formatProvider: CultureInfo.CurrentCulture)
+                .CreateLogger();
+            loggingBuilder.AddSerilog(dispose: true);
         }
 
         private sealed record LaunchOptions(

@@ -34,7 +34,7 @@ namespace HHSGameTest.HHSGame
             var manager = CreateManager();
             manager.Initialize();
             manager.AdvanceFromWelcome();
-            manager.SelectMap("Cave", false);
+            manager.SelectMap("UrbanStreet", false);
             manager.SelectPlaystyle(PlaystyleCatalog.All[0]);
             Assert.AreEqual(CreationStep.NameInput, manager.CurrentStep);
             Assert.IsNotNull(manager.SelectedPlaystyle);
@@ -47,7 +47,7 @@ namespace HHSGameTest.HHSGame
             var manager = CreateManager();
             manager.Initialize();
             manager.AdvanceFromWelcome();
-            manager.SelectMap("Cave", false);
+            manager.SelectMap("UrbanStreet", false);
             manager.SelectPlaystyle(PlaystyleCatalog.All[0]);
             manager.ConfirmName("TestHero");
             Assert.AreEqual(CreationStep.DiceRoll, manager.CurrentStep);
@@ -63,7 +63,7 @@ namespace HHSGameTest.HHSGame
             var manager = CreateManager();
             manager.Initialize();
             manager.AdvanceFromWelcome();
-            manager.SelectMap("Cave", false);
+            manager.SelectMap("UrbanStreet", false);
             manager.SelectPlaystyle(PlaystyleCatalog.All[0]);
             manager.ConfirmName("");
             Assert.IsFalse(string.IsNullOrWhiteSpace(manager.PlayerName));
@@ -75,7 +75,7 @@ namespace HHSGameTest.HHSGame
             var manager = CreateManager();
             manager.Initialize();
             manager.AdvanceFromWelcome();
-            manager.SelectMap("Cave", false);
+            manager.SelectMap("UrbanStreet", false);
             manager.SelectPlaystyle(PlaystyleCatalog.All[0]);
             manager.ConfirmName("Hero");
             manager.ConfirmDice();
@@ -89,7 +89,7 @@ namespace HHSGameTest.HHSGame
             var manager = CreateManager();
             manager.Initialize();
             manager.AdvanceFromWelcome();
-            manager.SelectMap("Cave", false);
+            manager.SelectMap("UrbanStreet", false);
             manager.SelectPlaystyle(PlaystyleCatalog.All[0]);
             manager.ConfirmName("Hero");
             manager.ConfirmDice();
@@ -106,7 +106,7 @@ namespace HHSGameTest.HHSGame
             var manager = CreateManager();
             manager.Initialize();
             manager.AdvanceFromWelcome();
-            manager.SelectMap("Cave", false);
+            manager.SelectMap("UrbanStreet", false);
 
             // Select Warrior (STR + AGI bias)
             manager.SelectPlaystyle(PlaystyleCatalog.All[0]);
@@ -124,7 +124,7 @@ namespace HHSGameTest.HHSGame
             var manager = CreateManager();
             manager.Initialize();
             manager.AdvanceFromWelcome();
-            manager.SelectMap("Cave", false);
+            manager.SelectMap("UrbanStreet", false);
             manager.SelectPlaystyle(PlaystyleCatalog.All[0]);
             manager.ConfirmName("Hero");
 
@@ -143,7 +143,7 @@ namespace HHSGameTest.HHSGame
             var manager = CreateManager();
             manager.Initialize();
             manager.AdvanceFromWelcome();
-            manager.SelectMap("Cave", false);
+            manager.SelectMap("UrbanStreet", false);
             manager.SelectPlaystyle(PlaystyleCatalog.All[0]);
             manager.ConfirmName("Hero");
 
@@ -189,7 +189,7 @@ namespace HHSGameTest.HHSGame
             var manager = CreateManager();
             manager.Initialize();
             manager.AdvanceFromWelcome();
-            manager.SelectMap("Cave", false);
+            manager.SelectMap("UrbanStreet", false);
             manager.SelectPlaystyle(PlaystyleCatalog.All[0]); // Warrior
             manager.ConfirmName("Hero");
             manager.ConfirmDice();

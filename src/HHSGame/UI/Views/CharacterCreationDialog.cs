@@ -208,7 +208,7 @@ namespace HHSGame.UI.Views
             // 0 = Generated, 1+ = custom maps
             if (index == 0)
             {
-                manager.SelectMap("Cave", false);
+                manager.SelectMap("UrbanStreet", false);
             }
             else
             {

@@ -31,7 +31,7 @@ namespace HHSGame.UI.Views
 
             Label titleLabel = new()
             {
-                Text = "HHSGame - Roguelike Adventure",
+                Text = "沦陷区 — 二战地下智斗",
                 X = Pos.Center(),
                 Y = 2,
                 Width = Dim.Fill()
@@ -40,7 +40,7 @@ namespace HHSGame.UI.Views
 
             Label subtitleLabel = new()
             {
-                Text = "A terminal-based roguelike in the style of NetHack",
+                Text = "在沦陷区的黑暗中，每一个选择都关乎生死",
                 X = Pos.Center(),
                 Y = 4,
                 Width = Dim.Fill()

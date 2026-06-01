@@ -121,7 +121,7 @@ namespace HHSGameTest.HHSGame
 
         private static GameContext CreateContext()
         {
-            var parameters = new GameParameters { MapStyle = MapStyle.Cave, MapWidth = 20, MapHeight = 20 };
+            var parameters = new GameParameters { MapStyle = MapStyle.UrbanStreet, MapWidth = 20, MapHeight = 20 };
             var random = new Random(1234);
             var itemManager = new ItemManager();
             var mapState = new MapState();
@@ -140,7 +140,8 @@ namespace HHSGameTest.HHSGame
             var pathfinder = new Pathfinder(mapState);
             var enemyFactory = new EnemyFactory(new EnemyCatalog([]), catalog, collisionSystem, mapState, pathfinder, new global::HHSGame.Core.Factions.FactionManager());
             var npcFactory = new NpcFactory(catalog);
-            var dialogueManager = new DialogueManager(partyState, questManager);
+            var factionManager = new global::HHSGame.Core.Factions.FactionManager();
+            var dialogueManager = new DialogueManager(partyState, questManager, factionManager);
             var surroundingsManager = new SurroundingsManager(itemManager, enemyManager, mapState, npcManager);
             var interactableManager = new InteractableManager();
             var turnManager = new TurnManager();

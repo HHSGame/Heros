@@ -43,19 +43,28 @@ namespace HHSGame.Core.Engine.Catalogs
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                return ColorPresets.Enemies.Gangster;
+                return ColorPresets.Enemies.Occupier;
             }
 
             return key.Trim().ToLowerInvariant() switch
             {
-                "default" => ColorPresets.Enemies.Gangster,
-                "gangster" => ColorPresets.Enemies.Gangster,
+                "default" => ColorPresets.Enemies.Occupier,
+                "occupier" => ColorPresets.Enemies.Occupier,
+                "officer" => ColorPresets.Enemies.Officer,
+                "gestapo" => ColorPresets.Enemies.Gestapo,
+                "collaborator" => ColorPresets.Enemies.Collaborator,
+                "informer" => ColorPresets.Enemies.Informer,
                 "bandit" => ColorPresets.Enemies.Bandit,
-                "banditleader" => ColorPresets.Enemies.BanditLeader,
-                "thug" => ColorPresets.Enemies.Thug,
-                "soldier" => ColorPresets.Enemies.Soldier,
+                "banditboss" => ColorPresets.Enemies.BanditBoss,
+                "deserter" => ColorPresets.Enemies.Deserter,
+                "mgnest" => ColorPresets.Enemies.Sniper,
                 "sniper" => ColorPresets.Enemies.Sniper,
-                _ => ColorPresets.Enemies.Gangster
+                "patrol" => ColorPresets.Enemies.Patrol,
+                "medic" => ColorPresets.Enemies.Medic,
+                "dog" => ColorPresets.Enemies.Dog,
+                "tank" => ColorPresets.Enemies.Tank,
+                "turncoat" => ColorPresets.Enemies.Turncoat,
+                _ => ColorPresets.Enemies.Occupier
             };
         }
     }

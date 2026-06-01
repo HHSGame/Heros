@@ -200,7 +200,7 @@ namespace HHSGameTest.HHSGame
         {
             GameParameters parameters = new()
             {
-                MapStyle = MapStyle.Cave,
+                MapStyle = MapStyle.UrbanStreet,
                 MapWidth = 15,
                 MapHeight = 15
             };
@@ -279,7 +279,7 @@ namespace HHSGameTest.HHSGame
                 new EnemyDefinition(
                     "Gangster", "Gangster", "Neutral", new Attributes { Strength = 4, Perception = 5, Agility = 5, Charisma = 4, Intelligence = 4 },
                     new Skills(), "Dagger", "UnknownArmor", 50, 'g',
-                    ColorPresets.Enemies.Gangster,
+                    ColorPresets.Enemies.Occupier,
                     new List<EnemyLootEntry>(), new List<EnemyAbilityDefinition>())
             ];
 

@@ -64,7 +64,7 @@ namespace HHSGame.Core.Engine.Scripting
 
             GameParameters parameters = new()
             {
-                MapStyle = MapStyle.Cave,
+                MapStyle = MapStyle.UrbanStreet,
                 MapWidth = mapSize,
                 MapHeight = mapSize,
                 UseCustomMap = true,

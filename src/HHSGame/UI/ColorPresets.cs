@@ -20,20 +20,23 @@ namespace HHSGame.UI
             public static readonly Attribute Swamp = new(Color.DarkGray, Color.Black);
         }
 
-        // Enemy colors
+        // Enemy colors (WWII themed)
         public static class Enemies
         {
-            public static readonly Attribute Gangster = new(Color.Gray, Color.BrightGreen);
-            public static readonly Attribute Bandit = new(Color.Blue, Color.BrightGreen);
-            public static readonly Attribute BanditLeader = new(Color.DarkGray, Color.BrightGreen);
-            public static readonly Attribute Thug = new(Color.Cyan, Color.DarkGray);
-            public static readonly Attribute Soldier = new(Color.Gray, Color.DarkGray);
+            public static readonly Attribute Occupier = new(Color.Gray, Color.BrightRed);
+            public static readonly Attribute Officer = new(Color.BrightYellow, Color.DarkGray);
+            public static readonly Attribute Gestapo = new(Color.Black, Color.BrightRed);
+            public static readonly Attribute Collaborator = new(Color.DarkGray, Color.BrightYellow);
+            public static readonly Attribute Informer = new(Color.Cyan, Color.DarkGray);
+            public static readonly Attribute Bandit = new(Color.BrightRed, Color.Black);
+            public static readonly Attribute BanditBoss = new(Color.BrightYellow, Color.BrightRed);
+            public static readonly Attribute Deserter = new(Color.Gray, Color.DarkGray);
             public static readonly Attribute Sniper = new(Color.DarkGray, Color.Black);
-            // public static Attribute Dragon = new(Color.Red, Color.White);
-            // public static Attribute Skeleton = new(Color.White, Color.Black);
-            // public static Attribute Slime = new(Color.BrightCyan, Color.Black);
-            // public static Attribute Demon = new(Color.BrightRed, Color.Black);
-            // public static Attribute Ghost = new(Color.BrightMagenta, Color.Black);
+            public static readonly Attribute Patrol = new(Color.BrightGreen, Color.Black);
+            public static readonly Attribute Medic = new(Color.White, Color.BrightRed);
+            public static readonly Attribute Dog = new(Color.BrightYellow, Color.Black);
+            public static readonly Attribute Tank = new(Color.BrightCyan, Color.DarkGray);
+            public static readonly Attribute Turncoat = new(Color.BrightMagenta, Color.Black);
         }
 
         // Player color

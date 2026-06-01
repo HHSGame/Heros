@@ -20,7 +20,7 @@ namespace HHSGame.Core
             GameConfigLoader loader = CreateLoader();
             GameConfig config = loader.Load(path);
 
-            Assert.AreEqual("Cave", config.Map.Style);
+            Assert.AreEqual("UrbanStreet", config.Map.Style);
             Assert.AreEqual(20, config.Map.Width);
             Assert.AreEqual(10, config.Map.Height);
             Assert.IsTrue(config.Conditions.Lose.Contains("PlayerDeath"));
@@ -57,7 +57,7 @@ namespace HHSGame.Core
 
             GameParameters parameters = CreateMapper().ToParameters(config);
 
-            Assert.AreEqual(MapStyle.Cave, parameters.MapStyle);
+            Assert.AreEqual(MapStyle.UrbanStreet, parameters.MapStyle);
             Assert.AreEqual(50, parameters.MapWidth);
             Assert.AreEqual(30, parameters.MapHeight);
             Assert.IsNotNull(parameters.PlayerClass);
@@ -179,7 +179,7 @@ namespace HHSGame.Core
                     "UnknownArmor",
                     0,
                     'g',
-                    HHSGame.UI.ColorPresets.Enemies.Gangster,
+                    HHSGame.UI.ColorPresets.Enemies.Occupier,
                     new List<EnemyLootEntry>(),
                     new List<EnemyAbilityDefinition>())
             });

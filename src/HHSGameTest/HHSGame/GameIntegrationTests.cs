@@ -463,7 +463,7 @@ namespace HHSGame.Core
 
             GameParameters parameters = new()
             {
-                MapStyle = MapStyle.Cave,
+                MapStyle = MapStyle.UrbanStreet,
                 MapWidth = mapSize,
                 MapHeight = mapSize,
                 UseCustomMap = true,
@@ -590,7 +590,7 @@ namespace HHSGame.Core
                     "Cloak",
                     50,
                     'g',
-                    HHSGame.UI.ColorPresets.Enemies.Gangster,
+                    HHSGame.UI.ColorPresets.Enemies.Occupier,
                     new List<EnemyLootEntry>(),
                     new List<EnemyAbilityDefinition>())
             ];

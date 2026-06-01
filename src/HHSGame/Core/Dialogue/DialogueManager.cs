@@ -1,4 +1,5 @@
 using HHSGame.Core;
+using HHSGame.Core.Factions;
 using HHSGame.Core.Quests;
 using HHSGame.Core.Stats;
 
@@ -33,14 +34,16 @@ namespace HHSGame.Core.Dialogue
     {
         private readonly PartyState partyState;
         private readonly QuestManager questManager;
+        private readonly FactionManager factionManager;
         private readonly Dictionary<string, DialogueDefinition> definitions = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, HashSet<string>> visitedNodes = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, HashSet<string>> visitedOptions = new(StringComparer.OrdinalIgnoreCase);
 
-        public DialogueManager(PartyState partyState, QuestManager questManager)
+        public DialogueManager(PartyState partyState, QuestManager questManager, FactionManager factionManager)
         {
             this.partyState = partyState;
             this.questManager = questManager;
+            this.factionManager = factionManager;
         }
 
         public DialogueSession? CurrentSession { get; private set; }
@@ -462,6 +465,31 @@ namespace HHSGame.Core.Dialogue
                         break;
                     case DialogueEffectType.UnlockAchievement:
                         questManager.UnlockAchievement(effect.Target);
+                        break;
+                    case DialogueEffectType.ModifyReputation:
+                        if (!string.IsNullOrWhiteSpace(effect.Target))
+                        {
+                            Faction faction = FactionManager.ParseFaction(effect.Target);
+                            factionManager.ModifyReputation(faction, effect.Amount);
+                        }
+                        break;
+                    case DialogueEffectType.SetRelation:
+                        if (!string.IsNullOrWhiteSpace(effect.Target))
+                        {
+                            string[] parts = effect.Target.Split(':');
+                            if (parts.Length == 2)
+                            {
+                                Faction a = FactionManager.ParseFaction(parts[0]);
+                                Faction b = FactionManager.ParseFaction(parts[1]);
+                                FactionRelation relation = effect.Amount switch
+                                {
+                                    1 => FactionRelation.Allied,
+                                    -1 => FactionRelation.Hostile,
+                                    _ => FactionRelation.Neutral
+                                };
+                                factionManager.SetRelation(a, b, relation);
+                            }
+                        }
                         break;
                     default:
                         break;

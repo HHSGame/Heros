@@ -20,7 +20,7 @@ namespace HHSGame.Core.Engine
 
         public GameParameters ToParameters(GameConfig config)
         {
-            MapStyle style = MapStyle.Cave;
+            MapStyle style = MapStyle.UrbanStreet;
             if (!string.IsNullOrWhiteSpace(config.Map.Style)
                 && Enum.TryParse(config.Map.Style, true, out MapStyle parsedStyle))
             {
@@ -343,9 +343,16 @@ namespace HHSGame.Core.Engine
                     case DialogueEffectType.CompleteQuest:
                     case DialogueEffectType.GiveItem:
                     case DialogueEffectType.UnlockAchievement:
+                    case DialogueEffectType.ModifyReputation:
                         if (string.IsNullOrWhiteSpace(target))
                         {
                             throw new InvalidDataException($"Dialogue effect '{typeValue}' in {dialogueId} requires a target.");
+                        }
+                        break;
+                    case DialogueEffectType.SetRelation:
+                        if (string.IsNullOrWhiteSpace(target) || !target.Contains(':'))
+                        {
+                            throw new InvalidDataException($"Dialogue effect 'SetRelation' in {dialogueId} requires a target in format 'FactionA:FactionB'.");
                         }
                         break;
                     case DialogueEffectType.AddCurrency:

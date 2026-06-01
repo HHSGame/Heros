@@ -26,7 +26,7 @@ namespace HHSGame.Core.Engine.Config
 
     public sealed class MapConfig
     {
-        public string Style { get; init; } = "Cave";
+        public string Style { get; init; } = "UrbanStreet";
         public int Width { get; init; } = 50;
         public int Height { get; init; } = 30;
         public bool UseCustomMap { get; init; }

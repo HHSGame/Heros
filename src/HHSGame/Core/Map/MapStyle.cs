@@ -2,9 +2,12 @@ namespace HHSGame.Core.Map
 {
     public enum MapStyle
     {
-        Cave,
-        Hills,
-        Town,
+        UrbanStreet,
+        Headquarters,
+        Bunker,
+        Camp,
+        Industrial,
+        Residential,
         Forest,
     }
 }

@@ -5,12 +5,12 @@ using HHSGame.Core.Stats;
 namespace HHSGame.Core.Interactions
 {
     /// <summary>
-    /// A treasure chest that can be opened (with lockpick or forced) to yield items.
+    /// A supply crate that can be opened (with lockpick or forced) to yield items.
     /// </summary>
-    public sealed class TreasureChest : IInteractable
+    public sealed class SupplyCrate : IInteractable
     {
         public string Id { get; }
-        public string Name { get; } = "Treasure Chest";
+        public string Name { get; } = "Supply Crate";
         public string Description { get; }
         public char Glyph { get; } = '=';
         public Coordinate Position { get; }
@@ -21,7 +21,7 @@ namespace HHSGame.Core.Interactions
         private readonly int lockDifficulty;
         private readonly GameContext context;
 
-        public TreasureChest(string id, Coordinate position, List<string> lootItemIds,
+        public SupplyCrate(string id, Coordinate position, List<string> lootItemIds,
             int lockDifficulty, string description, GameContext context)
         {
             Id = id;
@@ -29,13 +29,13 @@ namespace HHSGame.Core.Interactions
             this.lootItemIds = lootItemIds;
             this.lockDifficulty = lockDifficulty;
             this.context = context;
-            Description = description ?? "A sturdy wooden chest with iron fittings.";
+            Description = description ?? "一个军用补给箱，上面印有占领军的标记。";
         }
 
         public InteractionResult Examine(Player player)
         {
-            string lockStatus = IsInteracted ? "The lock is broken and the chest is empty."
-                : lockDifficulty > 0 ? "The chest has a sturdy lock." : "The chest appears unlocked.";
+            string lockStatus = IsInteracted ? "箱子已经被打开，里面空空如也。"
+                : lockDifficulty > 0 ? "箱子上了锁，需要撬开。" : "箱子没有上锁。";
             return new InteractionResult
             {
                 Success = true,
@@ -47,10 +47,9 @@ namespace HHSGame.Core.Interactions
         {
             if (IsInteracted)
             {
-                return new InteractionResult { Success = false, Message = "The chest is already empty." };
+                return new InteractionResult { Success = false, Message = "箱子已经被搜刮过了。" };
             }
 
-            // Try lockpicking if locked
             if (lockDifficulty > 0)
             {
                 int skillValue = context.PartyState.GetEffectiveSkillValue(player, SkillType.Mechanics);
@@ -60,7 +59,7 @@ namespace HHSGame.Core.Interactions
                     return new InteractionResult
                     {
                         Success = false,
-                        Message = "You fail to open the chest. The lock holds firm."
+                        Message = "你没能撬开锁。锁很结实。"
                     };
                 }
             }
@@ -82,21 +81,21 @@ namespace HHSGame.Core.Interactions
 
             string itemNames = items.Count > 0
                 ? string.Join(", ", items.Select(i => i.Name))
-                : "nothing of value";
+                : "没有任何有用的东西";
 
             return new InteractionResult
             {
                 Success = true,
-                Message = $"You open the chest and find: {itemNames}.",
+                Message = $"你打开补给箱，找到了：{itemNames}。",
                 ItemsGiven = items
             };
         }
     }
 
     /// <summary>
-    /// A book, scroll, or inscription that provides lore when read.
+    /// An intelligence document or secret file that provides information when read.
     /// </summary>
-    public sealed class BookInscription : IInteractable
+    public sealed class IntelligenceDocument : IInteractable
     {
         public string Id { get; }
         public string Name { get; }
@@ -104,17 +103,17 @@ namespace HHSGame.Core.Interactions
         public char Glyph { get; } = '?';
         public Coordinate Position { get; }
         public bool IsInteracted { get; private set; }
-        public bool CanInteract => true; // Can always read
+        public bool CanInteract => true;
 
-        private readonly string loreText;
+        private readonly string content;
 
-        public BookInscription(string id, string name, Coordinate position, string description, string loreText)
+        public IntelligenceDocument(string id, string name, Coordinate position, string description, string content)
         {
             Id = id;
             Name = name;
             Position = position;
-            Description = description ?? $"A weathered {name.ToLowerInvariant()}.";
-            this.loreText = loreText;
+            Description = description ?? $"一份{name}的文件。";
+            this.content = content;
         }
 
         public InteractionResult Examine(Player player)
@@ -132,30 +131,30 @@ namespace HHSGame.Core.Interactions
             return new InteractionResult
             {
                 Success = true,
-                Message = $"You read the {Name.ToLowerInvariant()}:\n\n\"{loreText}\""
+                Message = $"你阅读了{Name}：\n\n\"{content}\""
             };
         }
     }
 
     /// <summary>
-    /// A lever or switch that toggles a map state (e.g., opens a hidden passage).
+    /// A switch or mechanism that toggles a map state (e.g., opens a hidden passage).
     /// </summary>
-    public sealed class Lever : IInteractable
+    public sealed class Switch : IInteractable
     {
         public string Id { get; }
-        public string Name { get; } = "Lever";
+        public string Name { get; } = "Switch";
         public string Description { get; }
         public char Glyph { get; } = '/';
         public Coordinate Position { get; }
         public bool IsInteracted { get; private set; }
-        public bool CanInteract => true; // Can always toggle
+        public bool CanInteract => true;
 
         private readonly Coordinate targetCell;
         private readonly char toggledGlyph;
         private readonly GameContext context;
         private bool isToggled;
 
-        public Lever(string id, Coordinate position, Coordinate targetCell, char toggledGlyph,
+        public Switch(string id, Coordinate position, Coordinate targetCell, char toggledGlyph,
             string description, GameContext context)
         {
             Id = id;
@@ -163,12 +162,12 @@ namespace HHSGame.Core.Interactions
             this.targetCell = targetCell;
             this.toggledGlyph = toggledGlyph;
             this.context = context;
-            Description = description ?? "A rusty lever mounted on the wall.";
+            Description = description ?? "墙上的一个老旧开关。";
         }
 
         public InteractionResult Examine(Player player)
         {
-            string state = isToggled ? "It is currently pulled." : "It is in the default position.";
+            string state = isToggled ? "开关处于开启状态。" : "开关处于关闭状态。";
             return new InteractionResult
             {
                 Success = true,
@@ -193,19 +192,19 @@ namespace HHSGame.Core.Interactions
                 }
             }
 
-            string action = isToggled ? "pull" : "release";
+            string action = isToggled ? "打开" : "关闭";
             return new InteractionResult
             {
                 Success = true,
-                Message = $"You {action} the lever. You hear a mechanical grinding sound nearby."
+                Message = $"你{action}了开关。附近传来一阵机械声。"
             };
         }
     }
 
     /// <summary>
-    /// A statue that can provide a buff or trigger an event when interacted with.
+    /// A war memorial or monument that can provide a buff or trigger an event when interacted with.
     /// </summary>
-    public sealed class Statue : IInteractable
+    public sealed class Memorial : IInteractable
     {
         public string Id { get; }
         public string Name { get; }
@@ -219,13 +218,13 @@ namespace HHSGame.Core.Interactions
         private readonly string buffMessage;
         private readonly GameContext context;
 
-        public Statue(string id, string name, Coordinate position, string description,
+        public Memorial(string id, string name, Coordinate position, string description,
             int sanityRestore, string buffMessage, GameContext context)
         {
             Id = id;
             Name = name;
             Position = position;
-            Description = description ?? $"A weathered statue of {name}.";
+            Description = description ?? $"一座{name}的纪念碑。";
             this.sanityRestore = sanityRestore;
             this.buffMessage = buffMessage;
             this.context = context;
@@ -247,7 +246,7 @@ namespace HHSGame.Core.Interactions
                 return new InteractionResult
                 {
                     Success = false,
-                    Message = "The statue has already bestowed its blessing."
+                    Message = "你已经在这里默哀过了。"
                 };
             }
 

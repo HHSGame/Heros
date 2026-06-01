@@ -1,6 +1,6 @@
 {
   "game": { "name": "沦陷区", "version": 2 },
-  "map": { "style": "Cave", "width": 40, "height": 25, "useCustomMap": true, "customMapPath": "data/maps/city-center.txt" },
+  "map": { "style": "UrbanStreet", "width": 40, "height": 25, "useCustomMap": true, "customMapPath": "data/maps/city-center.txt" },
   "player": { "class": "Civilian", "startingItems": ["Bandage"] },
   "players": [{ "name": "主角", "glyph": "@", "class": "Civilian", "startPosition": { "x": 2, "y": 2 }, "startingItems": ["Bandage", "Bread"] }],
   "catalogs": { "weapons": "data/catalogs/weapons.json", "armors": "data/catalogs/armors.json", "items": "data/catalogs/items.json", "classes": "data/catalogs/classes.json", "enemies": "data/catalogs/enemies.json" },
@@ -33,12 +33,12 @@
     { "id": "marcel-dialogue", "startNodeId": "start", "nodes": [
       { "id": "start", "text": "马塞尔压低声音：年轻人，这世道不太平。你是什么来路？不管怎样，如果你想在这沦陷区活下去，就得学会左右逢源。", "options": [
         { "text": "我需要了解这里的情况。", "nextNodeId": "info" },
-        { "text": "我在找反抗军的人。", "nextNodeId": "resistant_hint", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 5 }] },
-        { "text": "我是占领军的人。", "nextNodeId": "occupier_threat", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 3 }] },
+        { "text": "我在找反抗军的人。", "nextNodeId": "resistant_hint", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 5 }], "effects": [{ "type": "ModifyReputation", "target": "Resistance", "amount": 10 }] },
+        { "text": "我是占领军的人。", "nextNodeId": "occupier_threat", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 3 }], "effects": [{ "type": "ModifyReputation", "target": "Occupier", "amount": 10 }] },
         { "text": "告辞。", "nextNodeId": "" }
       ]},
       { "id": "info", "text": "马塞尔叹了口气：城里分三股势力——占领军盘踞北区指挥部，傀儡政权在市政厅办公，反抗军藏在东边山区。西边废弃工厂区被匪徒占了。你要小心行事。", "options": [
-        { "text": "帮我打听一下反抗军的消息。", "nextNodeId": "accept_intel", "effects": [{ "type": "StartQuest", "target": "act1-intel" }] },
+        { "text": "帮我打听一下反抗军的消息。", "nextNodeId": "accept_intel", "effects": [{ "type": "StartQuest", "target": "act1-intel" }, { "type": "ModifyReputation", "target": "Resistance", "amount": 5 }] },
         { "text": "你这有什么物资？", "nextNodeId": "trade" },
         { "text": "谢谢，我先走了。", "nextNodeId": "" }
       ]},
@@ -62,8 +62,8 @@
     { "id": "colette-dialogue", "startNodeId": "start", "nodes": [
       { "id": "start", "text": "科莱特警惕地看着你：你是谁？这里是反抗军的秘密联络点。如果你是占领军的人，我劝你赶紧离开。", "options": [
         { "text": "我受马塞尔介绍来的。", "nextNodeId": "trust", "requirements": [{ "type": "QuestStatus", "id": "act1-intel", "status": "Active" }] },
-        { "text": "我是来加入反抗军的。", "nextNodeId": "recruit" },
-        { "text": "（亮出占领军证件）我代表占领军。", "nextNodeId": "enemy" },
+        { "text": "我是来加入反抗军的。", "nextNodeId": "recruit", "effects": [{ "type": "ModifyReputation", "target": "Resistance", "amount": 15 }] },
+        { "text": "（亮出占领军证件）我代表占领军。", "nextNodeId": "enemy", "effects": [{ "type": "ModifyReputation", "target": "Resistance", "amount": -20 }, { "type": "ModifyReputation", "target": "Occupier", "amount": 10 }] },
         { "text": "抱歉，走错了。", "nextNodeId": "" }
       ]},
       { "id": "trust", "text": "科莱特放松了警惕：马塞尔介绍的？好吧。我们需要有人去侦察北区指挥部的防御情况。", "options": [
@@ -90,12 +90,12 @@
         { "text": "长官，我是平民，迷路了。", "nextNodeId": "civilian_excuse" }
       ]},
       { "id": "fake_id", "text": "穆勒上尉检查了证件：过去吧。不过我劝你不要在军事区逗留太久。", "options": [
-        { "text": "长官，我愿意为占领军效力。", "nextNodeId": "occupier_quest", "effects": [{ "type": "StartQuest", "target": "act1-infiltrate" }] },
+        { "text": "长官，我愿意为占领军效力。", "nextNodeId": "occupier_quest", "effects": [{ "type": "StartQuest", "target": "act1-infiltrate" }, { "type": "ModifyReputation", "target": "Occupier", "amount": 15 }] },
         { "text": "谢谢长官。", "nextNodeId": "" }
       ]},
       { "id": "negotiate", "text": "穆勒上尉挑了挑眉：谈判？有意思。如果你们愿意交出山区营地的位置，我可以保证你们的安全。", "options": [
-        { "text": "我可以提供情报。", "nextNodeId": "double_agent", "effects": [{ "type": "StartQuest", "target": "act2-double-agent" }] },
-        { "text": "我们不会出卖同志。", "nextNodeId": "defiance" }
+        { "text": "我可以提供情报。", "nextNodeId": "double_agent", "effects": [{ "type": "StartQuest", "target": "act2-double-agent" }, { "type": "ModifyReputation", "target": "Occupier", "amount": 10 }] },
+        { "text": "我们不会出卖同志。", "nextNodeId": "defiance", "effects": [{ "type": "ModifyReputation", "target": "Occupier", "amount": -10 }, { "type": "ModifyReputation", "target": "Resistance", "amount": 10 }] }
       ]},
       { "id": "flee", "text": "穆勒上尉大声喊道：抓住他！开枪！（你成功逃脱，但占领军加强了巡逻。）", "options": [{ "text": "（逃离）", "nextNodeId": "" }] },
       { "id": "civilian_excuse", "text": "穆勒上尉不耐烦地挥了挥手：赶紧离开这里。下次再被抓到，就不是这么简单了。", "options": [{ "text": "是是是，长官。", "nextNodeId": "" }] },
@@ -111,7 +111,7 @@
         { "text": "没什么，就是路过。", "nextNodeId": "" }
       ]},
       { "id": "ambition", "text": "皮埃尔压低声音：你消息很灵通。上头一直在寻找机会。如果能获得盟军的支持，或者削弱占领军的力量，我们就有可能夺回控制权。", "options": [
-        { "text": "我可以帮你收集占领军的情报。", "nextNodeId": "accept_intel", "effects": [{ "type": "StartQuest", "target": "act2-puppet-intel" }] },
+        { "text": "我可以帮你收集占领军的情报。", "nextNodeId": "accept_intel", "effects": [{ "type": "StartQuest", "target": "act2-puppet-intel" }, { "type": "ModifyReputation", "target": "Puppet", "amount": 10 }] },
         { "text": "（威胁）我要告诉穆勒上尉。", "nextNodeId": "threaten", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 8 }] },
         { "text": "我再想想。", "nextNodeId": "" }
       ]},
@@ -133,7 +133,7 @@
     ]},
     { "id": "marie-dialogue", "startNodeId": "start", "nodes": [
       { "id": "start", "text": "玛丽修女在祈祷台前转过身来：愿主保佑你，孩子。在这黑暗的时代，教堂是唯一安全的庇护所。", "options": [
-        { "text": "我需要治疗。", "nextNodeId": "heal" },
+        { "text": "我需要治疗。", "nextNodeId": "heal", "effects": [{ "type": "ModifyReputation", "target": "Church", "amount": 5 }] },
         { "text": "我受马塞尔介绍来的。", "nextNodeId": "resistant_contact", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 4 }] },
         { "text": "修女，你知道盟军的消息吗？", "nextNodeId": "allies_intel" },
         { "text": "打扰了。", "nextNodeId": "" }
@@ -156,7 +156,7 @@
     ]},
     { "id": "viktor-dialogue", "startNodeId": "start", "nodes": [
       { "id": "start", "text": "维克多大笑着拍了拍你的肩膀：哈！又一个不怕死的。我是这一带的老大。你想活命的话，最好老实点。", "options": [
-        { "text": "合作？怎么合作？", "nextNodeId": "deal" },
+        { "text": "合作？怎么合作？", "nextNodeId": "deal", "effects": [{ "type": "ModifyReputation", "target": "Bandits", "amount": 5 }] },
         { "text": "我只想过路。", "nextNodeId": "pass" },
         { "text": "我代表反抗军来谈判。", "nextNodeId": "resistant_deal", "requirements": [{ "type": "Skill", "id": "Persuasion", "min": 7 }] },
         { "text": "我不和匪徒合作。", "nextNodeId": "fight" }
@@ -192,12 +192,12 @@
         { "text": "我走错了。", "nextNodeId": "" }
       ]},
       { "id": "trusted", "text": "雷诺队长放下武器：既然是同志介绍的，进来吧。占领军的扫荡迫在眉睫，我们必须摧毁占领军的通讯塔。", "options": [
-        { "text": "我去摧毁通讯塔。", "nextNodeId": "accept_final", "effects": [{ "type": "StartQuest", "target": "act3-destroy-comm" }] },
+        { "text": "我去摧毁通讯塔。", "nextNodeId": "accept_final", "effects": [{ "type": "StartQuest", "target": "act3-destroy-comm" }, { "type": "ModifyReputation", "target": "Resistance", "amount": 15 }] },
         { "text": "有没有更安全的方案？", "nextNodeId": "alternative" },
         { "text": "我需要时间准备。", "nextNodeId": "" }
       ]},
       { "id": "critical_intel", "text": "雷诺队长震惊地说：扫荡？什么时候？快告诉我！（你将情报告诉了雷诺队长）雷诺队长感激地说：你救了我们。我们只有一次机会——摧毁占领军的指挥部。", "options": [
-        { "text": "我来执行。", "nextNodeId": "accept_final", "effects": [{ "type": "StartQuest", "target": "act3-destroy-hq" }] },
+        { "text": "我来执行。", "nextNodeId": "accept_final", "effects": [{ "type": "StartQuest", "target": "act3-destroy-hq" }, { "type": "ModifyReputation", "target": "Resistance", "amount": 15 }] },
         { "text": "我需要盟军的支援。", "nextNodeId": "allies_support" }
       ]},
       { "id": "join", "text": "雷诺队长审视着你：加入反抗军？你需要先证明自己——去完成一个侦察任务。", "options": [

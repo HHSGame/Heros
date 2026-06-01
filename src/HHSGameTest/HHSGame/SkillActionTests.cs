@@ -79,7 +79,7 @@ namespace HHSGame.Core
         {
             GameParameters parameters = new()
             {
-                MapStyle = MapStyle.Cave,
+                MapStyle = MapStyle.UrbanStreet,
                 MapWidth = 10,
                 MapHeight = 10
             };
@@ -174,7 +174,7 @@ namespace HHSGame.Core
                     "UnknownArmor",
                     10,
                     'g',
-                    ColorPresets.Enemies.Gangster,
+                    ColorPresets.Enemies.Occupier,
                     new List<EnemyLootEntry>(),
                     new List<EnemyAbilityDefinition>())
             ];

@@ -151,7 +151,7 @@ namespace HHSGame.Core
         {
             GameParameters parameters = new()
             {
-                MapStyle = MapStyle.Cave,
+                MapStyle = MapStyle.UrbanStreet,
                 MapWidth = width,
                 MapHeight = height
             };

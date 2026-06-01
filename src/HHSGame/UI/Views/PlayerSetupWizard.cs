@@ -101,7 +101,7 @@ namespace HHSGame.UI.Views
                 Width = FillMinus(2),
                 Height = 1,
                 ReadOnly = true,
-                Text = "Cave"
+                Text = "UrbanStreet"
             };
             mapStyleCombo.SetSource<string>(new ObservableCollection<string>(Enum.GetValues<MapStyle>().Select(s => s.ToString()).ToList()));
             mapContainer.Add(mapStyleCombo);

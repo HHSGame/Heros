@@ -25,7 +25,9 @@ namespace HHSGame.Core.Dialogue
         CompleteQuest,
         GiveItem,
         AddCurrency,
-        UnlockAchievement
+        UnlockAchievement,
+        ModifyReputation,
+        SetRelation
     }
 
     public sealed record DialogueEffect(

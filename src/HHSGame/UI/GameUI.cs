@@ -6,8 +6,9 @@ using HHSGame.Core.CharacterCreation;
 using HHSGame.Core.Interactions;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
+using HHSGame.Core.Rendering;
 using HHSGame.Core.Save;
-using HHSGame.Core.SkillActions;
+using HHSGame.Core.SkillSystem;
 using HHSGame.Core.Tutorial;
 using Terminal.Gui.App;
 using Terminal.Gui.Drivers;
@@ -40,6 +41,7 @@ namespace HHSGame.UI
             SaveManager saveManager,
             LoadManager loadManager) : IDisposable
     {
+        private readonly TargetSelector targetSelector = new(game);
         private GameStateType lastNonInventoryState = GameStateType.Exploration;
         private GameStateType lastNonMenuState = GameStateType.Exploration;
         private bool isMoveSelection;

@@ -1,5 +1,6 @@
 using HHSGame.Core;
 using HHSGame.Core.Engine.Config;
+using HHSGame.Core.Rendering;
 using HHSGame.UI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

@@ -1,4 +1,4 @@
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 using HHSGame.Core;
 
 namespace HHSGame.Core.Items

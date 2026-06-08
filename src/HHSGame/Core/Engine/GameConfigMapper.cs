@@ -8,7 +8,7 @@ using HHSGame.Core.Map;
 using HHSGame.Core.Npcs;
 using HHSGame.Core.Quests;
 using HHSGame.Core.Stats;
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 
 namespace HHSGame.Core.Engine
 {

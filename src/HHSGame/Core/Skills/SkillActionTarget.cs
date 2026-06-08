@@ -1,7 +1,7 @@
 using HHSGame.Core;
 using HHSGame.Core.Enemies;
 
-namespace HHSGame.Core.SkillActions
+namespace HHSGame.Core.SkillSystem
 {
     public sealed record SkillActionTarget(
         Coordinate? Position = null,

@@ -7,7 +7,7 @@ using HHSGame.Core.Map;
 
 namespace HHSGame.Core.Enemies
 {
-    public class EnemyFactory(EnemyCatalog enemyCatalog, ItemCatalog itemCatalog, CollisionSystem collisionSystem, MapState mapState, Pathfinder pathfinder, Factions.FactionManager factionManager)    {
+    public class EnemyFactory(EnemyCatalog enemyCatalog, ItemCatalog itemCatalog, CollisionSystem collisionSystem, MapState mapState, Pathfinder pathfinder, Factions.FactionManager factionManager, Random random)    {
         public List<Enemy> SpawnEnemies(IEnumerable<EnemySpawn> spawns)
         {
             List<Enemy> enemies = [];
@@ -41,7 +41,7 @@ namespace HHSGame.Core.Enemies
         public Enemy CreateEnemy(string enemyId, int x, int y)
         {
             EnemyDefinition definition = enemyCatalog.GetDefinition(enemyId);
-            return new Enemy(x, y, collisionSystem, pathfinder, definition, itemCatalog, mapState, factionManager);
+            return new Enemy(x, y, collisionSystem, pathfinder, definition, itemCatalog, mapState, factionManager, random);
         }
 
         private static Enemy? GetEnemyAt(List<Enemy> enemies, int x, int y)

@@ -1,7 +1,7 @@
 
 using System.Collections.Immutable;
 using HHSGame.Core.Combat;
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 using HHSGame.Core.Items;
 
 namespace HHSGame.Core.Enemies

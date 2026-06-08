@@ -141,7 +141,7 @@ namespace HHSGame.Core.Factions
         {
             if (reputation.ContainsKey(faction))
             {
-                reputation[faction] = Math.Clamp(reputation[faction] + amount, -100, 100);
+                reputation[faction] = Math.Clamp(reputation[faction] + amount, GameConstants.Reputation.MinReputation, GameConstants.Reputation.MaxReputation);
             }
         }
 
@@ -172,7 +172,7 @@ namespace HHSGame.Core.Factions
             // 声望越高越不容易被识破
             int rep = GetReputation(DisguisedAs!.Value);
             int blowChance = Math.Max(5, enemyPerception * 5 - rep);
-            return random.Next(100) < blowChance;
+            return random.Next(GameConstants.Reputation.DisguiseBlowChanceBase) < blowChance;
         }
 
         /// <summary>

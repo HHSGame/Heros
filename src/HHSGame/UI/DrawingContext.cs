@@ -1,77 +1,10 @@
 using HHSGame.Core.Map;
+using HHSGame.Core.Rendering;
 using Terminal.Gui.ViewBase;
 using HHSGame.UI.Views;
 
-using Position = (int X, int Y);
-
 namespace HHSGame.UI
 {
-    public class Viewport(int x, int y, int width, int height)
-    {
-
-        public int X { get; private set; } = x;
-        public int Y { get; private set; } = y;
-        public int Width { get; private set; } = width;
-        public int Height { get; private set; } = height;
-
-        public bool Contains(Position pos)
-        {
-            return pos.X >= X && pos.X < X + Width && pos.Y >= Y && pos.Y < Y + Height;
-        }
-
-        public Position ToLocal(Position pos)
-        {
-            return (pos.X - X, pos.Y - Y);
-        }
-
-        public void UpdateViewport(int x, int y, int mapWidth, int mapHeight)
-        {
-            if (Width <= 0 || Height <= 0)
-            {
-                return;
-            }
-
-            int maxX = Math.Max(0, mapWidth - Width);
-            int maxY = Math.Max(0, mapHeight - Height);
-            int halfWidth = Width / 2;
-            int halfHeight = Height / 2;
-
-            X = Math.Clamp(x - halfWidth, 0, maxX);
-            Y = Math.Clamp(y - halfHeight, 0, maxY);
-        }
-
-        public void Resize(int width, int height)
-        {
-            Width = width;
-            Height = height;
-        }
-    }
-
-    public interface IDrawingContext
-    {
-
-        Viewport Viewport { get; }
-        void DrawAt(Position pos, char tile);
-        void DrawAt(Position pos, Cell cell);
-        void Clear();
-        void Render();
-        void AttachTo(View parent);
-    }
-
-    public interface IDrawable
-    {
-        void Draw(IDrawingContext ctx) { }
-    }
-
-
-    public struct Cell
-    {
-        public char Character { get; set; }
-        public Terminal.Gui.Drawing.Attribute Attribute { get; set; }
-
-        public readonly bool IsWalkable => Character is '.' or '▒';
-    }
-
     public class MapViewDrawingContext(MapView mapView, MapState mapState) : IDrawingContext
     {
         private readonly MapView mapView = mapView;

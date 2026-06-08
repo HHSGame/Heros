@@ -1,4 +1,3 @@
-
 using Terminal.Gui.Configuration;
 using Terminal.Gui.Drawing;
 
@@ -28,6 +27,5 @@ namespace HHSGame.UI
         public static char TargetPreviewGlyph => 'X';
         public static char PlannedDestinationGlyph => 'o';
         public static char RangePreviewGlyph => '+';
-
     }
 }

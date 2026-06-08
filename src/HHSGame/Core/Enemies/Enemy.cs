@@ -56,10 +56,11 @@ namespace HHSGame.Core.Enemies
             EnemyDefinition definition,
             ItemCatalog itemCatalog,
             MapState mapState,
-            Factions.FactionManager factionManager)
+            Factions.FactionManager factionManager,
+            Random random)
         {
             this.factionManager = factionManager;
-            random = new Random();
+            this.random = random;
             Id = definition.Id;
             X = x;
             Y = y;
@@ -182,12 +183,12 @@ namespace HHSGame.Core.Enemies
             int dy = player.Y - enemyY;
             int sqDistance = dx * dx + dy * dy;
 
-            if (sqDistance <= 1)
+            if (sqDistance <= GameConstants.EnemyAI.AttackRangeSquared)
             {
                 return EnemyState.Attacking;
             }
 
-            if (sqDistance <= 64)
+            if (sqDistance <= GameConstants.EnemyAI.DetectionRangeSquared)
             {
                 return EnemyState.Chasing;
             }

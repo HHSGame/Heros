@@ -179,7 +179,7 @@ namespace HHSGame.Core
                     "UnknownArmor",
                     0,
                     'g',
-                    HHSGame.UI.ColorPresets.Enemies.Occupier,
+                    HHSGame.Core.Rendering.ColorPresets.Enemies.Occupier,
                     new List<EnemyLootEntry>(),
                     new List<EnemyAbilityDefinition>())
             });

@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using HHSGame.Core;
-using HHSGame.Core.SkillActions;
+using HHSGame.Core.SkillSystem;
 using Terminal.Gui.Drivers;
 using Terminal.Gui.Input;
 using Terminal.Gui.ViewBase;

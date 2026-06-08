@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 
 namespace HHSGame.Core.Map
 {
@@ -53,9 +53,19 @@ namespace HHSGame.Core.Map
             return map[y, x];
         }
 
+        public Cell GetCell(Coordinate coordinate)
+        {
+            return map[coordinate.Y, coordinate.X];
+        }
+
         public void SetCell(int x, int y, Cell cell)
         {
             map[y, x] = cell;
+        }
+
+        public void SetCell(Coordinate coordinate, Cell cell)
+        {
+            map[coordinate.Y, coordinate.X] = cell;
         }
 
         public bool IsWalkable(int x, int y)
@@ -82,6 +92,11 @@ namespace HHSGame.Core.Map
         {
             // todo: fix
             return IsInBounds(x, y) && map[y, x].IsWalkable;
+        }
+
+        public bool IsTransparent(Coordinate coordinate)
+        {
+            return IsTransparent(coordinate.X, coordinate.Y);
         }
 
         public bool IsProjectileBlocking(int x, int y)
@@ -181,12 +196,22 @@ namespace HHSGame.Core.Map
             return IsInBounds(x, y) && visitedTileSet.Contains(new(x, y));
         }
 
+        public bool WasVisited(Coordinate coordinate)
+        {
+            return WasVisited(coordinate.X, coordinate.Y);
+        }
+
         public void MarkExplored(int x, int y)
         {
             if (IsInBounds(x, y))
             {
                 visitedTileSet.Add(new(x, y));
             }
+        }
+
+        public void MarkExplored(Coordinate coordinate)
+        {
+            MarkExplored(coordinate.X, coordinate.Y);
         }
 
 

@@ -1,5 +1,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
+using HHSGame.Core;
+using HHSGame.Core.Rendering;
 using HHSGame.UI.Views;
 
 namespace HHSGame.UI

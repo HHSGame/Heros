@@ -6,7 +6,7 @@ using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using HHSGame.Core.Quests;
 using HHSGame.Core.Stats;
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 using Microsoft.Extensions.Logging;
 
 namespace HHSGame.Core.Save
@@ -14,22 +14,22 @@ namespace HHSGame.Core.Save
     public sealed class LoadManager
     {
         private readonly ILogger<LoadManager> logger;
-        private readonly string saveDirectory;
+        private readonly SavePathHelper pathHelper;
 
-        public LoadManager(ILogger<LoadManager> logger, string? saveDirectory = null)
+        public LoadManager(ILogger<LoadManager> logger, SavePathHelper pathHelper)
         {
             this.logger = logger;
-            this.saveDirectory = saveDirectory ?? SaveManager.DefaultSaveDirectory;
+            this.pathHelper = pathHelper;
         }
 
         public string GetSlotPath(int slot)
         {
-            return Path.Combine(saveDirectory, $"slot-{slot}.json");
+            return pathHelper.GetSlotPath(slot);
         }
 
         public bool SlotExists(int slot)
         {
-            return File.Exists(GetSlotPath(slot));
+            return pathHelper.SlotExists(slot);
         }
 
         public SaveGameData? LoadSlot(int slot)
@@ -62,9 +62,14 @@ namespace HHSGame.Core.Save
                 logger.LogError(ex, "Save file for slot {Slot} is corrupted", slot);
                 return null;
             }
-            catch (Exception ex)
+            catch (IOException ex)
             {
-                logger.LogError(ex, "Failed to load save slot {Slot}", slot);
+                logger.LogError(ex, "Failed to load save slot {Slot} (IO error)", slot);
+                return null;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                logger.LogError(ex, "Failed to load save slot {Slot} (access denied)", slot);
                 return null;
             }
         }
@@ -88,9 +93,14 @@ namespace HHSGame.Core.Save
                 logger.LogInformation("Deleted save slot {Slot}", slot);
                 return true;
             }
-            catch (Exception ex)
+            catch (IOException ex)
             {
-                logger.LogError(ex, "Failed to delete save slot {Slot}", slot);
+                logger.LogError(ex, "Failed to delete save slot {Slot} (IO error)", slot);
+                return false;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                logger.LogError(ex, "Failed to delete save slot {Slot} (access denied)", slot);
                 return false;
             }
         }
@@ -148,9 +158,14 @@ namespace HHSGame.Core.Save
                 logger.LogInformation("Game state restored successfully (turn {Turn})", data.TurnNumber);
                 return true;
             }
-            catch (Exception ex)
+            catch (InvalidDataException ex)
             {
-                logger.LogError(ex, "Failed to restore game state");
+                logger.LogError(ex, "Failed to restore game state (invalid data)");
+                return false;
+            }
+            catch (InvalidOperationException ex)
+            {
+                logger.LogError(ex, "Failed to restore game state (invalid operation)");
                 return false;
             }
         }

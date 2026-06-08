@@ -1,5 +1,6 @@
 using HHSGame.Core.Items;
-using HHSGame.Core.SkillActions;
+using HHSGame.Core.Rendering;
+using HHSGame.Core.SkillSystem;
 using HHSGame.Core.Stats;
 
 namespace HHSGame.Core.Interactions
@@ -184,7 +185,7 @@ namespace HHSGame.Core.Interactions
             {
                 if (isToggled)
                 {
-                    context.MapState.SetCell(targetCell.X, targetCell.Y, new UI.Cell
+                    context.MapState.SetCell(targetCell.X, targetCell.Y, new Cell
                     {
                         Character = toggledGlyph,
                         Attribute = Map.TilePresets.GetTerrainColor(toggledGlyph)

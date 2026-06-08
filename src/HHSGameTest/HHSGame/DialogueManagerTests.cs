@@ -3,12 +3,14 @@ using HHSGame.Core.Combat;
 using HHSGame.Core.Dialogue;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Engine.Catalogs;
+using HHSGame.Core.Factions;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using HHSGame.Core.Npcs;
 using HHSGame.Core.Quests;
 using HHSGame.Core.Stats;
 using HHSGame.UI;
+using HHSGame.Core.Rendering;
 using Terminal.Gui.ViewBase;
 
 namespace HHSGame.Core
@@ -182,9 +184,11 @@ namespace HHSGame.Core
             NpcManager npcManager = new();
             CollisionSystem collisionSystem = new(enemyManager, mapState, npcManager);
             Pathfinder pathfinder = new(mapState);
-            EnemyFactory enemyFactory = new(enemyCatalog, itemCatalog, collisionSystem, mapState, pathfinder, new global::HHSGame.Core.Factions.FactionManager());
+            FactionManager factionManager = new();
+            Random random = new(123);
+            EnemyFactory enemyFactory = new(enemyCatalog, itemCatalog, collisionSystem, mapState, pathfinder, factionManager, random);
             NpcFactory npcFactory = new(itemCatalog);
-            DialogueManager dialogueManager = new(partyState, questManager);
+            DialogueManager dialogueManager = new(partyState, questManager, factionManager);
             SurroundingsManager surroundingsManager = new(itemManager, enemyManager, mapState, npcManager);
             TurnManager turnManager = new();
             GameStateMachine stateMachine = new();
@@ -192,7 +196,7 @@ namespace HHSGame.Core
 
             return new GameContext(
                 parameters,
-                new Random(123),
+                random,
                 enemyFactory,
                 collisionSystem,
                 mapState,

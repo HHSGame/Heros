@@ -27,12 +27,12 @@ namespace HHSGameTest.HHSGame
 
         private SaveManager CreateSaveManager()
         {
-            return new SaveManager(NullLogger<SaveManager>.Instance, tempDir);
+            return new SaveManager(NullLogger<SaveManager>.Instance, new SavePathHelper(tempDir));
         }
 
         private LoadManager CreateLoadManager()
         {
-            return new LoadManager(NullLogger<LoadManager>.Instance, tempDir);
+            return new LoadManager(NullLogger<LoadManager>.Instance, new SavePathHelper(tempDir));
         }
 
         // ── File naming ──────────────────────────────────────────────────

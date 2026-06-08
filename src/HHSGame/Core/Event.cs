@@ -52,38 +52,72 @@ namespace HHSGame.Core
         public SurroundingsChangeType Type { get; } = type;
     }
 
+    /// <summary>
+    /// 静态事件类，向后兼容。
+    /// 新代码应使用 IEventBus 接口。
+    /// </summary>
     public static class Events
     {
+        private static IEventBus? eventBus;
 
-        public static event EventHandler<GameMessageEventArgs>? OnGameMessageEvent;
-        public static event EventHandler<TurnEventArgs>? OnTurnChanged;
-        public static event EventHandler<InventoryChangeEventArgs>? OnInventoryChange;
-        public static event EventHandler<SurroundingsChangeEventArgs>? OnSurroundingsChange;
-        public static event EventHandler? OnActionSequenceChanged;
+        public static void Initialize(IEventBus bus)
+        {
+            eventBus = bus;
+        }
+
+        public static event EventHandler<GameMessageEventArgs>? OnGameMessageEvent
+        {
+            add { if (eventBus != null) eventBus.OnGameMessage += value; }
+            remove { if (eventBus != null) eventBus.OnGameMessage -= value; }
+        }
+
+        public static event EventHandler<TurnEventArgs>? OnTurnChanged
+        {
+            add { if (eventBus != null) eventBus.OnTurnChanged += value; }
+            remove { if (eventBus != null) eventBus.OnTurnChanged -= value; }
+        }
+
+        public static event EventHandler<InventoryChangeEventArgs>? OnInventoryChange
+        {
+            add { if (eventBus != null) eventBus.OnInventoryChange += value; }
+            remove { if (eventBus != null) eventBus.OnInventoryChange -= value; }
+        }
+
+        public static event EventHandler<SurroundingsChangeEventArgs>? OnSurroundingsChange
+        {
+            add { if (eventBus != null) eventBus.OnSurroundingsChange += value; }
+            remove { if (eventBus != null) eventBus.OnSurroundingsChange -= value; }
+        }
+
+        public static event EventHandler? OnActionSequenceChanged
+        {
+            add { if (eventBus != null) eventBus.OnActionSequenceChanged += value; }
+            remove { if (eventBus != null) eventBus.OnActionSequenceChanged -= value; }
+        }
 
         public static void RaiseGameMessage(string message)
         {
-            OnGameMessageEvent?.Invoke(null, new GameMessageEventArgs(message));
+            eventBus?.RaiseGameMessage(message);
         }
 
         public static void RaiseTurnChanged(TurnState state)
         {
-            OnTurnChanged?.Invoke(null, new TurnEventArgs(state));
+            eventBus?.RaiseTurnChanged(state);
         }
 
         public static void RaiseInventoryChange(InventoryEventType type, Item item)
         {
-            OnInventoryChange?.Invoke(null, new InventoryChangeEventArgs(type, item));
+            eventBus?.RaiseInventoryChange(type, item);
         }
 
         public static void RaiseSurroundingsChange((int X, int Y) position, int fovRadius, SurroundingsChangeType type)
         {
-            OnSurroundingsChange?.Invoke(null, new SurroundingsChangeEventArgs(position, fovRadius, type));
+            eventBus?.RaiseSurroundingsChange(position, fovRadius, type);
         }
 
         public static void RaiseActionSequenceChanged()
         {
-            OnActionSequenceChanged?.Invoke(null, EventArgs.Empty);
+            eventBus?.RaiseActionSequenceChanged();
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace HHSGame.UI
+namespace HHSGame.Core
 {
     public sealed class GameUiOptions
     {

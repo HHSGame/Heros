@@ -70,7 +70,7 @@ namespace HHSGame.Core.Engine
                 return null;
             }
 
-            int stepDelayMs = 100;
+            int stepDelayMs = GameConstants.Engine.ScriptStepDelayMs;
             string? delayValue = GetArgValue(args, "--test-step-ms");
             if (int.TryParse(delayValue, out int parsed) && parsed > 0)
             {

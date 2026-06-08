@@ -1,5 +1,6 @@
 using Terminal.Gui.Views;
 using Terminal.Gui.ViewBase;
+using HHSGame.Core.Rendering;
 
 namespace HHSGame.UI.Views
 {

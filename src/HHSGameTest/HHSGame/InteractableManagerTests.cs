@@ -9,6 +9,7 @@ using HHSGame.Core.Engine.Catalogs;
 using HHSGame.Core.Npcs;
 using HHSGame.Core.Quests;
 using HHSGame.UI;
+using HHSGame.Core.Rendering;
 
 namespace HHSGameTest.HHSGame
 {
@@ -138,7 +139,7 @@ namespace HHSGameTest.HHSGame
             var npcManager = new NpcManager();
             var collisionSystem = new CollisionSystem(enemyManager, mapState, npcManager);
             var pathfinder = new Pathfinder(mapState);
-            var enemyFactory = new EnemyFactory(new EnemyCatalog([]), catalog, collisionSystem, mapState, pathfinder, new global::HHSGame.Core.Factions.FactionManager());
+            var enemyFactory = new EnemyFactory(new EnemyCatalog([]), catalog, collisionSystem, mapState, pathfinder, new global::HHSGame.Core.Factions.FactionManager(), random);
             var npcFactory = new NpcFactory(catalog);
             var factionManager = new global::HHSGame.Core.Factions.FactionManager();
             var dialogueManager = new DialogueManager(partyState, questManager, factionManager);

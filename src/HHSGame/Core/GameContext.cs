@@ -1,5 +1,5 @@
 
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Dialogue;
 using HHSGame.Core.Enemies;
@@ -59,6 +59,11 @@ namespace HHSGame.Core
     {
         private Player? player;
         private IReadOnlyList<Player> players = Array.Empty<Player>();
+
+        // 分组上下文
+        public CombatContext CombatContext { get; } = new(enemyManager, turnManager, enemyFactory);
+        public WorldContext WorldContext { get; } = new(mapState, collisionSystem, surroundingsManager, interactableManager);
+
         public GameParameters Parameters => parameters;
         public Random Random => random;
         public EnemyFactory EnemyFactory => enemyFactory;

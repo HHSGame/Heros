@@ -1,5 +1,5 @@
 using HHSGame.Core;
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 
 namespace HHSGame.Core.Npcs
 {

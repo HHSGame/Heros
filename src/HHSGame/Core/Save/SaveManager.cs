@@ -6,41 +6,37 @@ using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using HHSGame.Core.Quests;
 using HHSGame.Core.Stats;
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 using Microsoft.Extensions.Logging;
 
 namespace HHSGame.Core.Save
 {
     public sealed class SaveManager
     {
-        public static readonly string DefaultSaveDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ".hhs-game", "saves");
+        public static readonly string DefaultSaveDirectory = SavePathHelper.DefaultSaveDirectory;
 
         private const int MaxSlots = 3;
-        private const string SaveFileExtension = ".json";
         private const int CurrentSaveVersion = 1;
 
         private readonly ILogger<SaveManager> logger;
-        private readonly string saveDirectory;
+        private readonly SavePathHelper pathHelper;
 
-        public SaveManager(ILogger<SaveManager> logger, string? saveDirectory = null)
+        public SaveManager(ILogger<SaveManager> logger, SavePathHelper pathHelper)
         {
             this.logger = logger;
-            this.saveDirectory = saveDirectory ?? DefaultSaveDirectory;
-            Directory.CreateDirectory(this.saveDirectory);
+            this.pathHelper = pathHelper;
         }
 
-        public string SaveDirectory => saveDirectory;
+        public string SaveDirectory => pathHelper.SaveDirectory;
 
         public string GetSlotPath(int slot)
         {
-            return Path.Combine(saveDirectory, $"slot-{slot}{SaveFileExtension}");
+            return pathHelper.GetSlotPath(slot);
         }
 
         public bool SlotExists(int slot)
         {
-            return File.Exists(GetSlotPath(slot));
+            return pathHelper.SlotExists(slot);
         }
 
         public SaveSlotInfo[] ListSlots()
@@ -70,9 +66,17 @@ namespace HHSGame.Core.Save
                             continue;
                         }
                     }
-                    catch (Exception ex)
+                    catch (IOException ex)
                     {
-                        logger.LogWarning(ex, "Failed to read save slot {Slot}", i + 1);
+                        logger.LogWarning(ex, "Failed to read save slot {Slot} (IO error)", i + 1);
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        logger.LogWarning(ex, "Failed to read save slot {Slot} (access denied)", i + 1);
+                    }
+                    catch (JsonException ex)
+                    {
+                        logger.LogWarning(ex, "Failed to read save slot {Slot} (invalid JSON)", i + 1);
                     }
                 }
 
@@ -100,9 +104,19 @@ namespace HHSGame.Core.Save
                 logger.LogInformation("Game saved to slot {Slot}", slot);
                 return true;
             }
-            catch (Exception ex)
+            catch (IOException ex)
             {
-                logger.LogError(ex, "Failed to save game to slot {Slot}", slot);
+                logger.LogError(ex, "Failed to save game to slot {Slot} (IO error)", slot);
+                return false;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                logger.LogError(ex, "Failed to save game to slot {Slot} (access denied)", slot);
+                return false;
+            }
+            catch (JsonException ex)
+            {
+                logger.LogError(ex, "Failed to save game to slot {Slot} (serialization error)", slot);
                 return false;
             }
         }

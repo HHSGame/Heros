@@ -3,11 +3,10 @@ using HHSGame.Core.Enemies;
 using HHSGame.Core.Interactions;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
-using HHSGame.Core.SkillActions;
 using HHSGame.Core.Stats;
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 
-namespace HHSGame.Core
+namespace HHSGame.Core.SkillSystem
 {
     /// <summary>
     /// Executes skill actions for a player within a game context.
@@ -283,7 +282,7 @@ namespace HHSGame.Core
         {
             int skillValue = GetEffectiveSkillValue(player, SkillType.Survival);
             Cell cell = context.MapState.GetCell(player.X, player.Y);
-            int difficulty = cell.Character is '*' or '.' ? 18 : 25;
+            int difficulty = cell.Character is '*' or '.' ? GameConstants.Skills.LockpickDifficultyEasy : GameConstants.Skills.LockpickDifficultyHard;
             SkillCheckResult check = SkillChecks.Roll(skillValue, difficulty, context.Random);
             if (!check.Success)
             {

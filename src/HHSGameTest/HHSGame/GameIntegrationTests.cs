@@ -5,12 +5,14 @@ using HHSGame.Core.Engine;
 using HHSGame.Core.Engine.Catalogs;
 using HHSGame.Core.Engine.Config;
 using HHSGame.Core.Enemies;
+using HHSGame.Core.Factions;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using HHSGame.Core.Npcs;
 using HHSGame.Core.Quests;
 using HHSGame.Core.Dialogue;
 using HHSGame.UI;
+using HHSGame.Core.Rendering;
 using Microsoft.Extensions.Logging.Abstractions;
 using Terminal.Gui.ViewBase;
 
@@ -480,9 +482,10 @@ namespace HHSGame.Core
             NpcManager npcManager = new();
             CollisionSystem collisionSystem = new(enemyManager, mapState, npcManager);
             Pathfinder pathfinder = new(mapState);
-            EnemyFactory enemyFactory = new(catalogs.EnemyCatalog, catalogs.ItemCatalog, collisionSystem, mapState, pathfinder, new global::HHSGame.Core.Factions.FactionManager());
+            FactionManager factionManager = new();
+            EnemyFactory enemyFactory = new(catalogs.EnemyCatalog, catalogs.ItemCatalog, collisionSystem, mapState, pathfinder, factionManager, random);
             NpcFactory npcFactory = new(catalogs.ItemCatalog);
-            DialogueManager dialogueManager = new(partyState, questManager);
+            DialogueManager dialogueManager = new(partyState, questManager, factionManager);
             SurroundingsManager surroundingsManager = new(itemManager, enemyManager, mapState, npcManager);
             TurnManager turnManager = new();
             GameStateMachine stateMachine = new();
@@ -590,7 +593,7 @@ namespace HHSGame.Core
                     "Cloak",
                     50,
                     'g',
-                    HHSGame.UI.ColorPresets.Enemies.Occupier,
+                    HHSGame.Core.Rendering.ColorPresets.Enemies.Occupier,
                     new List<EnemyLootEntry>(),
                     new List<EnemyAbilityDefinition>())
             ];

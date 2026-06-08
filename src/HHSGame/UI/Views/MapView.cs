@@ -1,5 +1,5 @@
 using Terminal.Gui.ViewBase;
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 using System.Drawing;
 
 using Attribute = Terminal.Gui.Drawing.Attribute;

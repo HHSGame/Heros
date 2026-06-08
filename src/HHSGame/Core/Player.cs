@@ -5,7 +5,7 @@ using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using HHSGame.Core.Stats;
 using HHSGame.Core.Quests;
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 using HHSGame.Utils;
 using Terminal.Gui.Drawing;
 

@@ -1,6 +1,6 @@
 using HHSGame.Core.Stats;
 
-namespace HHSGame.Core.SkillActions
+namespace HHSGame.Core.SkillSystem
 {
     public enum SkillActionId
     {

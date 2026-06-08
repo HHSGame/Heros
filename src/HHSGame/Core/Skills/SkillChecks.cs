@@ -1,4 +1,4 @@
-namespace HHSGame.Core.SkillActions
+namespace HHSGame.Core.SkillSystem
 {
     public sealed record SkillCheckResult(int Roll, int Total, int Difficulty, bool Success);
 

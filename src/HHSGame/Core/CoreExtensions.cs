@@ -21,6 +21,9 @@ namespace HHSGame.Core
         public static IServiceCollection AddHHSGameCore(this IServiceCollection serviceCollection, GameParameters parameters, Engine.GameCatalog catalogs)
         {
             // Setup Initial Parameters;
+            serviceCollection.AddSingleton<IEventBus, EventBus>();
+            serviceCollection.AddSingleton<CombatContext>();
+            serviceCollection.AddSingleton<WorldContext>();
             serviceCollection.AddSingleton((_) => new Random());
             serviceCollection.AddSingleton(parameters);
             serviceCollection.AddSingleton(catalogs);
@@ -51,6 +54,7 @@ namespace HHSGame.Core
             serviceCollection.AddSingleton<DialogueManager>();
 
             // Save/Load
+            serviceCollection.AddSingleton<SavePathHelper>();
             serviceCollection.AddSingleton<SaveManager>();
             serviceCollection.AddSingleton<LoadManager>();
 

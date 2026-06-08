@@ -1,6 +1,7 @@
 using HHSGame.Core;
 using HHSGame.Core.Map;
 using HHSGame.UI;
+using HHSGame.Core.Rendering;
 
 namespace HHSGameTest.HHSGame
 {

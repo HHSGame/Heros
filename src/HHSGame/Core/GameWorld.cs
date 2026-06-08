@@ -1,4 +1,4 @@
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Classes;
 using HHSGame.Core.Map;

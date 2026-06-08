@@ -20,9 +20,9 @@ namespace HHSGame.Core.Combat
             }
             int target = attributeValue + skillValue + accuracyBonus - defender.EvasionBonus;
 
-            int roll = random.Next(1, 21);
-            bool criticalSuccess = roll == 1;
-            bool criticalFailure = roll == 20;
+            int roll = random.Next(GameConstants.Combat.DiceMin, GameConstants.Combat.DiceMax + 1);
+            bool criticalSuccess = roll == GameConstants.Combat.CriticalSuccessThreshold;
+            bool criticalFailure = roll == GameConstants.Combat.CriticalFailureThreshold;
             bool hit = (roll <= target && !criticalFailure) || criticalSuccess;
 
             if (attacker is Player rangedPlayer && WeaponRules.IsRanged(weapon.WeaponType))
@@ -43,11 +43,11 @@ namespace HHSGame.Core.Combat
             }
 
             int effectiveArmor = Math.Max(0, defender.ArmorValue - weapon.Penetration);
-            int damage = Math.Max(1, rawDamage - effectiveArmor);
+            int damage = Math.Max(GameConstants.Combat.MinDamage, rawDamage - effectiveArmor);
 
             if (criticalSuccess)
             {
-                damage = (int)Math.Ceiling(damage * 1.5);
+                damage = (int)Math.Ceiling(damage * GameConstants.Combat.CriticalDamageMultiplier);
             }
 
             defender.TakeDamage(damage);

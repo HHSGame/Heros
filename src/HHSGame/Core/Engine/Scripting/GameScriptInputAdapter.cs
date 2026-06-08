@@ -3,6 +3,7 @@ using HHSGame.Core.Combat;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
+using HHSGame.Core.Rendering;
 using HHSGame.UI;
 
 namespace HHSGame.Core.Engine.Scripting

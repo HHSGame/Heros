@@ -6,15 +6,16 @@ using HHSGame.Core.Engine.Config;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
-using HHSGame.Core.SkillActions;
+using HHSGame.Core.SkillSystem;
 using HHSGame.Core.Stats;
+using HHSGame.Core.Rendering;
 using HHSGame.UI;
 using Terminal.Gui.App;
 using Microsoft.Extensions.Logging;
 
 namespace HHSGame.Core
 {
-    public partial class Game(ILogger<Game> logger, GameContext context, GameWorld world, ClassCatalog classCatalog, GameConfig config)
+    public partial class Game(ILogger<Game> logger, GameContext context, GameWorld world, ClassCatalog classCatalog, GameConfig config, IEventBus eventBus)
     {
         private sealed record PlannedActionEntry(Player Player, QueuedAction Action);
 
@@ -36,6 +37,7 @@ namespace HHSGame.Core
 
         public void Start()
         {
+            Events.Initialize(eventBus);
             controlledPlayers.Clear();
             if (context.Parameters.PlayerSpawns.Count > 0)
             {
@@ -55,7 +57,7 @@ namespace HHSGame.Core
                 throw new InvalidDataException("No player was created.");
             }
 
-            LogStartup(logger, "Intializing Context");
+            LogStartup(logger, "Initializing Context");
             context.InitializeContext(controlledPlayers, Player);
             UpdateActivePlayer(Player);
             isRunning = true;
@@ -646,7 +648,7 @@ namespace HHSGame.Core
                 return;
             }
 
-            UI.IDrawingContext drawingContext = context.DrawingContext;
+            IDrawingContext drawingContext = context.DrawingContext;
 
             drawingContext.Viewport.UpdateViewport(Player.X, Player.Y, context.MapState.Width, context.MapState.Height);
             drawingContext.Clear();
@@ -669,7 +671,7 @@ namespace HHSGame.Core
             drawingContext.Render();
         }
 
-        private void DrawPlannedDestinations(UI.IDrawingContext drawingContext)
+        private void DrawPlannedDestinations(IDrawingContext drawingContext)
         {
             foreach (Player player in controlledPlayers)
             {

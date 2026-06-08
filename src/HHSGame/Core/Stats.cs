@@ -128,21 +128,21 @@ namespace HHSGame.Core.Stats
 
     public static class ProgressionRules
     {
-        public const int HardSkillCap = 100;
+        public const int HardSkillCap = GameConstants.Progression.HardSkillCap;
 
         public static int ExperienceForLevel(int level)
         {
-            return (int)Math.Round(100 * Math.Pow(level, 1.5));
+            return (int)Math.Round(GameConstants.Progression.ExperienceBase * Math.Pow(level, GameConstants.Progression.ExperienceExponent));
         }
 
         public static int SkillPointsPerLevel(Attributes attributes)
         {
-            return 10 + (attributes.Intelligence / 2);
+            return GameConstants.Progression.BaseSkillPointsPerLevel + (attributes.Intelligence / GameConstants.Progression.IntelligenceDivisor);
         }
 
         public static int SoftSkillCap(int level)
         {
-            return level * 5 + 20;
+            return level * GameConstants.Progression.SoftCapLevelMultiplier + GameConstants.Progression.SoftCapBase;
         }
     }
 
@@ -226,7 +226,7 @@ namespace HHSGame.Core.Stats
 
         public static int CarryCapacity(Attributes attributes)
         {
-            return attributes.Strength * 10;
+            return attributes.Strength * GameConstants.Attributes.CarryCapacityMultiplier;
         }
 
         public static int Initiative(Attributes attributes, Skills skills)

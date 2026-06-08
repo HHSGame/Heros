@@ -2,6 +2,7 @@ using HHSGame.Core.Combat;
 using HHSGame.Core.Items;
 using HHSGame.Core.Map;
 using HHSGame.UI;
+using HHSGame.Core.Rendering;
 
 namespace HHSGame.Core
 {

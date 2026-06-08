@@ -1,4 +1,4 @@
-using HHSGame.UI;
+using HHSGame.Core.Rendering;
 using Attribute = Terminal.Gui.Drawing.Attribute;
 
 namespace HHSGame.Core.Map

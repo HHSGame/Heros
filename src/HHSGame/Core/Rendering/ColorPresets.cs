@@ -1,7 +1,7 @@
 using Terminal.Gui.Drawing;
 using Attribute = Terminal.Gui.Drawing.Attribute;
 
-namespace HHSGame.UI
+namespace HHSGame.Core.Rendering
 {
     public static class ColorPresets
     {

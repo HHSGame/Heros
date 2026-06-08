@@ -1,3 +1,4 @@
+using HHSGame.Core.Rendering;
 using System.Collections.ObjectModel;
 using HHSGame.Core.Quests;
 using Terminal.Gui.ViewBase;
@@ -58,7 +59,7 @@ namespace HHSGame.UI.Views
 
             Add(listView);
             Add(detailView);
-            SetScheme(GUISettings.CommonWindowColorScheme);
+            SetScheme(GUISettingsExtensions.CommonWindowColorScheme);
 
             listView.SelectedItemChanged += (_, __) => UpdateDetails();
             questManager.QuestLogChanged += (_, __) => RefreshEntries();

@@ -1,3 +1,4 @@
+using HHSGame.Core.Rendering;
 using HHSGame.Core;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Items;

@@ -1,3 +1,4 @@
+using HHSGame.Core.Rendering;
 using HHSGame.Core;
 using Terminal.Gui.ViewBase;
 

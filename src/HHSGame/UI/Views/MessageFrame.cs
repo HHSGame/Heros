@@ -1,3 +1,4 @@
+using HHSGame.Core.Rendering;
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
 
@@ -15,7 +16,7 @@ namespace HHSGame.UI.Views
 
 
             Add(eventLoggerView);
-            SetScheme(GUISettings.CommonWindowColorScheme);
+            SetScheme(GUISettingsExtensions.CommonWindowColorScheme);
         }
     }
 }

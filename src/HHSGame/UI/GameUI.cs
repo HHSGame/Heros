@@ -1604,7 +1604,7 @@ namespace HHSGame.UI
             return count > 1 ? $"{baseText} ({index + 1}/{count})" : baseText;
         }
 
-        private Terminal.Gui.Drawing.Attribute SelectionHighlightAttribute =>
+        private GameAttribute SelectionHighlightAttribute =>
             selectionBlinkOn ? ColorPresets.TargetPreviewHighlight : ColorPresets.TargetPreview;
 
         private void EnsureSelectionBlinker()

@@ -1,3 +1,4 @@
+using HHSGame.Core.Rendering;
 using System.Collections.ObjectModel;
 using HHSGame.Core;
 using Terminal.Gui.ViewBase;
@@ -32,7 +33,7 @@ namespace HHSGame.UI.Views
 
             listView.SetSource(actionItems);
             Add(listView);
-            SetScheme(GUISettings.CommonWindowColorScheme);
+            SetScheme(GUISettingsExtensions.CommonWindowColorScheme);
 
             UpdateList();
             Events.OnActionSequenceChanged += (_, __) => UpdateList();

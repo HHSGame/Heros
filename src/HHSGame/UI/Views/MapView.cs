@@ -41,6 +41,11 @@ namespace HHSGame.UI.Views
 
         public void SetCell(int x, int y, char character, Attribute attribute)
         {
+            SetCell(x, y, character, attribute.ToGameAttribute());
+        }
+
+        public void SetCell(int x, int y, char character, GameAttribute attribute)
+        {
             ResizeBackBuffer();
             if (x >= 0 && x < Frame.Width && y >= 0 && y < Frame.Height)
             {
@@ -66,12 +71,11 @@ namespace HHSGame.UI.Views
                         cell = DefaultCell;
                     }
                     Move(x, y);
-                    SetAttribute(cell.Attribute);
+                    SetAttribute(cell.Attribute.ToTerminalAttribute());
                     AddRune(cell.Character);
                 }
             }
             return true;
         }
-
     }
 }

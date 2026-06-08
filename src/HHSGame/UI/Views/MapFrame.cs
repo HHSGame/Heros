@@ -10,7 +10,7 @@ namespace HHSGame.UI.Views
         public MapFrame(IDrawingContext drawingContext)
         {
             Title = GUISettings.MapWindowTitle;
-            this.SetScheme(GUISettings.CommonWindowColorScheme);
+            this.SetScheme(GUISettingsExtensions.CommonWindowColorScheme);
             X = 0;
             Y = 0;
             Width = Dim.Fill()! - GUISettings.SidebarWidth;

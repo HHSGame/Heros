@@ -1,7 +1,7 @@
 using HHSGame.Core.Map;
 using HHSGame.Core.Rendering;
-using Terminal.Gui.ViewBase;
 using HHSGame.UI.Views;
+using Terminal.Gui.ViewBase;
 
 namespace HHSGame.UI
 {
@@ -11,7 +11,6 @@ namespace HHSGame.UI
 
         public Viewport Viewport { get; } = new(0, 0, 0, 0);
 
-        // Explicit interface implementation for original method
         public void DrawAt((int X, int Y) pos, char tile)
         {
             this.DrawAt(pos, new Cell { Character = tile, Attribute = ColorPresets.Terrain.Stone });
@@ -28,34 +27,28 @@ namespace HHSGame.UI
                 return;
             }
 
-            // Check visibility
             if (mapState != null)
             {
                 if (mapState.IsVisible(pos.X, pos.Y))
                 {
-                    // Visible - use normal colors
                     (int posX, int posY) = Viewport.ToLocal(pos);
-                    mapView.SetCell(posX, posY, cell.Character, cell.Attribute);
+                    mapView.SetCell(posX, posY, cell.Character, cell.Attribute.ToTerminalAttribute());
                 }
                 else if (mapState.WasVisited(pos.X, pos.Y))
                 {
-                    // Visited but not visible - grey out
                     (int posX, int posY) = Viewport.ToLocal(pos);
-                    mapView.SetCell(posX, posY, cell.Character, ColorPresets.GreyedOut);
+                    mapView.SetCell(posX, posY, cell.Character, ColorPresets.GreyedOut.ToTerminalAttribute());
                 }
                 else
                 {
-                    // Visited but not visible - grey out
                     (int posX, int posY) = Viewport.ToLocal(pos);
-                    mapView.SetCell(posX, posY, ' ', ColorPresets.GreyedOut);
+                    mapView.SetCell(posX, posY, ' ', ColorPresets.GreyedOut.ToTerminalAttribute());
                 }
-                // Else - don't draw at all
             }
             else
             {
-                // Fallback if no game world reference
                 (int posX, int posY) = Viewport.ToLocal(pos);
-                mapView.SetCell(posX, posY, cell.Character, cell.Attribute);
+                mapView.SetCell(posX, posY, cell.Character, cell.Attribute.ToTerminalAttribute());
             }
         }
 
@@ -64,14 +57,17 @@ namespace HHSGame.UI
             mapView.SetNeedsDraw();
         }
 
-        public void AttachTo(View parent)
-        {
-            parent.Add(mapView);
-        }
-
         public void Clear()
         {
             mapView.ClearBuffer();
+        }
+
+        public void AttachTo(object parent)
+        {
+            if (parent is View view)
+            {
+                view.Add(mapView);
+            }
         }
     }
 }

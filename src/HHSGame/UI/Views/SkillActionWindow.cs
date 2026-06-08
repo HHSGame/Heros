@@ -1,3 +1,4 @@
+using HHSGame.Core.Rendering;
 using System.Collections.ObjectModel;
 using HHSGame.Core;
 using HHSGame.Core.SkillSystem;
@@ -60,7 +61,7 @@ namespace HHSGame.UI.Views
 
             Add(listView);
             Add(detailView);
-            SetScheme(GUISettings.CommonWindowColorScheme);
+            SetScheme(GUISettingsExtensions.CommonWindowColorScheme);
 
             listView.SelectedItemChanged += (_, __) => UpdateDetails();
             listView.SetSource(entries);

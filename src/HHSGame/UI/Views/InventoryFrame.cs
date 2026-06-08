@@ -1,3 +1,4 @@
+using HHSGame.Core.Rendering;
 using Terminal.Gui.Views;
 using Terminal.Gui.ViewBase;
 using HHSGame.Core.Items;
@@ -25,7 +26,7 @@ namespace HHSGame.UI.Views
             };
             listView.SetSource(inventoryManager.GetItems());
 
-            SetScheme(GUISettings.CommonWindowColorScheme);
+            SetScheme(GUISettingsExtensions.CommonWindowColorScheme);
             Add(listView);
         }
     }

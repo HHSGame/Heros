@@ -1,0 +1,77 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:HHSEditor.ViewModels"
+        x:Class="HHSEditor.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="HHS Game Editor"
+        Width="1200"
+        Height="800"
+        WindowStartupLocation="CenterScreen">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <DockPanel>
+        <!-- Menu Bar -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New Project" />
+                <MenuItem Header="_Open Project" />
+                <MenuItem Header="_Save" />
+                <Separator />
+                <MenuItem Header="E_xit" />
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Header="_Undo" />
+                <MenuItem Header="_Redo" />
+                <Separator />
+                <MenuItem Header="Cu_t" />
+                <MenuItem Header="_Copy" />
+                <MenuItem Header="_Paste" />
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="_Map Editor" />
+                <MenuItem Header="_Catalog Editor" />
+                <MenuItem Header="_Enemy Editor" />
+                <MenuItem Header="_Dialogue Editor" />
+                <MenuItem Header="_Quest Editor" />
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" />
+            </MenuItem>
+        </Menu>
+
+        <!-- Toolbar -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+            <Button Content="New" Margin="2" />
+            <Button Content="Open" Margin="2" />
+            <Button Content="Save" Margin="2" />
+            <Separator Width="8" />
+            <Button Content="Map Editor" Margin="2" />
+            <Button Content="Catalog" Margin="2" />
+            <Button Content="Enemies" Margin="2" />
+            <Button Content="Dialogue" Margin="2" />
+            <Button Content="Quests" Margin="2" />
+        </StackPanel>
+
+        <!-- Main Content -->
+        <TabControl>
+            <TabItem Header="Map Editor">
+                <TextBlock Text="Map Editor Content" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </TabItem>
+            <TabItem Header="Catalog Editor">
+                <TextBlock Text="Catalog Editor Content" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </TabItem>
+            <TabItem Header="Enemy Editor">
+                <TextBlock Text="Enemy Editor Content" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </TabItem>
+            <TabItem Header="Dialogue Editor">
+                <TextBlock Text="Dialogue Editor Content" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </TabItem>
+            <TabItem Header="Quest Editor">
+                <TextBlock Text="Quest Editor Content" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

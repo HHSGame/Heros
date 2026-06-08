@@ -1,3 +1,4 @@
+using HHSGame.Core.Rendering;
 using System.Collections.ObjectModel;
 using HHSGame.Core.Dialogue;
 using Terminal.Gui.ViewBase;
@@ -45,7 +46,7 @@ namespace HHSGame.UI.Views
 
             Add(textView);
             Add(optionsView);
-            SetScheme(GUISettings.CommonWindowColorScheme);
+            SetScheme(GUISettingsExtensions.CommonWindowColorScheme);
 
             optionsView.SetSource(optionItems);
             dialogueManager.SessionChanged += (_, __) => Refresh();

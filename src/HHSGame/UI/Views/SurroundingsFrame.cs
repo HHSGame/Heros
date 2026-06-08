@@ -1,3 +1,4 @@
+using HHSGame.Core.Rendering;
 using Terminal.Gui.Views;
 using Terminal.Gui.ViewBase;
 using HHSGame.Core.Map;
@@ -36,7 +37,7 @@ namespace HHSGame.UI.Views
             Events.OnSurroundingsChange += HandleVisibleTilesChange;
 
             Add(listView);
-            SetScheme(GUISettings.CommonWindowColorScheme);
+            SetScheme(GUISettingsExtensions.CommonWindowColorScheme);
         }
 
         private void HandleVisibleTilesChange(object? sender, SurroundingsChangeEventArgs e)

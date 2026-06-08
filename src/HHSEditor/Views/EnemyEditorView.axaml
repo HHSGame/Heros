@@ -1,0 +1,68 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HHSEditor.ViewModels"
+             x:Class="HHSEditor.Views.EnemyEditorView"
+             x:DataType="vm:EnemyEditorViewModel">
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+            <TextBox Watermark="Search enemies..." Text="{Binding SearchText}" Width="200" Margin="2" />
+            <Button Content="Load" Command="{Binding LoadDataCommand}" Margin="2" />
+            <Button Content="Save" Command="{Binding SaveDataCommand}" Margin="2" />
+            <Button Content="Add Enemy" Command="{Binding AddEnemyCommand}" Margin="2" />
+            <Button Content="Remove" Command="{Binding RemoveEnemyCommand}" Margin="2" />
+        </StackPanel>
+
+        <Grid ColumnDefinitions="*,*">
+            <!-- Enemy List -->
+            <DataGrid Grid.Column="0"
+                      ItemsSource="{Binding FilteredEnemies}"
+                      SelectedItem="{Binding SelectedEnemy}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="False"
+                      
+                      
+                      Margin="4">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="100" />
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="120" />
+                    <DataGridTextColumn Header="Faction" Binding="{Binding Faction}" Width="80" />
+                    <DataGridTextColumn Header="XP" Binding="{Binding ExperienceValue}" Width="60" />
+                    <DataGridTextColumn Header="Glyph" Binding="{Binding Glyph}" Width="60" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Enemy Details -->
+            <ScrollViewer Grid.Column="1" Margin="4">
+                <StackPanel DataContext="{Binding SelectedEnemy}">
+                    <TextBlock Text="Enemy Details" FontWeight="Bold" FontSize="16" Margin="0,0,0,8" />
+
+                    <TextBlock Text="ID:" />
+                    <TextBox Text="{Binding Id}" Margin="0,0,0,4" />
+
+                    <TextBlock Text="Name:" />
+                    <TextBox Text="{Binding Name}" Margin="0,0,0,4" />
+
+                    <TextBlock Text="Faction:" />
+                    <TextBox Text="{Binding Faction}" Margin="0,0,0,4" />
+
+                    <TextBlock Text="Glyph:" />
+                    <TextBox Text="{Binding Glyph}" MaxLength="1" Width="40" Margin="0,0,0,4" />
+
+                    <TextBlock Text="Experience Value:" />
+                    <NumericUpDown Value="{Binding ExperienceValue}" Minimum="0" Maximum="9999" Margin="0,0,0,4" />
+
+                    <TextBlock Text="Weapon ID:" />
+                    <TextBox Text="{Binding WeaponId}" Margin="0,0,0,4" />
+
+                    <TextBlock Text="Armor ID:" />
+                    <TextBox Text="{Binding ArmorId}" Margin="0,0,0,4" />
+
+                    <TextBlock Text="Attributes" FontWeight="Bold" Margin="0,8,0,4" />
+                    <TextBlock Text="(Edit via JSON for now)" FontStyle="Italic" />
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</UserControl>

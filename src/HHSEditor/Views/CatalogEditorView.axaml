@@ -1,0 +1,180 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HHSEditor.ViewModels"
+             x:Class="HHSEditor.Views.CatalogEditorView"
+             x:DataType="vm:CatalogEditorViewModel">
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+            <TextBox Watermark="Search..." Text="{Binding SearchText}" Width="200" Margin="2" />
+            <Button Content="Load" Command="{Binding LoadDataCommand}" Margin="2" />
+            <Button Content="Save" Command="{Binding SaveDataCommand}" Margin="2" />
+        </StackPanel>
+
+        <!-- Tab Control for Weapons/Armors/Items -->
+        <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+            <!-- Weapons Tab -->
+            <TabItem Header="Weapons">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+                        <Button Content="Add Weapon" Command="{Binding AddWeaponCommand}" Margin="2" />
+                        <Button Content="Remove" Command="{Binding RemoveWeaponCommand}" Margin="2" />
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <!-- Weapon List -->
+                        <DataGrid Grid.Column="0"
+                                  ItemsSource="{Binding FilteredWeapons}"
+                                  SelectedItem="{Binding SelectedWeapon}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="False"
+                                  
+                                  
+                                  Margin="4">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="100" />
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="150" />
+                                <DataGridTextColumn Header="Damage" Binding="{Binding Damage}" Width="80" />
+                                <DataGridTextColumn Header="Penetration" Binding="{Binding Penetration}" Width="80" />
+                                <DataGridTextColumn Header="Range" Binding="{Binding Range}" Width="80" />
+                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="80" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!-- Weapon Details -->
+                        <ScrollViewer Grid.Column="1" Margin="4">
+                            <StackPanel DataContext="{Binding SelectedWeapon}">
+                                <TextBlock Text="Weapon Details" FontWeight="Bold" Margin="0,0,0,8" />
+
+                                <TextBlock Text="ID:" />
+                                <TextBox Text="{Binding Id}" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Name:" />
+                                <TextBox Text="{Binding Name}" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Damage:" />
+                                <NumericUpDown Value="{Binding Damage}" Minimum="0" Maximum="1000" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Penetration:" />
+                                <NumericUpDown Value="{Binding Penetration}" Minimum="0" Maximum="100" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Range:" />
+                                <NumericUpDown Value="{Binding Range}" Minimum="0" Maximum="100" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Value:" />
+                                <NumericUpDown Value="{Binding Value}" Minimum="0" Maximum="99999" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Weight:" />
+                                <NumericUpDown Value="{Binding Weight}" Minimum="0" Maximum="100" Increment="0.1" Margin="0,0,0,4" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </DockPanel>
+            </TabItem>
+
+            <!-- Armors Tab -->
+            <TabItem Header="Armors">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+                        <Button Content="Add Armor" Command="{Binding AddArmorCommand}" Margin="2" />
+                        <Button Content="Remove" Command="{Binding RemoveArmorCommand}" Margin="2" />
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <DataGrid Grid.Column="0"
+                                  ItemsSource="{Binding FilteredArmors}"
+                                  SelectedItem="{Binding SelectedArmor}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="False"
+                                  
+                                  
+                                  Margin="4">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="100" />
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="150" />
+                                <DataGridTextColumn Header="Armor Value" Binding="{Binding ArmorValue}" Width="80" />
+                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="80" />
+                                <DataGridTextColumn Header="Weight" Binding="{Binding Weight}" Width="80" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <ScrollViewer Grid.Column="1" Margin="4">
+                            <StackPanel DataContext="{Binding SelectedArmor}">
+                                <TextBlock Text="Armor Details" FontWeight="Bold" Margin="0,0,0,8" />
+
+                                <TextBlock Text="ID:" />
+                                <TextBox Text="{Binding Id}" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Name:" />
+                                <TextBox Text="{Binding Name}" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Armor Value:" />
+                                <NumericUpDown Value="{Binding ArmorValue}" Minimum="0" Maximum="1000" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Value:" />
+                                <NumericUpDown Value="{Binding Value}" Minimum="0" Maximum="99999" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Weight:" />
+                                <NumericUpDown Value="{Binding Weight}" Minimum="0" Maximum="100" Increment="0.1" Margin="0,0,0,4" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </DockPanel>
+            </TabItem>
+
+            <!-- Items Tab -->
+            <TabItem Header="Items">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+                        <Button Content="Add Item" Command="{Binding AddItemCommand}" Margin="2" />
+                        <Button Content="Remove" Command="{Binding RemoveItemCommand}" Margin="2" />
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <DataGrid Grid.Column="0"
+                                  ItemsSource="{Binding FilteredItems}"
+                                  SelectedItem="{Binding SelectedItem}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="False"
+                                  
+                                  
+                                  Margin="4">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="100" />
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="150" />
+                                <DataGridTextColumn Header="Kind" Binding="{Binding Kind}" Width="100" />
+                                <DataGridTextColumn Header="Heal Amount" Binding="{Binding HealAmount}" Width="80" />
+                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="80" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <ScrollViewer Grid.Column="1" Margin="4">
+                            <StackPanel DataContext="{Binding SelectedItem}">
+                                <TextBlock Text="Item Details" FontWeight="Bold" Margin="0,0,0,8" />
+
+                                <TextBlock Text="ID:" />
+                                <TextBox Text="{Binding Id}" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Name:" />
+                                <TextBox Text="{Binding Name}" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Kind:" />
+                                <TextBox Text="{Binding Kind}" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Heal Amount:" />
+                                <NumericUpDown Value="{Binding HealAmount}" Minimum="0" Maximum="1000" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Value:" />
+                                <NumericUpDown Value="{Binding Value}" Minimum="0" Maximum="99999" Margin="0,0,0,4" />
+
+                                <TextBlock Text="Weight:" />
+                                <NumericUpDown Value="{Binding Weight}" Minimum="0" Maximum="100" Increment="0.1" Margin="0,0,0,4" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</UserControl>

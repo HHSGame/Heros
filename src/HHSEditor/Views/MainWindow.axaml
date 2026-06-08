@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:HHSEditor.ViewModels"
+        xmlns:views="using:HHSEditor.Views"
         x:Class="HHSEditor.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="HHS Game Editor"
@@ -42,35 +43,27 @@
             </MenuItem>
         </Menu>
 
-        <!-- Toolbar -->
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
-            <Button Content="New" Margin="2" />
-            <Button Content="Open" Margin="2" />
-            <Button Content="Save" Margin="2" />
-            <Separator Width="8" />
-            <Button Content="Map Editor" Margin="2" />
-            <Button Content="Catalog" Margin="2" />
-            <Button Content="Enemies" Margin="2" />
-            <Button Content="Dialogue" Margin="2" />
-            <Button Content="Quests" Margin="2" />
-        </StackPanel>
+        <!-- Status Bar -->
+        <Border DockPanel.Dock="Bottom" Background="#F0F0F0" Padding="4">
+            <TextBlock Text="{Binding StatusMessage}" />
+        </Border>
 
         <!-- Main Content -->
         <TabControl>
-            <TabItem Header="Map Editor">
-                <TextBlock Text="Map Editor Content" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            </TabItem>
             <TabItem Header="Catalog Editor">
-                <TextBlock Text="Catalog Editor Content" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <views:CatalogEditorView />
             </TabItem>
             <TabItem Header="Enemy Editor">
-                <TextBlock Text="Enemy Editor Content" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <views:EnemyEditorView />
+            </TabItem>
+            <TabItem Header="Map Editor">
+                <TextBlock Text="Map Editor - Coming Soon" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" />
             </TabItem>
             <TabItem Header="Dialogue Editor">
-                <TextBlock Text="Dialogue Editor Content" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <TextBlock Text="Dialogue Editor - Coming Soon" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" />
             </TabItem>
             <TabItem Header="Quest Editor">
-                <TextBlock Text="Quest Editor Content" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <TextBlock Text="Quest Editor - Coming Soon" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" />
             </TabItem>
         </TabControl>
     </DockPanel>

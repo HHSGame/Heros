@@ -1,0 +1,6 @@
+{
+  "enemies": [
+    { "id": "Wolf", "name": "Wolf", "glyph": "W", "colorKey": "Bandit", "faction": "Wildlife", "attributes": { "strength": 6, "perception": 8, "agility": 7, "charisma": 2, "intelligence": 2 }, "skills": { "Melee": 3, "Awareness": 4 }, "hp": 20, "xp": 15, "weaponId": "Fists", "armorId": "ClothArmor", "abilities": [] },
+    { "id": "Bandit", "name": "Bandit", "glyph": "B", "colorKey": "Bandit", "faction": "Bandits", "attributes": { "strength": 7, "perception": 5, "agility": 6, "charisma": 3, "intelligence": 3 }, "skills": { "Melee": 4, "Firearms": 2, "Stealth": 2 }, "hp": 30, "xp": 25, "weaponId": "Knife", "armorId": "LeatherArmor", "abilities": [] }
+  ]
+}

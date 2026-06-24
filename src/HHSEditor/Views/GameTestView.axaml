@@ -1,0 +1,65 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HHSEditor.ViewModels"
+             x:Class="HHSEditor.Views.GameTestView"
+             x:DataType="vm:GameTestViewModel">
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+            <Button Content="Launch Game" Command="{Binding LaunchGameCommand}"
+                    IsEnabled="{Binding !IsRunning}" Margin="2" />
+            <Button Content="Stop Game" Command="{Binding StopGameCommand}"
+                    IsEnabled="{Binding IsRunning}" Margin="2" />
+            <Button Content="Clear Log" Command="{Binding ClearLogCommand}" Margin="2" />
+            <Separator Width="8" />
+            <TextBlock Text="Status:" VerticalAlignment="Center" Margin="4,0" />
+            <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center" FontWeight="Bold" />
+        </StackPanel>
+
+        <!-- Config Info -->
+        <Border DockPanel.Dock="Top" Background="#F5F5F5" Padding="4" Margin="4,0">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Config: " FontWeight="Bold" />
+                    <TextBlock Text="{Binding CurrentConfigPath}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0" IsVisible="{Binding LaunchCommand}">
+                    <TextBlock Text="Command: " FontWeight="Bold" />
+                    <TextBox Text="{Binding LaunchCommand}" IsReadOnly="True" FontFamily="Courier New" FontSize="11"
+                             Width="600" Margin="0,0,4,0" />
+                    <Button Content="Copy" Command="{Binding CopyCommandCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Output Log -->
+        <Border Background="Black" Margin="4">
+            <ListBox ItemsSource="{Binding OutputLog}"
+                     Background="Black"
+                     Foreground="White"
+                     FontFamily="Courier New"
+                     FontSize="12">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+
+        <!-- Instructions -->
+        <Border DockPanel.Dock="Bottom" Background="#E8E8E8" Padding="4" Margin="4,0">
+            <StackPanel>
+                <TextBlock Text="How to Test:" FontWeight="Bold" />
+                <TextBlock Text="1. Open a project or load game data first" FontSize="11" />
+                <TextBlock Text="2. Click 'Launch Game' to start testing" FontSize="11" />
+                <TextBlock Text="3. The game will open in a new terminal window" FontSize="11" />
+                <TextBlock Text="4. If the window doesn't appear, copy the command and run it manually" FontSize="11" />
+                <TextBlock Text="5. Close the game window or click 'Stop Game' to end" FontSize="11" />
+                <TextBlock Text="" FontSize="11" />
+                <TextBlock Text="Note: The game uses Terminal.Gui which requires a terminal to run." FontSize="11" Foreground="Gray" />
+            </StackPanel>
+        </Border>
+    </DockPanel>
+</UserControl>

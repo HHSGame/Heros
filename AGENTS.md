@@ -1,35 +1,69 @@
 # AGENTS.md
 
-## Repository summary
-- HHSGame is a terminal-based roguelike (NetHack-like).
-- C#/.NET 9 solution: `Heros.sln` with the main game project in `src/HHSGame`.
-- UI is built with Terminal.Gui; logging uses Serilog; DI uses Microsoft.Extensions.*.
+## Repository Summary
+- HHSGame is a terminal-based roguelike (NetHack-like) set in WWII occupied France.
+- C#/.NET 9 solution: `Heros.sln` with 4 projects + 1 test project.
+- UI: Terminal.Gui 2.0 (game), Avalonia 11.2 (editor).
+- Logging: Serilog; DI: Microsoft.Extensions.*; Scripting: Lua (NLua/MoonSharp).
 - Combat uses AP-driven action planning with queued sequences (`ActionSequence`) that execute on turn commit; AP only applies in combat.
 - Tests live in `src/HHSGameTest` (MSTest).
 
-## Structure overview
-- `src/HHSGame/Core`: game loop, world, player, stats, map generation, combat (including action sequences), items, enemies.
-- `src/HHSGame/UI`: Terminal.Gui views, windows, rendering, combat planning input handling.
-- `src/HHSGame/Resources`: localization assets.
-- `src/HHSGame/Utils`: shared utilities (e.g., i18n).
-- `src/HHSGameTest`: unit tests for core functionality.
-- `docs`, `data`, `tools`: supporting materials and utilities.
-- `TODO.md`: roadmap (Chinese) for planned gameplay systems and features.
+## Solution Structure
+```
+Heros.sln
+├── src/HHSGame.Core/       # Core game logic (no UI dependency)
+│   ├── Combat/             # Combat resolver, targeting, action sequences
+│   ├── Map/                # Map state, pathfinding, generation
+│   ├── Items/              # Item definitions, catalogs
+│   ├── Enemies/            # Enemy AI, abilities, loot
+│   ├── Skills/             # Skill actions, execution
+│   ├── Quests/             # Quest models, manager
+│   ├── Dialogue/           # Dialogue manager, definitions
+│   ├── Interactions/       # IInteractable, InteractableManager
+│   ├── Triggers/           # Map trigger system
+│   ├── Scripting/          # Lua script engine integration
+│   ├── Factions/           # FactionManager (8 factions)
+│   ├── Classes/            # Class definitions
+│   ├── Save/               # SaveManager, LoadManager
+│   ├── Engine/             # GameEngine, Config, Launcher
+│   └── ...
+├── src/HHSGame/            # Terminal.Gui game executable
+│   ├── UI/                 # Views, windows, rendering
+│   ├── Engine/             # Game engine integration
+│   └── Resources/          # Localization assets
+├── src/HHSEditor.Core/     # Editor service layer
+├── src/HHSEditor/          # Avalonia desktop editor (MVVM)
+│   ├── ViewModels/         # 10 ViewModels
+│   ├── Views/              # 14 Avalonia views
+│   └── Controls/           # MapCanvas, GameCanvas, DialogueGraph, QuestGraph
+└── src/HHSGameTest/        # MSTest test project (27 test files)
+```
 
-## Common commands
+## Data Structure
+```
+data/
+├── game.json               # Main game configuration
+├── catalogs/               # armors, classes, enemies, items, weapons
+├── maps/                   # 10 ASCII tilemap files
+└── scripts/                # Combat scripts
+```
+
+## Common Commands
 - Build solution: `dotnet build Heros.sln`
 - Build game only: `dotnet build src/HHSGame/HHSGame.csproj`
 - Run the game: `dotnet run --project src/HHSGame/HHSGame.csproj`
+- Run with config: `dotnet run --project src/HHSGame/HHSGame.csproj -- --config data/game.json`
 - Run tests: `dotnet test src/HHSGameTest/HHSGameTest.csproj`
 - Clean: `dotnet clean`
 
 ## Notes
-- Logs appear in `hss.log` at repo root and under `src/HHSGame`.
+- Logs appear in `hss.log` at repo root.
+- CI runs on push to main/master/wwii branches (`.github/workflows/dotnet.yml`).
+- Documentation is organized in four layers under `docs/` — see `INK.md` for the index.
 
 ## Guidelines
-
-- Git Commit History contains detailed recent changes.
-- Add Unit test as soon as possible and as much as possible, Make sure most of chages are test covered.
-- Design and implement the features from a game player's viewpoint, make sure it's fun and challenging.
-- Make a friendly user experience by improve clear and simple guidance.
-- Consider build a engine-based game to make sure it supports different genres (RPG, Turn-Based Strategy, etc.).
+- Add unit tests as soon as possible; aim for test coverage on all changes.
+- Design features from a player's viewpoint — make it fun and challenging.
+- Provide clear, simple guidance for a friendly user experience.
+- The engine is data-driven: maps, items, enemies, and classes load from JSON configs in `data/`.
+- Use Lua scripts for triggers, events, and custom game logic (see `docs/behavioral/v7-trigger-system.md`).

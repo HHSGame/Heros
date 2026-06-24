@@ -5,7 +5,9 @@ using HHSGame.Core.CharacterCreation;
 using HHSGame.Core.Factions;
 using HHSGame.Core.Interactions;
 using HHSGame.Core.Map;
+using HHSGame.Core.Scripting;
 using HHSGame.Core.Tutorial;
+using HHSGame.Core.Triggers;
 using HHSGame.Core.Enemies;
 using HHSGame.Core.Items;
 using HHSGame.Core.Npcs;
@@ -52,6 +54,14 @@ namespace HHSGame.Core
             serviceCollection.AddSingleton<PartyState>();
             serviceCollection.AddSingleton<QuestManager>();
             serviceCollection.AddSingleton<DialogueManager>();
+
+            // Triggers
+            serviceCollection.AddSingleton<TriggerManager>();
+
+            // Scripting
+            serviceCollection.AddSingleton<ILuaScriptEngine, LuaScriptEngine>();
+            serviceCollection.AddSingleton<GameLuaAPI>();
+            serviceCollection.AddSingleton<ScriptIntegration>();
 
             // Save/Load
             serviceCollection.AddSingleton<SavePathHelper>();

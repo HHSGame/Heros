@@ -1,0 +1,96 @@
+{
+  "game": { "name": "Demo Island", "version": 1 },
+  "map": { "style": "Cave", "width": 30, "height": 20, "useCustomMap": true, "customMapPath": "data/maps/demo-island.txt" },
+  "player": { "class": "Civilian", "startingItems": ["Bandage"] },
+  "players": [{ "name": "Hero", "glyph": "@", "class": "Civilian", "startPosition": { "x": 15, "y": 10 }, "startingItems": ["Bandage", "Bread"] }],
+  "catalogs": { "weapons": "data/catalogs/weapons.json", "armors": "data/catalogs/armors.json", "items": "data/catalogs/items.json", "classes": "data/catalogs/classes.json", "enemies": "data/catalogs/enemies.json" },
+  "enemies": [
+    { "id": "Wolf", "position": { "x": 5, "y": 5 }, "count": 2 },
+    { "id": "Wolf", "position": { "x": 25, "y": 15 }, "count": 1 },
+    { "id": "Bandit", "position": { "x": 20, "y": 8 }, "count": 1 }
+  ],
+  "items": [
+    { "id": "HealthPotion", "position": { "x": 10, "y": 5 }, "quantity": 1 },
+    { "id": "Bandage", "position": { "x": 22, "y": 12 }, "quantity": 2 },
+    { "id": "Bread", "position": { "x": 8, "y": 18 }, "quantity": 1 }
+  ],
+  "npcs": [
+    { "id": "Elder", "name": "Village Elder", "glyph": "E", "colorKey": "Scholar", "faction": "Civilians", "attributes": { "strength": 3, "perception": 8, "agility": 3, "charisma": 9, "intelligence": 8 }, "skills": { "Persuasion": 10, "Knowledge": 8, "Awareness": 6 }, "position": { "x": 15, "y": 3 }, "dialogueId": "elder-dialogue", "startingItems": [] },
+    { "id": "Healer", "name": "Healer", "glyph": "H", "colorKey": "Scholar", "faction": "Civilians", "attributes": { "strength": 2, "perception": 6, "agility": 3, "charisma": 7, "intelligence": 9 }, "skills": { "Medicine": 12, "Persuasion": 6, "Knowledge": 7 }, "position": { "x": 25, "y": 3 }, "dialogueId": "healer-dialogue", "startingItems": [] }
+  ],
+  "dialogues": [
+    { "id": "elder-dialogue", "startNodeId": "start", "nodes": [
+      { "id": "start", "text": "Welcome, traveler. This island has been plagued by wolves and bandits. Can you help us?", "options": [
+        { "text": "I'll help. What needs to be done?", "nextNodeId": "quest_info", "effects": [{ "type": "StartQuest", "target": "clear-island" }] },
+        { "text": "Tell me more about this place.", "nextNodeId": "lore" },
+        { "text": "Goodbye.", "nextNodeId": "" }
+      ]},
+      { "id": "quest_info", "text": "Please clear the wolves from the forest (northwest) and the bandits from the cave (east). Return to me when it's safe.", "options": [
+        { "text": "I'll do it.", "nextNodeId": "" },
+        { "text": "Is there a reward?", "nextNodeId": "reward" }
+      ]},
+      { "id": "lore", "text": "This island was once peaceful. Then the wolves came from the mountains, and bandits followed. We need a hero.", "options": [
+        { "text": "I'll help.", "nextNodeId": "quest_info", "effects": [{ "type": "StartQuest", "target": "clear-island" }] },
+        { "text": "Goodbye.", "nextNodeId": "" }
+      ]},
+      { "id": "reward", "text": "Of course! I have a special weapon for you. Complete the quest and it's yours.", "options": [
+        { "text": "I'll do it.", "nextNodeId": "" }
+      ]}
+    ]},
+    { "id": "healer-dialogue", "startNodeId": "start", "nodes": [
+      { "id": "start", "text": "I am the village healer. You look hurt. Let me help you.", "options": [
+        { "text": "Yes, please heal me.", "nextNodeId": "heal", "effects": [{ "type": "LuaScript", "luaScript": "game.HealPlayer(50)" }] },
+        { "text": "Do you have any supplies?", "nextNodeId": "supplies" },
+        { "text": "Goodbye.", "nextNodeId": "" }
+      ]},
+      { "id": "heal", "text": "There you go. Be careful out there.", "options": [
+        { "text": "Thank you.", "nextNodeId": "" }
+      ]},
+      { "id": "supplies", "text": "I can give you some bandages. Take them.", "options": [
+        { "text": "Thank you.", "nextNodeId": "", "effects": [{ "type": "GiveItem", "target": "Bandage", "amount": 3 }] }
+      ]}
+    ]}
+  ],
+  "quests": [
+    { "id": "clear-island", "name": "Clear the Island", "description": "Defeat all wolves and bandits on the island.", "hint": "Check the northwest forest and east cave.", "objectives": [
+      { "kind": "KillEnemy", "targetId": "Wolf", "requiredCount": 3 },
+      { "kind": "KillEnemy", "targetId": "Bandit", "requiredCount": 1 }
+    ], "rewards": [
+      { "kind": "Experience", "amount": 100 },
+      { "kind": "Currency", "amount": 50 }
+    ]}
+  ],
+  "triggers": [
+    {
+      "id": "welcome-trigger",
+      "name": "Welcome Area",
+      "x": 14,
+      "y": 9,
+      "width": 3,
+      "height": 3,
+      "type": "OnEnter",
+      "isOneTime": true,
+      "actionScript": "game.ShowMessage('Welcome to Demo Island! Talk to the Village Elder for a quest.')"
+    },
+    {
+      "id": "forest-warning",
+      "name": "Forest Warning",
+      "x": 3,
+      "y": 3,
+      "width": 10,
+      "height": 8,
+      "type": "OnEnter",
+      "conditionScript": "return game.GetPlayerHP() < 30",
+      "actionScript": "game.ShowMessage('Warning: You are low on health! Consider visiting the Healer.')"
+    },
+    {
+      "id": "quest-complete-trigger",
+      "name": "Quest Complete",
+      "type": "OnQuestComplete",
+      "actionParameter": "clear-island",
+      "actionScript": "game.ShowMessage('Congratulations! You have cleared the island!')"
+    }
+  ],
+  "scripts": [],
+  "conditions": []
+}

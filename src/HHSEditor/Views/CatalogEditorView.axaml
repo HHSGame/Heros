@@ -12,6 +12,11 @@
             <Button Content="Save" Command="{Binding SaveDataCommand}" Margin="2" />
         </StackPanel>
 
+        <!-- Status Bar -->
+        <Border DockPanel.Dock="Bottom" Background="#E8E8E8" Padding="4">
+            <TextBlock Text="{Binding StatusMessage}" FontSize="12" />
+        </Border>
+
         <!-- Tab Control for Weapons/Armors/Items -->
         <TabControl SelectedIndex="{Binding SelectedTabIndex}">
             <!-- Weapons Tab -->

@@ -1,0 +1,85 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HHSEditor.ViewModels"
+             x:Class="HHSEditor.Views.ClassEditorView"
+             x:DataType="vm:ClassEditorViewModel">
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+            <Button Content="Load" Command="{Binding LoadDataCommand}" Margin="2" />
+            <Button Content="Save" Command="{Binding SaveDataCommand}" Margin="2" />
+            <Button Content="Add Class" Command="{Binding AddClassCommand}" Margin="2" />
+            <Button Content="Remove" Command="{Binding RemoveClassCommand}" Margin="2" />
+        </StackPanel>
+
+        <!-- Status Bar -->
+        <Border DockPanel.Dock="Bottom" Background="#E8E8E8" Padding="4">
+            <TextBlock Text="{Binding StatusMessage}" FontSize="12" />
+        </Border>
+
+        <Grid ColumnDefinitions="*,*">
+            <!-- Class List -->
+            <DataGrid Grid.Column="0"
+                      ItemsSource="{Binding Classes}"
+                      SelectedItem="{Binding SelectedClass}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="False"
+                      Margin="4">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="100" />
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="150" />
+                    <DataGridTextColumn Header="Weapon" Binding="{Binding WeaponId}" Width="100" />
+                    <DataGridTextColumn Header="Armor" Binding="{Binding ArmorId}" Width="100" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Class Details -->
+            <ScrollViewer Grid.Column="1" Margin="4">
+                <StackPanel DataContext="{Binding SelectedClass}">
+                    <TextBlock Text="Class Details" FontWeight="Bold" FontSize="16" Margin="0,0,0,8" />
+
+                    <TextBlock Text="ID:" />
+                    <TextBox Text="{Binding Id}" Margin="0,0,0,4" />
+
+                    <TextBlock Text="Name:" />
+                    <TextBox Text="{Binding Name}" Margin="0,0,0,8" />
+
+                    <TextBlock Text="Attributes" FontWeight="Bold" Margin="0,0,0,4" />
+                    <StackPanel DataContext="{Binding Attributes}">
+                        <DockPanel Margin="0,2">
+                            <TextBlock Text="Strength:" Width="100" VerticalAlignment="Center" />
+                            <NumericUpDown Value="{Binding Strength}" Minimum="1" Maximum="20" />
+                        </DockPanel>
+                        <DockPanel Margin="0,2">
+                            <TextBlock Text="Perception:" Width="100" VerticalAlignment="Center" />
+                            <NumericUpDown Value="{Binding Perception}" Minimum="1" Maximum="20" />
+                        </DockPanel>
+                        <DockPanel Margin="0,2">
+                            <TextBlock Text="Agility:" Width="100" VerticalAlignment="Center" />
+                            <NumericUpDown Value="{Binding Agility}" Minimum="1" Maximum="20" />
+                        </DockPanel>
+                        <DockPanel Margin="0,2">
+                            <TextBlock Text="Charisma:" Width="100" VerticalAlignment="Center" />
+                            <NumericUpDown Value="{Binding Charisma}" Minimum="1" Maximum="20" />
+                        </DockPanel>
+                        <DockPanel Margin="0,2">
+                            <TextBlock Text="Intelligence:" Width="100" VerticalAlignment="Center" />
+                            <NumericUpDown Value="{Binding Intelligence}" Minimum="1" Maximum="20" />
+                        </DockPanel>
+                    </StackPanel>
+
+                    <TextBlock Text="Starting Equipment" FontWeight="Bold" Margin="0,8,0,4" />
+                    <DockPanel Margin="0,2">
+                        <TextBlock Text="Weapon:" Width="80" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding WeaponId}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,2">
+                        <TextBlock Text="Armor:" Width="80" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding ArmorId}" />
+                    </DockPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</UserControl>

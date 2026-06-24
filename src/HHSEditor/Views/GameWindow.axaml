@@ -1,0 +1,79 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:HHSEditor.ViewModels"
+        xmlns:views="using:HHSEditor.Views"
+        x:Class="HHSEditor.Views.GameWindow"
+        x:DataType="vm:GameWindowViewModel"
+        Title="{Binding Title}"
+        Width="1200"
+        Height="800"
+        WindowStartupLocation="CenterScreen">
+
+    <DockPanel>
+        <!-- Menu Bar -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Game">
+                <MenuItem Header="_New Game" Command="{Binding NewGameCommand}" />
+                <Separator />
+                <MenuItem Header="Save _Game" Command="{Binding SaveGameCommand}" />
+                <Separator />
+                <MenuItem Header="E_xit" Click="OnExit" />
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_Controls" Command="{Binding ShowHelpCommand}" />
+            </MenuItem>
+        </Menu>
+
+        <!-- Status Bar -->
+        <Border DockPanel.Dock="Bottom" Background="#333" Padding="4">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="HP:" Foreground="White" Margin="0,0,4,0" />
+                <TextBlock Text="{Binding PlayerHP}" Foreground="Red" Margin="0,0,8,0" />
+                <TextBlock Text="AP:" Foreground="White" Margin="0,0,4,0" />
+                <TextBlock Text="{Binding PlayerAP}" Foreground="Blue" Margin="0,0,8,0" />
+                <TextBlock Text="Turn:" Foreground="White" Margin="0,0,4,0" />
+                <TextBlock Text="{Binding TurnNumber}" Foreground="Yellow" Margin="0,0,8,0" />
+                <TextBlock Text="|" Foreground="Gray" Margin="0,0,8,0" />
+                <TextBlock Text="{Binding StatusMessage}" Foreground="White" />
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid ColumnDefinitions="*,250">
+            <!-- Game Canvas -->
+            <Border Grid.Column="0" Background="Black">
+                <views:GameCanvasView DataContext="{Binding GameCanvas}" />
+            </Border>
+
+            <!-- Side Panel -->
+            <DockPanel Grid.Column="1" Background="#2D2D2D">
+                <!-- Messages -->
+                <Border DockPanel.Dock="Bottom" Background="#1E1E1E" Height="200">
+                    <DockPanel>
+                        <TextBlock Text="Messages" FontWeight="Bold" Foreground="White" Margin="4" DockPanel.Dock="Top" />
+                        <ListBox ItemsSource="{Binding Messages}" Background="Black" Foreground="White"
+                                 FontFamily="Courier New" FontSize="11">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </Border>
+
+                <!-- Inventory -->
+                <DockPanel>
+                    <TextBlock Text="Inventory" FontWeight="Bold" Foreground="White" Margin="4" DockPanel.Dock="Top" />
+                    <ListBox ItemsSource="{Binding InventoryItems}" Foreground="White">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>

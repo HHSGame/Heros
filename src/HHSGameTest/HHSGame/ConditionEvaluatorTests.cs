@@ -228,15 +228,17 @@ namespace HHSGameTest.HHSGame
             GameStateMachine stateMachine = new();
             IDrawingContext drawingContext = new TestDrawingContext(20, 10);
 
+            var triggerManager = new global::HHSGame.Core.Triggers.TriggerManager(NullLogger<global::HHSGame.Core.Triggers.TriggerManager>.Instance);
             GameContext context = new(
                 parameters, random, enemyFactory, collisionSystem, mapState,
                 enemyManager, itemManager, catalogs.ItemCatalog,
                 npcFactory, npcManager, surroundingsManager,
                 inventoryManager, interactableManager, turnManager, stateMachine,
-                questManager, dialogueManager, partyState, new global::HHSGame.Core.Factions.FactionManager(), drawingContext);
+                questManager, dialogueManager, partyState, new global::HHSGame.Core.Factions.FactionManager(), drawingContext, triggerManager, null);
 
             GameWorld world = new(context);
-            Game game = new(NullLogger<Game>.Instance, context, world, catalogs.ClassCatalog, new GameConfig());
+            var eventBus = new global::HHSGame.Core.EventBus();
+            Game game = new(NullLogger<Game>.Instance, context, world, catalogs.ClassCatalog, new GameConfig(), eventBus);
             game.Start();
             return game;
         }

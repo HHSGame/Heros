@@ -127,10 +127,13 @@ namespace HHSGame.Core
                 dialogueManager,
                 partyState,
                 new global::HHSGame.Core.Factions.FactionManager(),
-                drawingContext);
+                drawingContext,
+                new global::HHSGame.Core.Triggers.TriggerManager(NullLogger<global::HHSGame.Core.Triggers.TriggerManager>.Instance),
+                null);
 
             GameWorld world = new(context);
-            Game game = new(NullLogger<Game>.Instance, context, world, catalogs.ClassCatalog, new GameConfig());
+            var eventBus = new global::HHSGame.Core.EventBus();
+            Game game = new(NullLogger<Game>.Instance, context, world, catalogs.ClassCatalog, new GameConfig(), eventBus);
             game.Start();
             return game;
         }

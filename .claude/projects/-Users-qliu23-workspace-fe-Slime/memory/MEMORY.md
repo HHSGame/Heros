@@ -1,0 +1,1 @@
+- [INK.md Initialized](project-ink-md-initialized.md) — Four-layer document index for HHS project, maps all docs into Conceptual/Structural/Behavioral/Operational layers

@@ -9,6 +9,7 @@ using HHSGame.Core.Npcs;
 using HHSGame.Core.Quests;
 using HHSGame.Core.Stats;
 using HHSGame.Core.Rendering;
+using HHSGame.Core.Triggers;
 
 namespace HHSGame.Core.Engine
 {
@@ -44,7 +45,9 @@ namespace HHSGame.Core.Engine
                 NpcSpawns = BuildNpcSpawns(config.Npcs),
                 DialogueDefinitions = BuildDialogues(config.Dialogues),
                 QuestDefinitions = BuildQuestDefinitions(config.Quests),
-                AchievementDefinitions = BuildAchievementDefinitions(config.Achievements)
+                AchievementDefinitions = BuildAchievementDefinitions(config.Achievements),
+                TriggerDefinitions = BuildTriggers(config.Triggers),
+                ScriptPaths = config.Scripts
             };
 
             if (config.Player.StartPosition != null)
@@ -404,6 +407,42 @@ namespace HHSGame.Core.Engine
                 string description = achievement.Description?.Trim() ?? string.Empty;
                 List<QuestObjectiveDefinition> objectives = ParseObjectives(achievement.Objectives, $"achievement {id}");
                 result.Add(new AchievementDefinition(id, name, description, objectives));
+            }
+
+            return result;
+        }
+
+        private static List<MapTrigger> BuildTriggers(List<TriggerConfig>? triggers)
+        {
+            List<MapTrigger> result = [];
+            if (triggers == null || triggers.Count == 0)
+            {
+                return result;
+            }
+
+            foreach (TriggerConfig trigger in triggers)
+            {
+                string id = RequireId(trigger.Id, "trigger");
+                TriggerType type = Enum.TryParse<TriggerType>(trigger.Type, true, out var t) ? t : TriggerType.OnEnter;
+                BuiltInAction action = Enum.TryParse<BuiltInAction>(trigger.BuiltInAction, true, out var a) ? a : BuiltInAction.None;
+
+                result.Add(new MapTrigger
+                {
+                    Id = id,
+                    Name = string.IsNullOrWhiteSpace(trigger.Name) ? id : trigger.Name.Trim(),
+                    X = trigger.X,
+                    Y = trigger.Y,
+                    Width = trigger.Width,
+                    Height = trigger.Height,
+                    Type = type,
+                    ConditionScript = trigger.ConditionScript,
+                    ActionScript = trigger.ActionScript,
+                    BuiltInAction = action,
+                    ActionParameter = trigger.ActionParameter,
+                    IsOneTime = trigger.IsOneTime,
+                    IsEnabled = trigger.IsEnabled,
+                    CooldownTurns = trigger.CooldownTurns
+                });
             }
 
             return result;

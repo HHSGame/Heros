@@ -194,6 +194,7 @@ namespace HHSGame.Core
             GameStateMachine stateMachine = new();
             IDrawingContext drawingContext = new TestDrawingContext(width, height);
 
+            var triggerManager = new global::HHSGame.Core.Triggers.TriggerManager(Microsoft.Extensions.Logging.Abstractions.NullLogger<global::HHSGame.Core.Triggers.TriggerManager>.Instance);
             return new GameContext(
                 parameters,
                 random,
@@ -214,7 +215,9 @@ namespace HHSGame.Core
                 dialogueManager,
                 partyState,
                 new global::HHSGame.Core.Factions.FactionManager(),
-                drawingContext);
+                drawingContext,
+                triggerManager,
+                null);
         }
 
         private sealed class TestDrawingContext(int width, int height) : IDrawingContext

@@ -1,0 +1,15 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HHSEditor.ViewModels"
+             xmlns:controls="using:HHSEditor.Controls"
+             x:Class="HHSEditor.Views.GameCanvasView"
+             x:DataType="vm:GameCanvasViewModel">
+
+    <controls:GameCanvasControl
+        x:Name="GameCanvas"
+        MapWidth="{Binding MapWidth}"
+        MapHeight="{Binding MapHeight}"
+        MapData="{Binding MapData}"
+        Entities="{Binding Entities}" />
+
+</UserControl>

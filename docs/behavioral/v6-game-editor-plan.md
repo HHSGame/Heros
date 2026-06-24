@@ -248,16 +248,21 @@ editor-data/prompts/
 
 ## 八、脚本系统设计
 
-### 8.1 技术选型：Jint（推荐）
+> **Note:** Scripting technology has been updated to Lua (NLua/MoonSharp) to align with the v7 trigger system design and codebase implementation. See [v7-trigger-system.md](v7-trigger-system.md) for the authoritative scripting specification.
 
-- 纯 managed C# 实现，无原生依赖
-- 完整 ES2023 支持
-- 沙箱执行（默认无文件系统/网络访问）
-- JSON 原生支持
+### 8.1 技术选型：Lua（NLua/MoonSharp）
+
+- NLua 或 MoonSharp（纯 managed C# 实现，无原生依赖）
+- 完整 Lua 5.x 支持
+- 沙箱执行（可限制文件系统/网络访问）
+- 与 v7 触发系统统一脚本引擎
 
 ### 8.2 游戏 API 暴露
 
+> See [v7-trigger-system.md](v7-trigger-system.md) §3 for the full `IGameLuaAPI` interface specification.
+
 ```csharp
+// Lua-compatible API (mirrors v7 IGameLuaAPI)
 public interface IGameScriptAPI
 {
     // 地图
@@ -296,22 +301,19 @@ public interface IGameScriptAPI
 
 ### 8.3 脚本示例
 
-```javascript
-export default {
-  name: "custom-quest",
-  hooks: {
-    onEnemyKilled(enemyId, x, y) {
-      if (enemyId === "BanditBoss") {
-        api.StartQuest("bandit-revenge");
-      }
-    },
-    onDialogueOption(dialogueId, nodeId, optionIndex) {
-      if (dialogueId === "viktor-dialogue" && nodeId === "fight") {
-        api.ModifyReputation("Bandits", -20);
-      }
-    }
-  }
-};
+```lua
+-- custom-quest.lua
+function onEnemyKilled(enemyId, x, y)
+  if enemyId == "BanditBoss" then
+    api.StartQuest("bandit-revenge")
+  end
+end
+
+function onDialogueOption(dialogueId, nodeId, optionIndex)
+  if dialogueId == "viktor-dialogue" and nodeId == "fight" then
+    api.ModifyReputation("Bandits", -20)
+  end
+end
 ```
 
 ## 九、引擎扩展

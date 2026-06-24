@@ -491,6 +491,7 @@ namespace HHSGame.Core
             GameStateMachine stateMachine = new();
             IDrawingContext drawingContext = new TestDrawingContext(20, 10);
 
+            var triggerManager = new global::HHSGame.Core.Triggers.TriggerManager(NullLogger<global::HHSGame.Core.Triggers.TriggerManager>.Instance);
             GameContext context = new(
                 parameters,
                 random,
@@ -511,11 +512,14 @@ namespace HHSGame.Core
                 dialogueManager,
                 partyState,
                 new global::HHSGame.Core.Factions.FactionManager(),
-                drawingContext);
+                drawingContext,
+                triggerManager,
+                null);
 
             GameWorld world = new(context);
             GameConfig gameConfig = config ?? new GameConfig();
-            Game game = new(NullLogger<Game>.Instance, context, world, catalogs.ClassCatalog, gameConfig);
+            var eventBus = new global::HHSGame.Core.EventBus();
+            Game game = new(NullLogger<Game>.Instance, context, world, catalogs.ClassCatalog, gameConfig, eventBus);
             if (playerPositions != null)
             {
                 parameters.PlayerSpawns = playerPositions

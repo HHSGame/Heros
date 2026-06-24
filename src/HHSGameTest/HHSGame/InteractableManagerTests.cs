@@ -148,7 +148,8 @@ namespace HHSGameTest.HHSGame
             var turnManager = new TurnManager();
             var stateMachine = new GameStateMachine();
             var drawingContext = new TestDrawingContext(20, 20);
-            return new GameContext(parameters, random, enemyFactory, collisionSystem, mapState, enemyManager, itemManager, catalog, npcFactory, npcManager, surroundingsManager, inventoryManager, interactableManager, turnManager, stateMachine, questManager, dialogueManager, partyState, new global::HHSGame.Core.Factions.FactionManager(), drawingContext);
+            var triggerManager = new global::HHSGame.Core.Triggers.TriggerManager(Microsoft.Extensions.Logging.Abstractions.NullLogger<global::HHSGame.Core.Triggers.TriggerManager>.Instance);
+            return new GameContext(parameters, random, enemyFactory, collisionSystem, mapState, enemyManager, itemManager, catalog, npcFactory, npcManager, surroundingsManager, inventoryManager, interactableManager, turnManager, stateMachine, questManager, dialogueManager, partyState, new global::HHSGame.Core.Factions.FactionManager(), drawingContext, triggerManager, null);
         }
 
         private sealed class TestInteractable : IInteractable

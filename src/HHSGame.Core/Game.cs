@@ -486,6 +486,7 @@ namespace HHSGame.Core
                 return false;
             }
 
+            Coordinate oldPosition = Player.Position;
             Coordinate target = Player.Position.Move(move.ToVec());
             Enemy? enemy = context.EnemyManager.GetEnemyAt(target.X, target.Y);
             if (enemy != null)
@@ -497,7 +498,15 @@ namespace HHSGame.Core
                     allowedStates);
             }
 
-            return PerformPlayerAction(() => Player.Move(move), ActionCosts.Movement, false, allowedStates);
+            bool moved = PerformPlayerAction(() => Player.Move(move), ActionCosts.Movement, false, allowedStates);
+
+            // 检查移动触发器
+            if (moved)
+            {
+                context.TriggerManager.OnPlayerMoved(oldPosition.X, oldPosition.Y, Player.X, Player.Y, context.TurnManager.GetTurnNumber());
+            }
+
+            return moved;
         }
 
         public bool TryStartDialogue(Npc npc)
@@ -577,6 +586,10 @@ namespace HHSGame.Core
             context.TurnManager.EndPlayerTurn();
             world.Update(Player, useAp, _ => AnimateStep());
             context.TurnManager.EndEnemyTurn();
+
+            // 检查触发器
+            context.TriggerManager.OnTurnEnd(context.TurnManager.GetTurnNumber());
+
             if (CheckGameConditions())
             {
                 RenderFrame();

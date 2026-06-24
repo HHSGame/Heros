@@ -1,58 +1,58 @@
 {
   "items": [
     {
-      "id": "Bandage",
-      "kind": "HealthPotion",
-      "name": "绷带",
-      "rarity": "Common",
-      "value": 15,
-      "weight": 0.2,
-      "healAmount": 5
+      "Id": "Bandage",
+      "Kind": "HealthPotion",
+      "Name": "\u7EF7\u5E26",
+      "Rarity": 0,
+      "Value": 15,
+      "Weight": 0.2,
+      "HealAmount": 5
     },
     {
-      "id": "MedicalKit",
-      "kind": "HealthPotion",
-      "name": "医疗包",
-      "rarity": "Uncommon",
-      "value": 80,
-      "weight": 1.0,
-      "healAmount": 15
+      "Id": "MedicalKit",
+      "Kind": "HealthPotion",
+      "Name": "\u533B\u7597\u5305",
+      "Rarity": 1,
+      "Value": 80,
+      "Weight": 1,
+      "HealAmount": 15
     },
     {
-      "id": "Morphine",
-      "kind": "HealthPotion",
-      "name": "吗啡注射器",
-      "rarity": "Rare",
-      "value": 200,
-      "weight": 0.3,
-      "healAmount": 30
+      "Id": "Morphine",
+      "Kind": "HealthPotion",
+      "Name": "\u5417\u5561\u6CE8\u5C04\u5668",
+      "Rarity": 2,
+      "Value": 200,
+      "Weight": 0.3,
+      "HealAmount": 30
     },
     {
-      "id": "Cigarettes",
-      "kind": "HealthPotion",
-      "name": "香烟",
-      "rarity": "Common",
-      "value": 10,
-      "weight": 0.1,
-      "healAmount": 1
+      "Id": "Cigarettes",
+      "Kind": "HealthPotion",
+      "Name": "\u9999\u70DF",
+      "Rarity": 0,
+      "Value": 10,
+      "Weight": 0.1,
+      "HealAmount": 1
     },
     {
-      "id": "Bread",
-      "kind": "HealthPotion",
-      "name": "黑面包",
-      "rarity": "Common",
-      "value": 12,
-      "weight": 0.4,
-      "healAmount": 4
+      "Id": "Bread",
+      "Kind": "HealthPotion",
+      "Name": "\u9ED1\u9762\u5305",
+      "Rarity": 0,
+      "Value": 12,
+      "Weight": 0.4,
+      "HealAmount": 4
     },
     {
-      "id": "GoldBar",
-      "kind": "HealthPotion",
-      "name": "金条",
-      "rarity": "Rare",
-      "value": 500,
-      "weight": 2.0,
-      "healAmount": 0
+      "Id": "GoldBar",
+      "Kind": "HealthPotion",
+      "Name": "\u91D1\u6761",
+      "Rarity": 2,
+      "Value": 500,
+      "Weight": 2,
+      "HealAmount": 0
     }
   ]
 }

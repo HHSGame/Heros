@@ -1,0 +1,133 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HHSEditor.ViewModels"
+             x:Class="HHSEditor.Views.TriggerEditorView"
+             x:DataType="vm:TriggerEditorViewModel">
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+            <Button Content="Load" Command="{Binding LoadDataCommand}" Margin="2" />
+            <Button Content="Save" Command="{Binding SaveDataCommand}" Margin="2" />
+            <Button Content="Add Trigger" Command="{Binding AddTriggerCommand}" Margin="2" />
+            <Button Content="Remove" Command="{Binding RemoveTriggerCommand}" Margin="2" />
+        </StackPanel>
+
+        <!-- Status Bar -->
+        <Border DockPanel.Dock="Bottom" Background="#E8E8E8" Padding="4">
+            <TextBlock Text="{Binding StatusMessage}" />
+        </Border>
+
+        <!-- Main Content -->
+        <Grid ColumnDefinitions="250,*,300">
+            <!-- Left: Trigger List -->
+            <DockPanel Grid.Column="0">
+                <TextBlock Text="Triggers" FontWeight="Bold" Margin="4" DockPanel.Dock="Top" />
+                <ListBox ItemsSource="{Binding Triggers}"
+                         SelectedItem="{Binding SelectedTrigger}"
+                         Margin="4">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                                <TextBlock Text="{Binding Id}" FontSize="11" Foreground="Gray" />
+                                <TextBlock Text="{Binding Type}" FontSize="10" Foreground="Blue" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+            <!-- Center: Trigger Properties -->
+            <ScrollViewer Grid.Column="1" Margin="4">
+                <StackPanel DataContext="{Binding SelectedTrigger}">
+                    <TextBlock Text="Trigger Properties" FontWeight="Bold" FontSize="16" Margin="0,0,0,8" />
+
+                    <!-- Basic Properties -->
+                    <TextBlock Text="ID:" />
+                    <TextBox Text="{Binding Id}" Margin="0,0,0,4" />
+
+                    <TextBlock Text="Name:" />
+                    <TextBox Text="{Binding Name}" Margin="0,0,0,4" />
+
+                    <!-- Position -->
+                    <TextBlock Text="Position" FontWeight="Bold" Margin="0,8,0,4" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="X:" VerticalAlignment="Center" Width="30" />
+                        <NumericUpDown Value="{Binding X}" Minimum="0" Maximum="200" Width="80" Margin="0,0,8,0" />
+                        <TextBlock Text="Y:" VerticalAlignment="Center" Width="30" />
+                        <NumericUpDown Value="{Binding Y}" Minimum="0" Maximum="200" Width="80" />
+                    </StackPanel>
+
+                    <!-- Size -->
+                    <TextBlock Text="Size" FontWeight="Bold" Margin="0,8,0,4" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="W:" VerticalAlignment="Center" Width="30" />
+                        <NumericUpDown Value="{Binding Width}" Minimum="1" Maximum="50" Width="80" Margin="0,0,8,0" />
+                        <TextBlock Text="H:" VerticalAlignment="Center" Width="30" />
+                        <NumericUpDown Value="{Binding Height}" Minimum="1" Maximum="50" Width="80" />
+                    </StackPanel>
+
+                    <!-- Type -->
+                    <TextBlock Text="Trigger Type:" FontWeight="Bold" Margin="0,8,0,4" />
+                    <ComboBox ItemsSource="{x:Static vm:TriggerTypes.All}"
+                              SelectedItem="{Binding Type}" />
+
+                    <!-- Built-in Action -->
+                    <TextBlock Text="Built-in Action:" FontWeight="Bold" Margin="0,8,0,4" />
+                    <ComboBox ItemsSource="{x:Static vm:TriggerTypes.Actions}"
+                              SelectedItem="{Binding BuiltInAction}" />
+
+                    <TextBlock Text="Action Parameter:" Margin="0,4,0,0" />
+                    <TextBox Text="{Binding ActionParameter}" Watermark="e.g., quest-id or faction:amount" Margin="0,0,0,4" />
+
+                    <!-- Condition Script -->
+                    <TextBlock Text="Condition Script (Lua):" FontWeight="Bold" Margin="0,8,0,4" />
+                    <TextBox Text="{Binding ConditionScript}"
+                             AcceptsReturn="True"
+                             MinHeight="60"
+                             FontFamily="Courier New"
+                             Watermark="return game.GetPlayerHP() > 50"
+                             Margin="0,0,0,4" />
+
+                    <!-- Options -->
+                    <TextBlock Text="Options" FontWeight="Bold" Margin="0,8,0,4" />
+                    <CheckBox Content="Enabled" IsChecked="{Binding IsEnabled}" Margin="0,2" />
+                    <CheckBox Content="One Time" IsChecked="{Binding IsOneTime}" Margin="0,2" />
+
+                    <TextBlock Text="Cooldown Turns:" Margin="0,4,0,0" />
+                    <NumericUpDown Value="{Binding CooldownTurns}" Minimum="0" Maximum="100" Width="100" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Right: Script Editor -->
+            <DockPanel Grid.Column="2">
+                <TextBlock Text="Action Script (Lua)" FontWeight="Bold" Margin="4" DockPanel.Dock="Top" />
+                <TextBox Text="{Binding ScriptCode}"
+                         AcceptsReturn="True"
+                         FontFamily="Courier New"
+                         Margin="4" />
+                <Button Content="Apply Script" Command="{Binding UpdateScriptCommand}" Margin="4" DockPanel.Dock="Bottom" />
+
+                <!-- Script Examples -->
+                <Border Background="#F5F5F5" Margin="4" Padding="8">
+                    <StackPanel>
+                        <TextBlock Text="Script Examples" FontWeight="Bold" Margin="0,0,0,4" />
+                        <TextBlock Text="Show message:" FontSize="11" Foreground="Gray" />
+                        <TextBlock Text="game.ShowMessage('Hello!')" FontFamily="Courier New" FontSize="10" Margin="0,0,0,4" />
+                        <TextBlock Text="Heal player:" FontSize="11" Foreground="Gray" />
+                        <TextBlock Text="game.HealPlayer(50)" FontFamily="Courier New" FontSize="10" Margin="0,0,0,4" />
+                        <TextBlock Text="Start quest:" FontSize="11" Foreground="Gray" />
+                        <TextBlock Text="game.StartQuest('quest-id')" FontFamily="Courier New" FontSize="10" Margin="0,0,0,4" />
+                        <TextBlock Text="Modify reputation:" FontSize="11" Foreground="Gray" />
+                        <TextBlock Text="game.ModifyReputation('Faction', 10)" FontFamily="Courier New" FontSize="10" Margin="0,0,0,4" />
+                        <TextBlock Text="Conditional:" FontSize="11" Foreground="Gray" />
+                        <TextBlock Text="if game.GetPlayerHP() > 50 then" FontFamily="Courier New" FontSize="10" />
+                        <TextBlock Text="  game.ShowMessage('Healthy!')" FontFamily="Courier New" FontSize="10" />
+                        <TextBlock Text="end" FontFamily="Courier New" FontSize="10" />
+                    </StackPanel>
+                </Border>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</UserControl>

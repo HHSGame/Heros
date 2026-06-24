@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HHSEditor.Core.Services;
 
@@ -10,23 +11,38 @@ public sealed class JsonDataService : IDataService
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter() }
     };
 
     public async Task<T?> LoadAsync<T>(string filePath, CancellationToken ct = default) where T : class
     {
+        Console.WriteLine($"[JsonDataService] LoadAsync called for: {filePath}");
+
         if (!File.Exists(filePath))
         {
+            Console.WriteLine($"[JsonDataService] File not found: {filePath}");
             return null;
         }
 
         try
         {
+            string json = await File.ReadAllTextAsync(filePath, ct);
+            Console.WriteLine($"[JsonDataService] File content length: {json.Length}");
+
             using FileStream stream = File.OpenRead(filePath);
-            return await JsonSerializer.DeserializeAsync<T>(stream, JsonOptions, ct);
+            var result = await JsonSerializer.DeserializeAsync<T>(stream, JsonOptions, ct);
+            Console.WriteLine($"[JsonDataService] Deserialized result: {result?.GetType().Name ?? "null"}");
+            return result;
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
+            Console.WriteLine($"[JsonDataService] JsonException: {ex.Message}");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[JsonDataService] Exception: {ex.Message}");
             return null;
         }
     }

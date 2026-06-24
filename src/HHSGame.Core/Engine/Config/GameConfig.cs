@@ -15,6 +15,8 @@ namespace HHSGame.Core.Engine.Config
         public List<DialogueConfig> Dialogues { get; init; } = [];
         public List<QuestConfig> Quests { get; init; } = [];
         public List<AchievementConfig> Achievements { get; init; } = [];
+        public List<TriggerConfig> Triggers { get; init; } = [];
+        public List<string> Scripts { get; init; } = [];
         public ConditionConfig Conditions { get; init; } = new();
     }
 
@@ -170,5 +172,23 @@ namespace HHSGame.Core.Engine.Config
         public string Id { get; init; } = string.Empty;
         public int Value { get; init; }
         public string Param { get; init; } = string.Empty;
+    }
+
+    public sealed class TriggerConfig
+    {
+        public string Id { get; init; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
+        public int X { get; init; }
+        public int Y { get; init; }
+        public int Width { get; init; } = 1;
+        public int Height { get; init; } = 1;
+        public string Type { get; init; } = "OnEnter";
+        public string? ConditionScript { get; init; }
+        public string? ActionScript { get; init; }
+        public string? BuiltInAction { get; init; }
+        public string? ActionParameter { get; init; }
+        public bool IsOneTime { get; init; }
+        public bool IsEnabled { get; init; } = true;
+        public int CooldownTurns { get; init; }
     }
 }

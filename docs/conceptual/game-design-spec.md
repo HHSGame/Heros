@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-This document serves as the authoritative Game Design Specification for *HHSGame*, a terminal-based roguelike RPG set in a post-apocalyptic world. The design philosophy emphasizes **Rule of Scarcity**: every resource—from ammunition to Action Points—must be meaningful. The game combines the tactical depth of traditional CRPGs with the unforgiving survival elements of roguelikes.
+This document serves as the authoritative Game Design Specification for *HHSGame*, a terminal-based roguelike RPG set in a WWII occupied-France resistance setting. The design philosophy emphasizes **Rule of Scarcity**: every resource—from ammunition to Action Points—must be meaningful. The game combines the tactical depth of traditional CRPGs with the unforgiving survival elements of roguelikes.
 
 The core pillars are:
 *   **Tactical Combat:** A grid-based system where positioning and Action Point (AP) management determine survival.
@@ -223,7 +223,7 @@ In a survival setting, health does not regenerate automatically.
     *   **Surgery:** Needed for "Crippled Limb" status.
 
 ### 7.2 Economic Exchange
-**Currency:** Old World Cash (Fiat) and Trade Goods.
+**Currency:** Occupation Francs and Black Market Trade Goods.
 **Barter Formula:**
 *   **Buy Price:** $\text{Base} \times (1.5 - (\text{Barter} \times 0.02))$
 *   **Sell Price:** $\text{Base} \times (0.3 + (\text{Barter} \times 0.02))$
@@ -248,18 +248,27 @@ Range: **-10 (Hated)** to **10 (Idolized)**.
 ### 8.2 Faction Perks
 Unique bonuses unlocked by reaching reputation thresholds.
 
-*   **Military (Army Remnants)**
+*   **Occupier (Occupation Forces)**
     *   *Friendly:* **Standard Issue** - Loot +20% ammo in military crates.
     *   *Ally:* **Tactical Superiority** - +1 Accuracy with Rifles; +5% Combat XP.
-*   **Merchants (Trade Union)**
+*   **Civilians (French Citizens)**
     *   *Friendly:* **Preferred Customer** - Buy prices -5% (stacks).
-    *   *Ally:* **Caravan Master** - Carry Capacity +15kg.
-*   **Outlaws (Raider Clans)**
+    *   *Ally:* **Safehouse Network** - Carry Capacity +15kg.
+*   **Bandits (Criminal Networks)**
     *   *Friendly:* **Streetwise** - Intimidation +2 effective skill.
     *   *Ally:* **Dirty Fighting** - Melee attacks: 10% chance to Blind.
-*   **Cultists (The Awakened)**
+*   **Church (Religious Neutrality)**
     *   *Friendly:* **Open Mind** - +10 Max Sanity Points (SP).
     *   *Ally:* **Martyr's Blood** - Auto-heal 25 HP when dropping below 20% HP (1/day).
+*   **Resistance (Underground Network)**
+    *   *Friendly:* **Covert Ops** - Stealth +2 effective skill.
+    *   *Ally:* **Saboteur** - +15% damage against occupation infrastructure.
+*   **Puppet (Vichy Government)**
+    *   *Friendly:* **Paper Trail** - Access to restricted zones via forged papers.
+    *   *Ally:* **Double Agent** - Intelligence gathering +20% effectiveness.
+*   **Allies (Foreign Support)**
+    *   *Friendly:* **Lend-Lease** - Rare equipment supply drops.
+    *   *Ally:* **Air Support** - Call in reconnaissance once per mission.
 
 ---
 

@@ -1,0 +1,7 @@
+{
+  "classes": [
+    { "id": "Civilian", "name": "Civilian", "attributes": { "strength": 5, "perception": 5, "agility": 5, "charisma": 5, "intelligence": 5 }, "skills": {}, "weaponId": "Fists", "armorId": "ClothArmor" },
+    { "id": "Warrior", "name": "Warrior", "attributes": { "strength": 8, "perception": 5, "agility": 6, "charisma": 4, "intelligence": 4 }, "skills": { "Melee": 3, "Athletics": 2 }, "weaponId": "Sword", "armorId": "LeatherArmor" },
+    { "id": "Scout", "name": "Scout", "attributes": { "strength": 4, "perception": 7, "agility": 8, "charisma": 5, "intelligence": 5 }, "skills": { "Stealth": 3, "Awareness": 2, "Firearms": 2 }, "weaponId": "Bow", "armorId": "ClothArmor" }
+  ]
+}

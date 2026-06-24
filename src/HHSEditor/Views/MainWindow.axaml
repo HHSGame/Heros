@@ -4,9 +4,9 @@
         xmlns:views="using:HHSEditor.Views"
         x:Class="HHSEditor.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="HHS Game Editor"
-        Width="1200"
-        Height="800"
+        Title="{Binding Title}"
+        Width="1400"
+        Height="900"
         WindowStartupLocation="CenterScreen">
 
     <Design.DataContext>
@@ -17,11 +17,14 @@
         <!-- Menu Bar -->
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_New Project" />
-                <MenuItem Header="_Open Project" />
-                <MenuItem Header="_Save" />
+                <MenuItem Header="_New Project" Click="OnNewProject" />
+                <MenuItem Header="_Open Project..." Click="OnOpenProject" />
                 <Separator />
-                <MenuItem Header="E_xit" />
+                <MenuItem Header="Open _Game Data" Click="OnOpenGameData" />
+                <Separator />
+                <MenuItem Header="_Save All" Click="OnSaveAll" />
+                <Separator />
+                <MenuItem Header="E_xit" Click="OnExit" />
             </MenuItem>
             <MenuItem Header="_Edit">
                 <MenuItem Header="_Undo" />
@@ -31,17 +34,21 @@
                 <MenuItem Header="_Copy" />
                 <MenuItem Header="_Paste" />
             </MenuItem>
-            <MenuItem Header="_View">
-                <MenuItem Header="_Map Editor" />
-                <MenuItem Header="_Catalog Editor" />
-                <MenuItem Header="_Enemy Editor" />
-                <MenuItem Header="_Dialogue Editor" />
-                <MenuItem Header="_Quest Editor" />
-            </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_About" />
             </MenuItem>
         </Menu>
+
+        <!-- Toolbar -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+            <Button Content="New Project" Click="OnNewProject" Margin="2" />
+            <Button Content="Open Project" Click="OnOpenProject" Margin="2" />
+            <Button Content="Load Game Data" Click="OnOpenGameData" Margin="2" />
+            <Separator Width="8" />
+            <Button Content="Save All" Click="OnSaveAll" Margin="2" />
+            <Separator Width="8" />
+            <Button Content="Play Game" Click="OnPlayGame" Margin="2" />
+        </StackPanel>
 
         <!-- Status Bar -->
         <Border DockPanel.Dock="Bottom" Background="#F0F0F0" Padding="4">
@@ -50,20 +57,29 @@
 
         <!-- Main Content -->
         <TabControl>
-            <TabItem Header="Catalog Editor">
-                <views:CatalogEditorView />
+            <TabItem Header="Weapons/Items">
+                <views:CatalogEditorView DataContext="{Binding CatalogEditor}" />
             </TabItem>
-            <TabItem Header="Enemy Editor">
-                <views:EnemyEditorView />
+            <TabItem Header="Enemies">
+                <views:EnemyEditorView DataContext="{Binding EnemyEditor}" />
+            </TabItem>
+            <TabItem Header="Classes">
+                <views:ClassEditorView DataContext="{Binding ClassEditor}" />
+            </TabItem>
+            <TabItem Header="Dialogues">
+                <views:DialogueEditorView DataContext="{Binding DialogueEditor}" />
+            </TabItem>
+            <TabItem Header="Quests">
+                <views:QuestEditorView DataContext="{Binding QuestEditor}" />
             </TabItem>
             <TabItem Header="Map Editor">
-                <TextBlock Text="Map Editor - Coming Soon" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" />
+                <views:MapEditorView DataContext="{Binding MapEditor}" />
             </TabItem>
-            <TabItem Header="Dialogue Editor">
-                <TextBlock Text="Dialogue Editor - Coming Soon" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" />
+            <TabItem Header="Triggers">
+                <views:TriggerEditorView DataContext="{Binding TriggerEditor}" />
             </TabItem>
-            <TabItem Header="Quest Editor">
-                <TextBlock Text="Quest Editor - Coming Soon" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" />
+            <TabItem Header="Test Game">
+                <views:GameTestView DataContext="{Binding GameTest}" />
             </TabItem>
         </TabControl>
     </DockPanel>

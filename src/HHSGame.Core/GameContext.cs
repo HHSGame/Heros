@@ -9,6 +9,9 @@ using HHSGame.Core.Map;
 using HHSGame.Core.Npcs;
 using HHSGame.Core.Quests;
 using HHSGame.Core.Classes;
+using HHSGame.Core.Scripting;
+using HHSGame.Core.Triggers;
+using HHSGame.Core.Tutorial;
 
 namespace HHSGame.Core
 {
@@ -32,6 +35,8 @@ namespace HHSGame.Core
         public List<DialogueDefinition> DialogueDefinitions { get; set; } = [];
         public List<QuestDefinition> QuestDefinitions { get; set; } = [];
         public List<AchievementDefinition> AchievementDefinitions { get; set; } = [];
+        public List<MapTrigger> TriggerDefinitions { get; set; } = [];
+        public List<string> ScriptPaths { get; set; } = [];
     }
 
     public class GameContext(
@@ -54,7 +59,9 @@ namespace HHSGame.Core
         DialogueManager dialogueManager,
         PartyState partyState,
         Factions.FactionManager factionManager,
-        IDrawingContext drawingContext
+        IDrawingContext drawingContext,
+        TriggerManager triggerManager,
+        ScriptIntegration scriptIntegration
     )
     {
         private Player? player;
@@ -84,6 +91,8 @@ namespace HHSGame.Core
         public PartyState PartyState => partyState;
         public Factions.FactionManager FactionManager => factionManager;
         public IDrawingContext DrawingContext => drawingContext;
+        public TriggerManager TriggerManager => triggerManager;
+        public ScriptIntegration ScriptIntegration => scriptIntegration;
         public Player Player => player!;
         public Player? PlayerOrNull => player;
         public IReadOnlyList<Player> Players => players;
@@ -100,6 +109,13 @@ namespace HHSGame.Core
             npcManager.SetNpcs(npcFactory.CreateNpcs(parameters.NpcSpawns));
             questManager.LoadDefinitions(parameters.QuestDefinitions, parameters.AchievementDefinitions);
             dialogueManager.LoadDefinitions(parameters.DialogueDefinitions);
+
+            // 加载触发器
+            if (parameters.TriggerDefinitions.Count > 0)
+            {
+                triggerManager.LoadTriggers(parameters.TriggerDefinitions);
+            }
+
             collisionSystem.SetPlayers(players);
             this.players = players;
             SetActivePlayer(activePlayer);

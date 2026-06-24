@@ -1,0 +1,8 @@
+{
+  "weapons": [
+    { "id": "Fists", "name": "Fists", "rarity": "Common", "value": 0, "weight": 0, "damage": 3, "penetration": 0, "range": 1, "weaponType": "MeleeLight", "trajectory": "Line" },
+    { "id": "Knife", "name": "Knife", "rarity": "Common", "value": 10, "weight": 0.5, "damage": 5, "penetration": 1, "range": 1, "weaponType": "MeleeLight", "trajectory": "Line" },
+    { "id": "Sword", "name": "Sword", "rarity": "Common", "value": 50, "weight": 2.0, "damage": 10, "penetration": 2, "range": 1, "weaponType": "MeleeHeavy", "trajectory": "Line" },
+    { "id": "Bow", "name": "Bow", "rarity": "Common", "value": 30, "weight": 1.5, "damage": 8, "penetration": 0, "range": 5, "weaponType": "RangedSnap", "trajectory": "Line" }
+  ]
+}

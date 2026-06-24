@@ -8,7 +8,8 @@ namespace HHSGame.Core.Dialogue
         Skill,
         Attribute,
         QuestStatus,
-        QuestObjectiveComplete
+        QuestObjectiveComplete,
+        LuaCondition  // 新增：Lua 条件
     }
 
     public sealed record DialogueRequirement(
@@ -17,7 +18,8 @@ namespace HHSGame.Core.Dialogue
         AttributeType? Attribute,
         string? QuestId,
         QuestStatus? QuestStatus,
-        int Minimum);
+        int Minimum,
+        string? LuaCondition = null);  // 新增：Lua 条件脚本
 
     public enum DialogueEffectType
     {
@@ -27,13 +29,15 @@ namespace HHSGame.Core.Dialogue
         AddCurrency,
         UnlockAchievement,
         ModifyReputation,
-        SetRelation
+        SetRelation,
+        LuaScript  // 新增：Lua 脚本
     }
 
     public sealed record DialogueEffect(
         DialogueEffectType Type,
         string Target,
-        int Amount);
+        int Amount,
+        string? LuaScript = null);  // 新增：Lua 脚本
 
     public sealed record DialogueOption(
         string Text,

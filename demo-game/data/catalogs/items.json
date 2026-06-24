@@ -1,0 +1,7 @@
+{
+  "items": [
+    { "id": "HealthPotion", "kind": "HealthPotion", "name": "Health Potion", "rarity": "Common", "value": 20, "weight": 0.5, "healAmount": 30 },
+    { "id": "Bandage", "kind": "Bandage", "name": "Bandage", "rarity": "Common", "value": 5, "weight": 0.2, "healAmount": 10 },
+    { "id": "Bread", "kind": "Food", "name": "Bread", "rarity": "Common", "value": 3, "weight": 0.3, "healAmount": 5 }
+  ]
+}

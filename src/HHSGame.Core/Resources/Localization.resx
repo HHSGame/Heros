@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Localizable strings -->
+  <data name="HHS.Core.Player.Name" xml:space="preserve">
+    <value>Hero</value>
+  </data>
+  <data name="PlayerAttacks" xml:space="preserve">
+    <value>Player attacks {0}!</value>
+  </data>
+  <data name="PlayerTakesDamage" xml:space="preserve">
+    <value>Player takes {0} damage!</value>
+  </data>
+  <data name="PlayerDefeated" xml:space="preserve">
+    <value>Player has been defeated!</value>
+  </data>
+  <data name="EquippedWeapon" xml:space="preserve">
+    <value>Equipped {0}</value>
+  </data>
+  <data name="EquippedArmor" xml:space="preserve">
+    <value>Equipped {0}</value>
+  </data>
+  <data name="NoItemsToPickUp" xml:space="preserve">
+    <value>No items here to pick up.</value>
+  </data>
+  <data name="PickedUpItem" xml:space="preserve">
+    <value>Picked up {0}</value>
+  </data>
+  <data name="HHS.Core.PoisonEffect.Message" xml:space="preserve">
+    <value>{0} is poisoned!</value>
+  </data>
+  <data name="HHS.Core.StunEffect.Message" xml:space="preserve">
+    <value>{0} is stunned!</value>
+  </data>
+  <data name="HHS.Core.Enemies.Enemy.Attack" xml:space="preserve">
+    <value>{0} attacks the player for {1} damage!</value>
+  </data>
+  <data name="HHS.Core.Enemies.Enemy.Defeated" xml:space="preserve">
+    <value>{0} was defeated!</value>
+  </data>
+  <data name="HHS.Core.Enemies.Enemy.TakeDamage" xml:space="preserve">
+    <value>{0} took {1} damage! HP remains {2}.</value>
+  </data>
+  <data name="HHS.Core.Map.CollisionSystem.BlockedByTerrain" xml:space="preserve">
+    <value>Collision: {0} blocked by terrain at ({1}, {2}).</value>
+  </data>
+  <data name="HHS.Core.Map.CollisionSystem.BlockedByOthers" xml:space="preserve">
+    <value>Collision: {0} blocked by {1} at ({2}, {3}).</value>
+  </data>
+  <data name="HHS.Core.Map.CollisionSystem.Movement" xml:space="preserve">
+    <value>Movement: {0} moved to ({1}, {2})</value>
+  </data>
+</root>

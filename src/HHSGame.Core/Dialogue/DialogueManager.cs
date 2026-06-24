@@ -1,6 +1,7 @@
 using HHSGame.Core;
 using HHSGame.Core.Factions;
 using HHSGame.Core.Quests;
+using HHSGame.Core.Scripting;
 using HHSGame.Core.Stats;
 
 namespace HHSGame.Core.Dialogue
@@ -35,15 +36,17 @@ namespace HHSGame.Core.Dialogue
         private readonly PartyState partyState;
         private readonly QuestManager questManager;
         private readonly FactionManager factionManager;
+        private readonly ScriptIntegration? scriptIntegration;
         private readonly Dictionary<string, DialogueDefinition> definitions = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, HashSet<string>> visitedNodes = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, HashSet<string>> visitedOptions = new(StringComparer.OrdinalIgnoreCase);
 
-        public DialogueManager(PartyState partyState, QuestManager questManager, FactionManager factionManager)
+        public DialogueManager(PartyState partyState, QuestManager questManager, FactionManager factionManager, ScriptIntegration? scriptIntegration = null)
         {
             this.partyState = partyState;
             this.questManager = questManager;
             this.factionManager = factionManager;
+            this.scriptIntegration = scriptIntegration;
         }
 
         public DialogueSession? CurrentSession { get; private set; }
@@ -170,6 +173,12 @@ namespace HHSGame.Core.Dialogue
 
         private bool MeetsRequirement(Player player, DialogueRequirement requirement)
         {
+            // 先检查 Lua 条件
+            if (requirement.Type == DialogueRequirementType.LuaCondition && scriptIntegration != null)
+            {
+                return scriptIntegration.CheckDialogueCondition(requirement);
+            }
+
             return requirement.Type switch
             {
                 DialogueRequirementType.Skill => requirement.Skill.HasValue
@@ -489,6 +498,12 @@ namespace HHSGame.Core.Dialogue
                                 };
                                 factionManager.SetRelation(a, b, relation);
                             }
+                        }
+                        break;
+                    case DialogueEffectType.LuaScript:
+                        if (scriptIntegration != null && !string.IsNullOrWhiteSpace(effect.LuaScript))
+                        {
+                            scriptIntegration.ExecuteDialogueEffect(effect);
                         }
                         break;
                     default:

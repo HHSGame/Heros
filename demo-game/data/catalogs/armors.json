@@ -1,0 +1,7 @@
+{
+  "armors": [
+    { "id": "ClothArmor", "name": "Cloth Armor", "rarity": "Common", "value": 10, "weight": 1.0, "armorValue": 2, "slot": "Body" },
+    { "id": "LeatherArmor", "name": "Leather Armor", "rarity": "Common", "value": 30, "weight": 3.0, "armorValue": 5, "slot": "Body" },
+    { "id": "IronHelmet", "name": "Iron Helmet", "rarity": "Common", "value": 25, "weight": 2.0, "armorValue": 3, "slot": "Head" }
+  ]
+}

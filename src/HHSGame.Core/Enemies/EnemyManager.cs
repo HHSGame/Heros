@@ -3,10 +3,11 @@ using System.Collections.Immutable;
 using HHSGame.Core.Combat;
 using HHSGame.Core.Rendering;
 using HHSGame.Core.Items;
+using HHSGame.Core.Triggers;
 
 namespace HHSGame.Core.Enemies
 {
-    public class EnemyManager(ItemManager itemManager, Quests.QuestManager questManager) : IDrawable
+    public class EnemyManager(ItemManager itemManager, Quests.QuestManager questManager, TriggerManager? triggerManager = null) : IDrawable
     {
         private readonly List<Enemy> enemies = [];
 
@@ -35,6 +36,10 @@ namespace HHSGame.Core.Enemies
                     enemies.Remove(enemy);
                     DropLoot(enemy);
                     questManager.NotifyEnemyDefeated(enemy.Id);
+
+                    // 触发敌人死亡事件
+                    triggerManager?.OnEnemyKilled(enemy.Id, enemy.X, enemy.Y, 0);
+
                     continue;
                 }
 

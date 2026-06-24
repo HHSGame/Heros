@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "palest-ink": {
+      "source": "git@github.com:kenpusney/palest-ink.git",
+      "sourceType": "git",
+      "skillPath": "skills/palest-ink/SKILL.md",
+      "computedHash": "815c87942073dd7191655a6e9a3fb53b382ecc83993679e24dfc17a5489c18c2"
+    },
     "workspace-delivery-loop": {
       "source": "myz-suite/skills",
       "sourceType": "github",

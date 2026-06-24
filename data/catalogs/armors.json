@@ -1,148 +1,148 @@
 {
   "armors": [
     {
-      "id": "UnknownArmor",
-      "name": "无防护",
-      "rarity": "Common",
-      "value": 0,
-      "weight": 0,
-      "armor": 0,
-      "slot": "Body"
+      "Id": "UnknownArmor",
+      "Name": "\u65E0\u9632\u62A4",
+      "Rarity": 0,
+      "Value": 0,
+      "Weight": 0,
+      "ArmorValue": 0,
+      "Slot": 2
     },
     {
-      "id": "CivilianClothes",
-      "name": "平民衣物",
-      "rarity": "Common",
-      "value": 20,
-      "weight": 1.0,
-      "armor": 1,
-      "slot": "Body"
+      "Id": "CivilianClothes",
+      "Name": "\u5E73\u6C11\u8863\u7269",
+      "Rarity": 0,
+      "Value": 20,
+      "Weight": 1,
+      "ArmorValue": 0,
+      "Slot": 2
     },
     {
-      "id": "LeatherJacket",
-      "name": "皮夹克",
-      "rarity": "Common",
-      "value": 80,
-      "weight": 2.0,
-      "armor": 3,
-      "slot": "Body"
+      "Id": "LeatherJacket",
+      "Name": "\u76AE\u5939\u514B",
+      "Rarity": 0,
+      "Value": 80,
+      "Weight": 2,
+      "ArmorValue": 0,
+      "Slot": 2
     },
     {
-      "id": "WehrmachtUniform",
-      "name": "国防军制服",
-      "rarity": "Uncommon",
-      "value": 150,
-      "weight": 2.5,
-      "armor": 5,
-      "slot": "Body"
+      "Id": "WehrmachtUniform",
+      "Name": "\u56FD\u9632\u519B\u5236\u670D",
+      "Rarity": 1,
+      "Value": 150,
+      "Weight": 2.5,
+      "ArmorValue": 0,
+      "Slot": 2
     },
     {
-      "id": "ResistantVest",
-      "name": "反抗军背心",
-      "rarity": "Uncommon",
-      "value": 120,
-      "weight": 1.8,
-      "armor": 4,
-      "slot": "Body"
+      "Id": "ResistantVest",
+      "Name": "\u53CD\u6297\u519B\u80CC\u5FC3",
+      "Rarity": 1,
+      "Value": 120,
+      "Weight": 1.8,
+      "ArmorValue": 0,
+      "Slot": 2
     },
     {
-      "id": "Stahlhelm",
-      "name": "钢盔",
-      "rarity": "Common",
-      "value": 60,
-      "weight": 1.2,
-      "armor": 3,
-      "slot": "Head"
+      "Id": "Stahlhelm",
+      "Name": "\u94A2\u76D4",
+      "Rarity": 0,
+      "Value": 60,
+      "Weight": 1.2,
+      "ArmorValue": 0,
+      "Slot": 1
     },
     {
-      "id": "Beret",
-      "name": "贝雷帽",
-      "rarity": "Common",
-      "value": 30,
-      "weight": 0.2,
-      "armor": 1,
-      "slot": "Head"
+      "Id": "Beret",
+      "Name": "\u8D1D\u96F7\u5E3D",
+      "Rarity": 0,
+      "Value": 30,
+      "Weight": 0.2,
+      "ArmorValue": 0,
+      "Slot": 1
     },
     {
-      "id": "OfficerCap",
-      "name": "军官帽",
-      "rarity": "Uncommon",
-      "value": 50,
-      "weight": 0.3,
-      "armor": 1,
-      "slot": "Head"
+      "Id": "OfficerCap",
+      "Name": "\u519B\u5B98\u5E3D",
+      "Rarity": 1,
+      "Value": 50,
+      "Weight": 0.3,
+      "ArmorValue": 0,
+      "Slot": 1
     },
     {
-      "id": "HeavyCoat",
-      "name": "重型大衣",
-      "rarity": "Uncommon",
-      "value": 200,
-      "weight": 4.0,
-      "armor": 6,
-      "slot": "Body"
+      "Id": "HeavyCoat",
+      "Name": "\u91CD\u578B\u5927\u8863",
+      "Rarity": 1,
+      "Value": 200,
+      "Weight": 4,
+      "ArmorValue": 0,
+      "Slot": 2
     },
     {
-      "id": "FlakVest",
-      "name": "防弹背心",
-      "rarity": "Rare",
-      "value": 500,
-      "weight": 5.0,
-      "armor": 8,
-      "slot": "Body"
+      "Id": "FlakVest",
+      "Name": "\u9632\u5F39\u80CC\u5FC3",
+      "Rarity": 2,
+      "Value": 500,
+      "Weight": 5,
+      "ArmorValue": 0,
+      "Slot": 2
     },
     {
-      "id": "Boots",
-      "name": "军靴",
-      "rarity": "Common",
-      "value": 40,
-      "weight": 1.5,
-      "armor": 2,
-      "slot": "Legs"
+      "Id": "Boots",
+      "Name": "\u519B\u9774",
+      "Rarity": 0,
+      "Value": 40,
+      "Weight": 1.5,
+      "ArmorValue": 0,
+      "Slot": 3
     },
     {
-      "id": "Trousers",
-      "name": "军裤",
-      "rarity": "Common",
-      "value": 35,
-      "weight": 1.0,
-      "armor": 1,
-      "slot": "Legs"
+      "Id": "Trousers",
+      "Name": "\u519B\u88E4",
+      "Rarity": 0,
+      "Value": 35,
+      "Weight": 1,
+      "ArmorValue": 0,
+      "Slot": 3
     },
     {
-      "id": "Goggles",
-      "name": "护目镜",
-      "rarity": "Common",
-      "value": 25,
-      "weight": 0.1,
-      "armor": 1,
-      "slot": "Head"
+      "Id": "Goggles",
+      "Name": "\u62A4\u76EE\u955C",
+      "Rarity": 0,
+      "Value": 25,
+      "Weight": 0.1,
+      "ArmorValue": 0,
+      "Slot": 1
     },
     {
-      "id": "Watch",
-      "name": "怀表",
-      "rarity": "Uncommon",
-      "value": 100,
-      "weight": 0.2,
-      "armor": 0,
-      "slot": "Accessory1"
+      "Id": "Watch",
+      "Name": "\u6000\u8868",
+      "Rarity": 1,
+      "Value": 100,
+      "Weight": 0.2,
+      "ArmorValue": 0,
+      "Slot": 4
     },
     {
-      "id": "Compass",
-      "name": "指南针",
-      "rarity": "Uncommon",
-      "value": 80,
-      "weight": 0.1,
-      "armor": 0,
-      "slot": "Accessory1"
+      "Id": "Compass",
+      "Name": "\u6307\u5357\u9488",
+      "Rarity": 1,
+      "Value": 80,
+      "Weight": 0.1,
+      "ArmorValue": 0,
+      "Slot": 4
     },
     {
-      "id": "Binoculars",
-      "name": "望远镜",
-      "rarity": "Uncommon",
-      "value": 120,
-      "weight": 0.7,
-      "armor": 0,
-      "slot": "Accessory2"
+      "Id": "Binoculars",
+      "Name": "\u671B\u8FDC\u955C",
+      "Rarity": 1,
+      "Value": 120,
+      "Weight": 0.7,
+      "ArmorValue": 0,
+      "Slot": 5
     }
   ]
 }

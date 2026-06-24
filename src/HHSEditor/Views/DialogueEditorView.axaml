@@ -1,0 +1,176 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HHSEditor.ViewModels"
+             xmlns:controls="using:HHSEditor.Controls"
+             x:Class="HHSEditor.Views.DialogueEditorView"
+             x:DataType="vm:DialogueEditorViewModel">
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+            <Button Content="Load" Command="{Binding LoadDataCommand}" Margin="2" />
+            <Button Content="Save" Command="{Binding SaveDataCommand}" Margin="2" />
+        </StackPanel>
+
+        <!-- Status Bar -->
+        <Border DockPanel.Dock="Bottom" Background="#E8E8E8" Padding="4">
+            <TextBlock Text="{Binding StatusMessage}" FontSize="12" />
+        </Border>
+
+        <!-- Main Content -->
+        <Grid ColumnDefinitions="250,*">
+            <!-- Dialogue List -->
+            <DockPanel Grid.Column="0">
+                <TextBlock Text="Dialogues" FontWeight="Bold" Margin="4" DockPanel.Dock="Top" />
+                <ListBox ItemsSource="{Binding Dialogues}"
+                         SelectedItem="{Binding SelectedDialogue}"
+                         Margin="4">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Id}" FontWeight="Bold" />
+                                <TextBlock Text="{Binding StartNodeId}" FontSize="11" Foreground="Gray" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+            <!-- Dialogue Editor -->
+            <TabControl Grid.Column="1" Margin="4">
+                <!-- Graph View -->
+                <TabItem Header="Graph View">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Dialogue Flow Graph" FontWeight="Bold" Margin="0,0,0,8" />
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                            <controls:DialogueGraphControl Nodes="{Binding GraphNodes}" />
+                        </ScrollViewer>
+                    </DockPanel>
+                </TabItem>
+
+                <!-- Node Editor View -->
+                <TabItem Header="Node Editor">
+                    <DockPanel>
+                        <Grid ColumnDefinitions="180,*">
+                            <!-- Node List -->
+                            <ListBox Grid.Column="0"
+                                     ItemsSource="{Binding Nodes}"
+                                     SelectedItem="{Binding SelectedNode}"
+                                     Margin="0,0,4,0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Id}" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <!-- Node Details -->
+                            <ScrollViewer Grid.Column="1">
+                                <StackPanel DataContext="{Binding SelectedNode}">
+                                    <TextBlock Text="Node Details" FontWeight="Bold" FontSize="14" Margin="0,0,0,8" />
+
+                                    <TextBlock Text="Node ID:" />
+                                    <TextBox Text="{Binding Id}" IsReadOnly="True" Margin="0,0,0,4" />
+
+                                    <TextBlock Text="Text:" />
+                                    <TextBox Text="{Binding Text}" AcceptsReturn="True" MinHeight="80" Margin="0,0,0,8" />
+
+                                    <TextBlock Text="Options" FontWeight="Bold" Margin="0,0,0,4" />
+
+                                    <ItemsControl ItemsSource="{Binding Options}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="LightBlue" BorderThickness="2" Margin="0,4" Padding="8" CornerRadius="4">
+                                                    <StackPanel>
+                                                        <TextBlock Text="Option Text:" FontWeight="Bold" />
+                                                        <TextBox Text="{Binding Text}" AcceptsReturn="True" MinHeight="40" Margin="0,0,0,4" />
+
+                                                        <TextBlock Text="Next Node ID:" FontWeight="Bold" />
+                                                        <TextBox Text="{Binding NextNodeId}" Watermark="Leave empty for end" Margin="0,0,0,4" />
+
+                                                        <!-- Requirements -->
+                                                        <Expander Header="Requirements" Margin="0,4">
+                                                            <ItemsControl ItemsSource="{Binding Requirements}">
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <Border Background="#FFF3E0" Margin="0,2" Padding="4">
+                                                                            <StackPanel>
+                                                                                <DockPanel>
+                                                                                    <TextBlock Text="Type:" Width="60" />
+                                                                                    <TextBlock Text="{Binding Type}" FontWeight="Bold" />
+                                                                                </DockPanel>
+                                                                                <DockPanel>
+                                                                                    <TextBlock Text="Skill:" Width="60" />
+                                                                                    <TextBlock Text="{Binding Skill}" />
+                                                                                </DockPanel>
+                                                                                <DockPanel>
+                                                                                    <TextBlock Text="Attribute:" Width="60" />
+                                                                                    <TextBlock Text="{Binding Attribute}" />
+                                                                                </DockPanel>
+                                                                                <DockPanel>
+                                                                                    <TextBlock Text="Quest ID:" Width="60" />
+                                                                                    <TextBlock Text="{Binding QuestId}" />
+                                                                                </DockPanel>
+                                                                                <DockPanel>
+                                                                                    <TextBlock Text="Minimum:" Width="60" />
+                                                                                    <TextBlock Text="{Binding Minimum}" />
+                                                                                </DockPanel>
+                                                                            </StackPanel>
+                                                                        </Border>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </Expander>
+
+                                                        <!-- Effects -->
+                                                        <Expander Header="Effects" Margin="0,4">
+                                                            <ItemsControl ItemsSource="{Binding Effects}">
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <Border Background="#E8F5E9" Margin="0,2" Padding="4">
+                                                                            <StackPanel>
+                                                                                <DockPanel>
+                                                                                    <TextBlock Text="Type:" Width="60" />
+                                                                                    <TextBlock Text="{Binding Type}" FontWeight="Bold" />
+                                                                                </DockPanel>
+                                                                                <DockPanel>
+                                                                                    <TextBlock Text="Target:" Width="60" />
+                                                                                    <TextBlock Text="{Binding Target}" />
+                                                                                </DockPanel>
+                                                                                <DockPanel>
+                                                                                    <TextBlock Text="Amount:" Width="60" />
+                                                                                    <TextBlock Text="{Binding Amount}" />
+                                                                                </DockPanel>
+                                                                            </StackPanel>
+                                                                        </Border>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </Expander>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </DockPanel>
+                </TabItem>
+
+                <!-- Stats Tab -->
+                <TabItem Header="Stats">
+                    <StackPanel DataContext="{Binding SelectedDialogue}" Margin="8">
+                        <TextBlock Text="Dialogue Statistics" FontWeight="Bold" FontSize="16" Margin="0,0,0,8" />
+                        <TextBlock Text="Dialogue ID:" FontWeight="Bold" />
+                        <TextBlock Text="{Binding Id}" Margin="0,0,0,8" />
+                        <TextBlock Text="Start Node:" FontWeight="Bold" />
+                        <TextBlock Text="{Binding StartNodeId}" Margin="0,0,0,8" />
+                        <TextBlock Text="Total Nodes:" FontWeight="Bold" />
+                        <TextBlock Text="{Binding Nodes.Count}" Margin="0,0,0,8" />
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </DockPanel>
+</UserControl>

@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HHSGame.Core.Engine.Catalogs;
@@ -24,10 +26,7 @@ public partial class EnemyEditorViewModel : ObservableObject
     private string _searchText = string.Empty;
 
     [ObservableProperty]
-    private ObservableCollection<WeaponDefinition> _availableWeapons = [];
-
-    [ObservableProperty]
-    private ObservableCollection<ArmorDefinition> _availableArmors = [];
+    private string _statusMessage = "Ready";
 
     public EnemyEditorViewModel(IDataService dataService, IProjectService projectService)
     {
@@ -35,29 +34,91 @@ public partial class EnemyEditorViewModel : ObservableObject
         _projectService = projectService;
     }
 
+    partial void OnEnemiesChanged(ObservableCollection<EnemyDefinition> value)
+    {
+        OnPropertyChanged(nameof(FilteredEnemies));
+    }
+
+    partial void OnSearchTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(FilteredEnemies));
+    }
+
     [RelayCommand]
-    private async Task LoadDataAsync()
+    public async Task LoadDataAsync()
     {
         string? catalogsDir = _projectService.GetCatalogsDirectory();
-        if (catalogsDir == null) return;
+        StatusMessage = $"Loading from: {catalogsDir ?? "null"}";
 
-        var enemies = await _dataService.LoadDirectoryAsync<EnemyDefinition>(
-            Path.Combine(catalogsDir, "enemies.json"));
-        var weapons = await _dataService.LoadDirectoryAsync<WeaponDefinition>(
-            Path.Combine(catalogsDir, "weapons.json"));
-        var armors = await _dataService.LoadDirectoryAsync<ArmorDefinition>(
-            Path.Combine(catalogsDir, "armors.json"));
+        if (catalogsDir == null)
+        {
+            StatusMessage = "Error: No project loaded. Please open a project first.";
+            return;
+        }
 
-        Enemies = new ObservableCollection<EnemyDefinition>(enemies);
-        AvailableWeapons = new ObservableCollection<WeaponDefinition>(weapons);
-        AvailableArmors = new ObservableCollection<ArmorDefinition>(armors);
+        if (!Directory.Exists(catalogsDir))
+        {
+            StatusMessage = $"Error: Directory not found: {catalogsDir}";
+            return;
+        }
+
+        try
+        {
+            string enemiesPath = Path.Combine(catalogsDir, "enemies.json");
+            if (File.Exists(enemiesPath))
+            {
+                var enemies = await LoadCatalogAsync<EnemyDefinition>(enemiesPath, "enemies");
+                Enemies = new ObservableCollection<EnemyDefinition>(enemies);
+            }
+
+            StatusMessage = $"Loaded {Enemies.Count} enemies";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error loading enemies: {ex.Message}";
+            Console.WriteLine($"[EnemyEditor] Exception: {ex}");
+        }
+    }
+
+    private async Task<List<T>> LoadCatalogAsync<T>(string filePath, string arrayPropertyName) where T : class
+    {
+        try
+        {
+            string json = await File.ReadAllTextAsync(filePath);
+            using JsonDocument doc = JsonDocument.Parse(json);
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters = { new JsonStringEnumConverter() }
+            };
+
+            if (doc.RootElement.TryGetProperty(arrayPropertyName, out JsonElement arrayElement))
+            {
+                var result = JsonSerializer.Deserialize<List<T>>(arrayElement.GetRawText(), options);
+                Console.WriteLine($"[EnemyEditor] Loaded {result?.Count ?? 0} items from {filePath}");
+                return result ?? [];
+            }
+            else
+            {
+                // Try to deserialize as direct array
+                var result = JsonSerializer.Deserialize<List<T>>(json, options);
+                Console.WriteLine($"[EnemyEditor] Loaded {result?.Count ?? 0} items from {filePath} (direct array)");
+                return result ?? [];
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[EnemyEditor] Error loading {filePath}: {ex.Message}");
+            return [];
+        }
     }
 
     [RelayCommand]
     private void AddEnemy()
     {
         var enemy = new EnemyDefinition(
-            Id: "NewEnemy",
+            Id: $"enemy_{Enemies.Count + 1}",
             Name: "New Enemy",
             Faction: "Axis",
             Attributes: new Attributes { Strength = 10, Perception = 10, Agility = 10, Charisma = 10, Intelligence = 10 },
@@ -72,6 +133,7 @@ public partial class EnemyEditorViewModel : ObservableObject
 
         Enemies.Add(enemy);
         SelectedEnemy = enemy;
+        StatusMessage = $"Added enemy: {enemy.Id}";
     }
 
     [RelayCommand]
@@ -79,18 +141,39 @@ public partial class EnemyEditorViewModel : ObservableObject
     {
         if (SelectedEnemy != null)
         {
+            string id = SelectedEnemy.Id;
             Enemies.Remove(SelectedEnemy);
             SelectedEnemy = null;
+            StatusMessage = $"Removed enemy: {id}";
         }
     }
 
     [RelayCommand]
-    private async Task SaveDataAsync()
+    public async Task SaveDataAsync()
     {
         string? catalogsDir = _projectService.GetCatalogsDirectory();
-        if (catalogsDir == null) return;
+        if (catalogsDir == null)
+        {
+            StatusMessage = "Error: No project loaded";
+            return;
+        }
 
-        await _dataService.SaveAsync(Path.Combine(catalogsDir, "enemies.json"), Enemies.ToList());
+        try
+        {
+            Directory.CreateDirectory(catalogsDir);
+
+            // Save with wrapper object
+            var wrapper = new Dictionary<string, List<EnemyDefinition>> { { "enemies", Enemies.ToList() } };
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(wrapper, options);
+            await File.WriteAllTextAsync(Path.Combine(catalogsDir, "enemies.json"), json);
+
+            StatusMessage = $"Saved {Enemies.Count} enemies";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error saving enemies: {ex.Message}";
+        }
     }
 
     public IEnumerable<EnemyDefinition> FilteredEnemies => string.IsNullOrWhiteSpace(SearchText)

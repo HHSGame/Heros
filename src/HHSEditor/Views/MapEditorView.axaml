@@ -1,0 +1,188 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HHSEditor.ViewModels"
+             xmlns:controls="using:HHSEditor.Controls"
+             x:Class="HHSEditor.Views.MapEditorView"
+             x:DataType="vm:MapEditorViewModel">
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+            <TextBlock Text="Tile:" VerticalAlignment="Center" Margin="4,0" />
+            <Button Content="Paint" Command="{Binding SetToolCommand}" CommandParameter="Paint" Margin="2" />
+            <Button Content="Fill" Command="{Binding SetToolCommand}" CommandParameter="Fill" Margin="2" />
+            <Separator Width="8" />
+            <TextBlock Text="Entity:" VerticalAlignment="Center" Margin="4,0" />
+            <Button Content="Place" Command="{Binding SetToolCommand}" CommandParameter="PlaceEntity" Margin="2" />
+            <Button Content="Select" Command="{Binding SetToolCommand}" CommandParameter="SelectEntity" Margin="2" />
+            <Button Content="Delete" Command="{Binding DeleteSelectedEntityCommand}" Margin="2" />
+            <Separator Width="8" />
+            <TextBlock Text="View:" VerticalAlignment="Center" Margin="4,0" />
+            <Button Content="Move" Command="{Binding SetToolCommand}" CommandParameter="Move" Margin="2" />
+            <Separator Width="8" />
+            <Button Content="New Map" Command="{Binding NewMapCommand}" Margin="2" />
+            <Button Content="Save" Command="{Binding SaveCurrentMapCommand}" Margin="2" />
+            <Button Content="Generate" Command="{Binding GenerateRandomMapCommand}" Margin="2" />
+        </StackPanel>
+
+        <!-- Status Bar -->
+        <Border DockPanel.Dock="Bottom" Background="#E8E8E8" Padding="4">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding StatusMessage}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid ColumnDefinitions="200,*,250">
+            <!-- Left: Tile Palette + Entity Type -->
+            <DockPanel Grid.Column="0">
+                <!-- Entity Type Selector -->
+                <StackPanel DockPanel.Dock="Top" Margin="4">
+                    <TextBlock Text="Entity Type" FontWeight="Bold" Margin="0,0,0,4" />
+                    <RadioButton Content="Enemy" GroupName="EntityType" Margin="0,2" />
+                    <RadioButton Content="NPC" GroupName="EntityType" Margin="0,2" />
+                    <RadioButton Content="Player Spawn" GroupName="EntityType" Margin="0,2" />
+                    <RadioButton Content="Item" GroupName="EntityType" Margin="0,2" />
+                    <RadioButton Content="Trigger" GroupName="EntityType" Margin="0,2" />
+                </StackPanel>
+
+                <!-- Tile Palette -->
+                <StackPanel DockPanel.Dock="Top" Margin="4">
+                    <TextBlock Text="Tile Palette" FontWeight="Bold" Margin="0,0,0,4" />
+                    <ListBox ItemsSource="{Binding AvailableTiles}"
+                             SelectedItem="{Binding SelectedTileType}"
+                             MaxHeight="300">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Character}" FontFamily="Monospace" FontSize="14"
+                                               Width="25" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </DockPanel>
+
+            <!-- Center: Map Tabs + Canvas -->
+            <DockPanel Grid.Column="1">
+                <!-- Map Tabs -->
+                <TabControl ItemsSource="{Binding OpenMaps}"
+                            SelectedItem="{Binding SelectedMap}"
+                            DockPanel.Dock="Top"
+                            Height="30">
+                    <TabControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Name}" Margin="0,0,4,0" />
+                                <TextBlock Text="*" Foreground="Red" IsVisible="{Binding IsDirty}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </TabControl.ItemTemplate>
+                </TabControl>
+
+                <!-- Map Canvas -->
+                <Border Background="#2D2D2D" Margin="4">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                        <controls:MapCanvasControl
+                            x:Name="MapCanvas"
+                            MapWidth="{Binding SelectedMap.MapWidth}"
+                            MapHeight="{Binding SelectedMap.MapHeight}"
+                            MapData="{Binding SelectedMap.MapData}"
+                            CurrentBrush="{Binding CurrentBrush}"
+                            CurrentTool="{Binding CurrentTool}"
+                            TileAction="OnTileAction" />
+                    </ScrollViewer>
+                </Border>
+            </DockPanel>
+
+            <!-- Right: Properties + Entity List -->
+            <DockPanel Grid.Column="2">
+                <!-- Entity Properties (when editing) -->
+                <Border DockPanel.Dock="Top" Margin="4" IsVisible="{Binding EditingEntity, Converter={x:Static ObjectConverters.IsNotNull}}"
+                        Background="#F5F5F5" Padding="8">
+                    <StackPanel>
+                        <TextBlock Text="Entity Properties" FontWeight="Bold" Margin="0,0,0,8" />
+                        <DockPanel Margin="0,2">
+                            <TextBlock Text="ID:" Width="80" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding EditingEntity.Id}" />
+                        </DockPanel>
+                        <DockPanel Margin="0,2">
+                            <TextBlock Text="Name:" Width="80" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding EditingEntity.Name}" />
+                        </DockPanel>
+                        <DockPanel Margin="0,2">
+                            <TextBlock Text="Position:" Width="80" VerticalAlignment="Center" />
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{},{0},{1}">
+                                        <Binding Path="EditingEntity.X" />
+                                        <Binding Path="EditingEntity.Y" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DockPanel>
+                        <DockPanel Margin="0,2">
+                            <TextBlock Text="Type:" Width="80" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding EditingEntity.EntityType}" />
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Map Properties -->
+                <StackPanel DockPanel.Dock="Top" Margin="4" IsVisible="{Binding SelectedMap, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <TextBlock Text="Map Properties" FontWeight="Bold" Margin="0,0,0,4" />
+                    <DockPanel Margin="0,2">
+                        <TextBlock Text="Name:" Width="50" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding SelectedMap.Name}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,2">
+                        <TextBlock Text="Size:" Width="50" VerticalAlignment="Center" />
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0} x {1}">
+                                    <Binding Path="SelectedMap.MapWidth" />
+                                    <Binding Path="SelectedMap.MapHeight" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </DockPanel>
+                </StackPanel>
+
+                <!-- Entity List -->
+                <StackPanel Margin="4">
+                    <TextBlock Text="Entities" FontWeight="Bold" Margin="0,0,0,4" />
+                    <ListBox ItemsSource="{Binding SelectedMap.Entities}"
+                             SelectedItem="{Binding SelectedMap.SelectedEntity}"
+                             MaxHeight="200">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding DisplayChar}" FontFamily="Monospace" FontSize="14"
+                                               Width="20" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+
+                <!-- Map Files -->
+                <StackPanel Margin="4">
+                    <TextBlock Text="Map Files" FontWeight="Bold" Margin="0,0,0,4" />
+                    <ListBox ItemsSource="{Binding MapFiles}"
+                             DoubleTapped="OnMapFileDoubleTapped"
+                             MaxHeight="150">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <Button Content="Refresh" Command="{Binding LoadMapFilesCommand}" Margin="0,4,0,0" />
+                </StackPanel>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</UserControl>

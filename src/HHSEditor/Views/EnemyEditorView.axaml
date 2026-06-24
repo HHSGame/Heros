@@ -14,6 +14,11 @@
             <Button Content="Remove" Command="{Binding RemoveEnemyCommand}" Margin="2" />
         </StackPanel>
 
+        <!-- Status Bar -->
+        <Border DockPanel.Dock="Bottom" Background="#E8E8E8" Padding="4">
+            <TextBlock Text="{Binding StatusMessage}" FontSize="12" />
+        </Border>
+
         <Grid ColumnDefinitions="*,*">
             <!-- Enemy List -->
             <DataGrid Grid.Column="0"
